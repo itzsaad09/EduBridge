@@ -233,7 +233,7 @@ public class LogIn extends javax.swing.JFrame {
             EmailLabel.setForeground(Color.RED);
             PasswordLabel.setForeground(Color.WHITE);
         } else {
-            String adminQuery = "SELECT * FROM `admin` WHERE `email`=? AND `password`=?";
+            String adminQuery = "SELECT * FROM `admin` WHERE `email`= BINARY ? AND `password`= BINARY?";
             String instructorQuery = "SELECT * FROM `instructor` WHERE `ID`=? AND `password`=?";
             String studentQuery = "SELECT * FROM `student` WHERE `ID`=? AND `password`=?";
             try {
