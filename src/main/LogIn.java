@@ -254,8 +254,8 @@ public class LogIn extends javax.swing.JFrame {
                             loginsuccessful.dispose();
                         }
                     }, 1000);
-                    new HomePageAdmin(id).setVisible(true);
                     this.dispose();
+                    new HomePageAdmin(id).setVisible(true);
                 } else {
                     if(result != null) result.close();
                     if(pst != null) pst.close();
@@ -275,8 +275,8 @@ public class LogIn extends javax.swing.JFrame {
                                 loginsuccessful.dispose();
                             }
                         }, 1000);
-                        new HomePageInstructor(id).setVisible(true);
                         this.dispose();
+                        new HomePageInstructor(id).setVisible(true);
                     } else {
                         if(result != null) result.close();
                         if(pst != null) pst.close();
@@ -296,8 +296,8 @@ public class LogIn extends javax.swing.JFrame {
                                     loginsuccessful.dispose();
                                 }
                             }, 1000);
-                            new HomePageStudent(id).setVisible(true);
                             this.dispose();
+                            new HomePageAdmin(id).setVisible(true);
                         } else {
                             LogInFailed loginfailed = new LogInFailed();
                             loginfailed.setVisible(true);

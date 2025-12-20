@@ -4,13 +4,18 @@
  */
 package main;
 
+import com.toedter.calendar.IDateEvaluator;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.text.SimpleDateFormat;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -98,7 +103,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
             public void run() {
                 updateDateTime();
             }
-        }, 0, 1000); // Start immediately (0 delay), repeat every 1000ms (1 second)
+        }, 0, 1000);
     }
 
     private void showProfilePopup(javax.swing.JLabel sourceButton, java.awt.event.MouseEvent evt) {
@@ -148,8 +153,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
     }
     
     private void showInstructorTimetable() {
-    
-        String instructorFullName = "";
+        String instructorFullName = null;
         try {
             pst = connect.prepareStatement("SELECT CONCAT(`fName`, ' ', `lName`) AS `fullName` FROM `instructor` WHERE `ID` = ?");
             pst.setString(1, this.id);
@@ -215,6 +219,229 @@ public class HomePageInstructor extends javax.swing.JFrame {
         }
     }
 
+    private void fillAttendanceTable(String courseCode) {
+        DefaultTableModel model = (DefaultTableModel) AttendanceTable.getModel();
+        model.setRowCount(0);
+
+        // 1. Define the options
+        String[] options = {"Present", "Absent"};
+        javax.swing.JComboBox<String> editorCombo = new javax.swing.JComboBox<>(options);
+
+        // 2. Set the Cell Editor (This handles the actual clicks/changes)
+        AttendanceTable.getColumnModel().getColumn(2).setCellEditor(new javax.swing.DefaultCellEditor(editorCombo));
+
+        // 3. Set the Cell Renderer (This handles the "Always Visible" look)
+        AttendanceTable.getColumnModel().getColumn(2).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                
+                // Create a temporary combo box just for painting the cell
+                javax.swing.JComboBox<String> renderCombo = new javax.swing.JComboBox<>(options);
+                renderCombo.setSelectedItem(value);
+                
+                // Match the table's selection colors
+                if (isSelected) {
+                    renderCombo.setBackground(table.getSelectionBackground());
+                } else {
+                    renderCombo.setBackground(table.getBackground());
+                }
+                return renderCombo;
+            }
+        });
+
+        // Database Logic to fetch enrolled students
+        String query = "SELECT s.fName, s.lName, aj.log " +
+                    "FROM student s " +
+                    "JOIN enrollment e ON s.ID = e.student_id " +
+                    "LEFT JOIN attendance_json aj ON s.ID = aj.student_id AND e.coursecode = aj.coursecode " +
+                    "WHERE e.coursecode = ?";
+
+        try {
+            pst = connect.prepareStatement(query);
+            pst.setString(1, courseCode);
+            result = pst.executeQuery();
+
+            while (result.next()) {
+                String fullName = result.getString("fName") + " " + result.getString("lName");
+                String jsonLog = result.getString("log");
+                
+                int absenceCount = 0;
+                if (jsonLog != null && !jsonLog.isEmpty()) {
+                    // Calculate absences from the JSON log
+                    absenceCount = (jsonLog.length() - jsonLog.replace("Absent", "").length()) / "Absent".length();
+                }
+
+                // Add the row: [Name, Absence Count, Default Status]
+                model.addRow(new Object[]{fullName, absenceCount, "Present"});
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (pst != null) pst.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void loadAttendanceForSelectedDate() {
+        String selectedCourse = (String) CourseCombo.getSelectedItem();
+        java.util.Date selectedDate = SelectDate.getDate();
+
+        if (selectedCourse == null || selectedCourse.equals("Select Course") || selectedDate == null) {
+            return;
+        }
+
+        // Format date to match your JSON keys (e.g., "2025-12-20")
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String dateKey = sdf.format(selectedDate);
+        
+        DefaultTableModel model = (DefaultTableModel) AttendanceTable.getModel();
+        
+        // We reuse your existing logic but look for the specific date in the JSON log
+        try {
+            // Query joining students and their attendance logs
+            String query = "SELECT s.fName, s.lName, aj.log " +
+                        "FROM student s " +
+                        "JOIN enrollment e ON s.ID = e.student_id " +
+                        "LEFT JOIN attendance_json aj ON s.ID = aj.student_id AND e.coursecode = aj.coursecode " +
+                        "WHERE e.coursecode = (SELECT coursecode FROM course WHERE coursename = ?)";
+            
+            pst = connect.prepareStatement(query);
+            pst.setString(1, selectedCourse);
+            result = pst.executeQuery();
+            
+            model.setRowCount(0);
+            while (result.next()) {
+                String fullName = result.getString("fName") + " " + result.getString("lName");
+                String jsonLog = result.getString("log");
+                String status = "Present"; // Default for new marking
+                
+                if (jsonLog != null && !jsonLog.isEmpty()) {
+                    // Check if the specific date exists in the JSON string
+                    if (jsonLog.contains(dateKey)) {
+                        // Primitive check: if "date": "Absent" exists in the log string
+                        if (jsonLog.contains("\"" + dateKey + "\": \"Absent\"")) {
+                            status = "Absent";
+                        }
+                    }
+                }
+                
+                // Populate table with existing status or default
+                model.addRow(new Object[]{fullName, calculateTotalAbsences(jsonLog), status});
+            }
+        } catch (SQLException ex) {
+            System.err.println("Error loading date-specific attendance: " + ex.getMessage());
+        }
+    }
+
+    // Helper to keep absence count accurate
+    private int calculateTotalAbsences(String jsonLog) {
+        if (jsonLog == null || jsonLog.isEmpty()) return 0;
+        return (jsonLog.length() - jsonLog.replace("Absent", "").length()) / "Absent".length();
+    }
+    
+    private void restrictDateAndMultipleDays(String session, java.util.List<Integer> allowedDays) {
+        com.toedter.calendar.JDayChooser dayChooser = SelectDate.getJCalendar().getDayChooser();
+
+        // Clear previous custom evaluators using reflection (safe for jcalendar-1.4)
+        try {
+            java.lang.reflect.Field field = com.toedter.calendar.JDayChooser.class.getDeclaredField("dateEvaluators");
+            field.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            List<IDateEvaluator> evaluators = (List<IDateEvaluator>) field.get(dayChooser);
+            // Remove all except the built-in MinMaxDateEvaluator (index 0)
+            while (evaluators.size() > 1) {
+                evaluators.remove(1);
+            }
+        } catch (Exception e) {
+            System.err.println("Could not clear old evaluators: " + e.getMessage());
+        }
+
+        // Set semester range
+        Calendar cal = Calendar.getInstance();
+        int currentYear = cal.get(Calendar.YEAR);
+        Date minDate, maxDate;
+
+        if (session.equalsIgnoreCase("Fall")) {
+            cal.set(currentYear, Calendar.OCTOBER, 1);
+            minDate = cal.getTime();
+            cal.set(currentYear + 1, Calendar.JANUARY, 31);
+            maxDate = cal.getTime();
+        } else { // Spring
+            cal.set(currentYear, Calendar.MARCH, 1);
+            minDate = cal.getTime();
+            cal.set(currentYear, Calendar.JUNE, 30);
+            maxDate = cal.getTime();
+        }
+
+        SelectDate.setMinSelectableDate(minDate);
+        SelectDate.setMaxSelectableDate(maxDate);
+        SelectDate.setSelectableDateRange(minDate, maxDate);
+
+        // Add evaluator for allowed days only
+        dayChooser.addDateEvaluator(new IDateEvaluator() {
+            @Override
+            public boolean isSpecial(Date date) { return false; }
+
+            @Override
+            public Color getSpecialForegroundColor() { return null; }
+
+            @Override
+            public Color getSpecialBackroundColor() { return null; }
+
+            @Override
+            public String getInvalidTooltip() { return "No lecture on this day"; }
+
+            @Override
+            public boolean isInvalid(Date date) {
+                if (date == null) return true;
+                Calendar c = Calendar.getInstance();
+                c.setTime(date);
+                int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+                return !allowedDays.contains(dayOfWeek);
+            }
+
+            @Override
+            public String getSpecialTooltip() {
+                return null;
+            }
+
+            @Override
+            public Color getInvalidForegroundColor() {
+                return Color.RED;
+            }
+
+            @Override
+            public Color getInvalidBackroundColor() {
+                return null;
+            }
+        });
+
+        dayChooser.repaint();
+    }
+
+    private int getDayInteger(String day) {
+        if (day == null) return -1;
+        
+        // Trim removes hidden spaces that might be in the DB
+        switch (day.trim().toLowerCase()) {
+            case "sunday":    return java.util.Calendar.SUNDAY;    // 1
+            case "monday":    return java.util.Calendar.MONDAY;    // 2
+            case "tuesday":   return java.util.Calendar.TUESDAY;   // 3
+            case "wednesday": return java.util.Calendar.WEDNESDAY; // 4
+            case "thursday":  return java.util.Calendar.THURSDAY;  // 5
+            case "friday":    return java.util.Calendar.FRIDAY;    // 6
+            case "saturday":  return java.util.Calendar.SATURDAY;  // 7
+            default: 
+                System.out.println("Warning: Could not map day string: '" + day + "'");
+                return -1;
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -238,6 +465,12 @@ public class HomePageInstructor extends javax.swing.JFrame {
         ViewCoursesTable = new RoundedTable();
         AttendancePanel = new javax.swing.JPanel();
         ProfileButton1 = new javax.swing.JLabel();
+        Course = new javax.swing.JLabel();
+        CourseCombo = new RoundedComboBox<>();
+        Date = new javax.swing.JLabel();
+        SelectDate = new RoundedDateChooser();
+        AttendanceTableScrollPane = new javax.swing.JScrollPane();
+        AttendanceTable = new RoundedTable();
         ResultsPanel = new javax.swing.JPanel();
         ProfileButton2 = new javax.swing.JLabel();
 
@@ -433,6 +666,57 @@ public class HomePageInstructor extends javax.swing.JFrame {
             }
         });
 
+        Course.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
+        Course.setText("Course");
+
+        CourseCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Course" }));
+        CourseCombo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CourseComboActionPerformed(evt);
+            }
+        });
+
+        Date.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
+        Date.setText("Date");
+
+        SelectDate.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                SelectDatePropertyChange(evt);
+            }
+        });
+
+        AttendanceTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "Name", "Absence Count", "Status"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, true
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        AttendanceTable.setShowHorizontalLines(true);
+        AttendanceTable.setShowVerticalLines(true);
+        AttendanceTable.getTableHeader().setResizingAllowed(false);
+        AttendanceTable.getTableHeader().setReorderingAllowed(false);
+        AttendanceTableScrollPane.setViewportView(AttendanceTable);
+
         javax.swing.GroupLayout AttendancePanelLayout = new javax.swing.GroupLayout(AttendancePanel);
         AttendancePanel.setLayout(AttendancePanelLayout);
         AttendancePanelLayout.setHorizontalGroup(
@@ -440,12 +724,40 @@ public class HomePageInstructor extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AttendancePanelLayout.createSequentialGroup()
                 .addGap(0, 663, Short.MAX_VALUE)
                 .addComponent(ProfileButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(AttendancePanelLayout.createSequentialGroup()
+                .addGap(159, 159, 159)
+                .addGroup(AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(CourseCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(Course))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(Date)
+                    .addComponent(SelectDate, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(159, 159, 159))
+            .addGroup(AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(AttendancePanelLayout.createSequentialGroup()
+                    .addGap(43, 43, 43)
+                    .addComponent(AttendanceTableScrollPane)
+                    .addGap(44, 44, 44)))
         );
         AttendancePanelLayout.setVerticalGroup(
             AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(AttendancePanelLayout.createSequentialGroup()
                 .addComponent(ProfileButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 548, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(Course)
+                    .addComponent(Date))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(CourseCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(SelectDate, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(473, Short.MAX_VALUE))
+            .addGroup(AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(AttendancePanelLayout.createSequentialGroup()
+                    .addGap(124, 124, 124)
+                    .addComponent(AttendanceTableScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 442, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(22, Short.MAX_VALUE)))
         );
 
         MainPagePanel.add(AttendancePanel, "Card2");
@@ -540,6 +852,45 @@ public class HomePageInstructor extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card2");
+        // Clear existing items except the default prompt
+        CourseCombo.removeAllItems();
+        CourseCombo.addItem("Select Course");
+
+        try {
+            // 1. Get the Instructor's Full Name using their ID
+            String instructorFullName = "";
+            String nameQuery = "SELECT CONCAT(`fName`, ' ', `lName`) AS `fullName` FROM `instructor` WHERE `ID` = ?";
+            pst = connect.prepareStatement(nameQuery);
+            pst.setString(1, this.id);
+            result = pst.executeQuery();
+
+            if (result.next()) {
+                instructorFullName = result.getString("fullName");
+            } else {
+                return; // Instructor not found
+            }
+
+            // 2. Get unique courses assigned to this instructor from the timetable
+            String courseQuery = "SELECT DISTINCT `cName` FROM `timetable` WHERE `instructorName` = ?";
+            pst = connect.prepareStatement(courseQuery);
+            pst.setString(1, instructorFullName);
+            result = pst.executeQuery();
+
+            while (result.next()) {
+                CourseCombo.addItem(result.getString("cName"));
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error loading courses: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            // Close resources to prevent leaks
+            try {
+                if (result != null) result.close();
+                if (pst != null) pst.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }//GEN-LAST:event_MarkAttendanceMouseClicked
 
     private void MarkAttendanceKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_MarkAttendanceKeyPressed
@@ -613,6 +964,57 @@ public class HomePageInstructor extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_ProfileButton2MouseExited
 
+    private void CourseComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CourseComboActionPerformed
+        // TODO add your handling code here:
+        String selectedCourse = (String) CourseCombo.getSelectedItem();
+        if (selectedCourse == null || selectedCourse.equals("Select Course")) {
+            ((DefaultTableModel) AttendanceTable.getModel()).setRowCount(0);
+            return;
+        }
+
+        try {
+            String courseQuery = "SELECT `coursecode`, `session` FROM `course` WHERE `coursename` = ?";
+            pst = connect.prepareStatement(courseQuery);
+            pst.setString(1, selectedCourse);
+            result = pst.executeQuery();
+
+            if (result.next()) {
+                String code = result.getString("coursecode");
+                String session = result.getString("session");
+
+                java.util.List<Integer> scheduledDays = new java.util.ArrayList<>();
+                String dayQuery = "SELECT `day` FROM `timetable` WHERE `courseCode` = ?";
+                pst = connect.prepareStatement(dayQuery);
+                pst.setString(1, code);
+                result = pst.executeQuery();
+
+                while (result.next()) {
+                    String dayFromDB = result.getString("day");
+                    int dayInt = getDayInteger(dayFromDB);
+                    
+                    if (dayInt != -1) {
+                        scheduledDays.add(dayInt);
+                        // This will now print the correct integers (e.g., 2 and 3 for Monday/Tuesday)
+                        System.out.println("Mapped " + dayFromDB + " to Calendar Constant: " + dayInt);
+                    }
+                }
+                System.out.println("All scheduled days for " + code + ": " + scheduledDays);
+                
+                fillAttendanceTable(code);
+                restrictDateAndMultipleDays(session, scheduledDays);
+            }
+        } catch (SQLException ex) {
+            System.err.println("Database Error: " + ex.getMessage());
+        }
+    }//GEN-LAST:event_CourseComboActionPerformed
+
+    private void SelectDatePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_SelectDatePropertyChange
+        // TODO add your handling code here:
+            if ("date".equals(evt.getPropertyName())) {
+                loadAttendanceForSelectedDate();
+            }
+    }//GEN-LAST:event_SelectDatePropertyChange
+
     /**
      * @param args the command line arguments
      */
@@ -650,6 +1052,11 @@ public class HomePageInstructor extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AttendancePanel;
+    private javax.swing.JTable AttendanceTable;
+    private javax.swing.JScrollPane AttendanceTableScrollPane;
+    private javax.swing.JLabel Course;
+    private javax.swing.JComboBox<String> CourseCombo;
+    private javax.swing.JLabel Date;
     private javax.swing.JLabel DateTime;
     private javax.swing.JPanel HomePageInstuctorPanel;
     private javax.swing.JButton LogOut;
@@ -659,6 +1066,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
     private javax.swing.JLabel ProfileButton1;
     private javax.swing.JLabel ProfileButton2;
     private javax.swing.JPanel ResultsPanel;
+    private com.toedter.calendar.JDateChooser SelectDate;
     private javax.swing.JPanel SidePanel;
     private javax.swing.JButton UploadResult;
     private javax.swing.JButton ViewCourses;
@@ -666,4 +1074,5 @@ public class HomePageInstructor extends javax.swing.JFrame {
     private javax.swing.JScrollPane ViewCoursesScrollPane;
     private javax.swing.JTable ViewCoursesTable;
     // End of variables declaration//GEN-END:variables
+
 }

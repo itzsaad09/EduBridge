@@ -2458,7 +2458,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             while (result.next()) {
                 String code = result.getString("coursecode");
                 String name = result.getString("coursename");
-                courseMap.put(name, code); // Store mapping
+                courseMap.put(name, code);
                 CourseCombo.addItem(name);
             }
         } catch (SQLException ex) {
@@ -2476,7 +2476,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             while(result.next()){
                 String id = result.getString("ID");
                 String name = result.getString("fullName");
-                instructorMap.put(name, id); // Store mapping
+                instructorMap.put(name, id);
                 InstructorCombo.addItem(name);
             }
         } catch (SQLException ex) {
