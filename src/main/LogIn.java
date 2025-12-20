@@ -9,6 +9,8 @@ import java.awt.Image;
 import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
 import java.sql.*;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.JOptionPane;
 
 /**
@@ -233,7 +235,7 @@ public class LogIn extends javax.swing.JFrame {
             EmailLabel.setForeground(Color.RED);
             PasswordLabel.setForeground(Color.WHITE);
         } else {
-            String adminQuery = "SELECT * FROM `admin` WHERE `email`= BINARY ? AND `password`= BINARY?";
+            String adminQuery = "SELECT * FROM `admin` WHERE `email`= ? AND `password`= ?";
             String instructorQuery = "SELECT * FROM `instructor` WHERE `ID`=? AND `password`=?";
             String studentQuery = "SELECT * FROM `student` WHERE `ID`=? AND `password`=?";
             try {
@@ -244,9 +246,14 @@ public class LogIn extends javax.swing.JFrame {
                 result = pst.executeQuery();
                 
                 if (result.next()) {
-                    String successMessage = "LogIn Successful";
-                    CustomMessageDialog messageDialog = new CustomMessageDialog(this, "Success", successMessage, CustomMessageDialog.SUCCESS);
-                    messageDialog.setVisible(true);
+                    LogInSuccessful loginsuccessful = new LogInSuccessful();
+                    loginsuccessful.setVisible(true);
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            loginsuccessful.dispose();
+                        }
+                    }, 1000);
                     new HomePageAdmin(id).setVisible(true);
                     this.dispose();
                 } else {
@@ -260,9 +267,14 @@ public class LogIn extends javax.swing.JFrame {
                     result = pst.executeQuery();
                     
                     if (result.next()) {
-                        String successMessage = "LogIn Successful";
-                        CustomMessageDialog messageDialog = new CustomMessageDialog(this, "Success",  successMessage, CustomMessageDialog.SUCCESS);
-                        messageDialog.setVisible(true);
+                        LogInSuccessful loginsuccessful = new LogInSuccessful();
+                        loginsuccessful.setVisible(true);
+                        new Timer().schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                loginsuccessful.dispose();
+                            }
+                        }, 1000);
                         new HomePageInstructor(id).setVisible(true);
                         this.dispose();
                     } else {
@@ -276,15 +288,25 @@ public class LogIn extends javax.swing.JFrame {
                         result = pst.executeQuery();
 
                         if (result.next()) {
-                            String successMessage = "LogIn Successful";
-                            CustomMessageDialog messageDialog = new CustomMessageDialog(this, "Success", successMessage, CustomMessageDialog.SUCCESS);
-                            messageDialog.setVisible(true);
+                            LogInSuccessful loginsuccessful = new LogInSuccessful();
+                            loginsuccessful.setVisible(true);
+                            new Timer().schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    loginsuccessful.dispose();
+                                }
+                            }, 1000);
                             new HomePageStudent(id).setVisible(true);
                             this.dispose();
                         } else {
-                            String failedMessage = "Invalid ID or Password";
-                            CustomMessageDialog messageDialog = new CustomMessageDialog(this, "Failed", failedMessage, CustomMessageDialog.ERROR);
-                            messageDialog.setVisible(true);
+                            LogInFailed loginfailed = new LogInFailed();
+                            loginfailed.setVisible(true);
+                            new Timer().schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    loginfailed.dispose();
+                                }
+                            }, 1000);
                             EmailField.setText("example@domain.com");
                             EmailField.setForeground(new Color(153,153,153));
                             PasswordField.setText("password");

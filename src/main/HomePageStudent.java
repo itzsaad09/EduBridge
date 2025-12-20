@@ -727,8 +727,6 @@ public class HomePageStudent extends javax.swing.JFrame {
         EnrollTable.setRowHeight(50);
         EnrollTable.setRowSelectionAllowed(false);
         EnrollTable.setShowGrid(true);
-        EnrollTable.setShowHorizontalLines(true);
-        EnrollTable.setShowVerticalLines(true);
         EnrollTable.getTableHeader().setResizingAllowed(false);
         EnrollTable.getTableHeader().setReorderingAllowed(false);
         EnrollTable.addMouseListener(new java.awt.event.MouseAdapter() {

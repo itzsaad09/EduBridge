@@ -59,7 +59,7 @@ public class LogInSuccessful extends javax.swing.JFrame {
             .addGroup(LogInSuccessfulPanelLayout.createSequentialGroup()
                 .addGap(39, 39, 39)
                 .addComponent(LoginSuccessfulText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(40, Short.MAX_VALUE))
+                .addContainerGap(39, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

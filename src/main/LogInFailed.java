@@ -31,7 +31,6 @@ public class LogInFailed extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
-        setPreferredSize(new java.awt.Dimension(200, 100));
         setResizable(false);
 
         LogInFailedPanel.setBackground(new java.awt.Color(151, 137, 219));
@@ -41,7 +40,7 @@ public class LogInFailed extends javax.swing.JFrame {
         LogInFailedText.setEditable(false);
         LogInFailedText.setBackground(new java.awt.Color(151, 137, 219));
         LogInFailedText.setFont(new java.awt.Font("Bodoni MT Black", 0, 18)); // NOI18N
-        LogInFailedText.setForeground(new java.awt.Color(245, 245, 245));
+        LogInFailedText.setForeground(new java.awt.Color(204, 0, 0));
         LogInFailedText.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         LogInFailedText.setText("Login Failed");
         LogInFailedText.setBorder(null);

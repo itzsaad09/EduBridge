@@ -6,6 +6,7 @@ package main;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.sql.*;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -43,7 +44,9 @@ public class HomePageAdmin extends javax.swing.JFrame {
     // Store View Time Table Data
     private String cName, instructorName, day, sTime, eTime, roomNo;
 
-    
+    // Top of file with other variables
+    HashMap<String, String> courseMap = new HashMap<>();
+    HashMap<String, String> instructorMap = new HashMap<>();
     public HomePageAdmin() {
         initComponents();
         // Set Title
@@ -2443,31 +2446,41 @@ public class HomePageAdmin extends javax.swing.JFrame {
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card4");
         show_Table("timetable", ViewTimeTable);
+        
+        // 1. Populate Course Combo and Map
         CourseCombo.removeAllItems();
         CourseCombo.addItem("Select Course");
-        String query_course = "SELECT `coursename` FROM `course`";
+        courseMap.clear();
+        String query_course = "SELECT `coursecode`, `coursename` FROM `course`";
         try {
             pst = connect.prepareStatement(query_course);
-            result = pst.executeQuery(query_course);
+            result = pst.executeQuery();
             while (result.next()) {
-                String item = result.getString("coursename");
-                CourseCombo.addItem(item);
+                String code = result.getString("coursecode");
+                String name = result.getString("coursename");
+                courseMap.put(name, code); // Store mapping
+                CourseCombo.addItem(name);
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null,ex);
+            JOptionPane.showMessageDialog(null, ex);
         }
+
+        // 2. Populate Instructor Combo and Map
         InstructorCombo.removeAllItems();
         InstructorCombo.addItem("Select Instructor");
-        String query_instructor = "SELECT CONCAT(`fName`, ' ', `lName`) AS `fullName` FROM `instructor`";
+        instructorMap.clear();
+        String query_instructor = "SELECT `ID`, CONCAT(`fName`, ' ', `lName`) AS `fullName` FROM `instructor`";
         try {
             pst = connect.prepareStatement(query_instructor);
-            result = pst.executeQuery(query_instructor);
+            result = pst.executeQuery();
             while(result.next()){
-                String item = result.getString("fullName");
-                InstructorCombo.addItem(item);
+                String id = result.getString("ID");
+                String name = result.getString("fullName");
+                instructorMap.put(name, id); // Store mapping
+                InstructorCombo.addItem(name);
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null,ex);
+            JOptionPane.showMessageDialog(null, ex);
         }
     }//GEN-LAST:event_TimeTableMouseClicked
 
@@ -4247,147 +4260,96 @@ public class HomePageAdmin extends javax.swing.JFrame {
         String sMinutes = (String)MinutesCombo.getSelectedItem();
         String eHour = (String)HoursCombo1.getSelectedItem();
         String eMinutes = (String)MinutesCombo1.getSelectedItem();
+        
         day = (String)DayCombo.getSelectedItem();
         sTime = sHour + ':' + sMinutes;
         eTime = eHour + ':' + eMinutes;
+        
+        // Get Names from UI
         cName = (String)CourseCombo.getSelectedItem();
         instructorName = (String)InstructorCombo.getSelectedItem();
         roomNo = (String)RoomCombo.getSelectedItem();
         
+        // Retrieve IDs from Maps
+        String courseCode = courseMap.get(cName);
+        String instructorID = instructorMap.get(instructorName);
+        
         String[] sparts = sTime.split(":");
         String[] eparts = eTime.split(":");
 
-        if(day.equals("Select Day")){
-            Day.setForeground(Color.RED);
-            temp = false;
-            overlap = false;
-        } else {
-            Day.setForeground(Color.BLACK);
-            temp = true;
+        // Validation logic
+        if(day.equals("Select Day") || sparts[0].equals("Select Hour") || eparts[0].equals("Select Hour") || 
+        cName.equals("Select Course") || instructorName.equals("Select Instructor") || roomNo.equals("Select Room")){
+            JOptionPane.showMessageDialog(null, "Please fill all fields");
+            return;
         }
-        if(sparts[0].equals("Select Hour") || sparts[1].equals("Select Minute")){
-            StartTime.setForeground(Color.RED);
-            temp = false;
-            overlap = false;
-        } else {
-            StartTime.setForeground(Color.BLACK);
-            temp = true;
-        }
-        if(eparts[0].equals("Select Hour") || eparts[1].equals("Select Minute")){
-            EndTime.setForeground(Color.RED);
-            temp = false;
-            overlap = false;
-        } else {
-            EndTime.setForeground(Color.BLACK);
-            temp = true;
-        }
-        if(cName.equals("Select Course")){
-            Course.setForeground(Color.RED);
-            temp = false;
-            overlap = false;
-        } else {
-            Course.setForeground(Color.BLACK);
-            temp = true;
-        }
-        if(instructorName.equals("Select Instructor")){
-            Instructor.setForeground(Color.RED);
-            temp = false;
-            overlap = false;
-        } else {
-            Instructor.setForeground(Color.BLACK);
-            temp = true;
-        }
-        if(roomNo.equals("Select Room")){
-            Room.setForeground(Color.RED);
-            temp = false;
-            overlap = false;
-        } else {
-            Room.setForeground(Color.BLACK);
-            temp = true;
-        }
-        if(overlap == true){
-            String query = "SELECT COUNT(*) FROM `timetable` WHERE " +
-            "    `day` = ? AND " +
-            "    ((`instructorName` = ?) OR (`roomNo` = ?)) AND " +
-            "    (`sTime` < ? AND `eTime` > ?)";
-            try {
-                pst = connect.prepareStatement(query);
-                pst.setString(1, day);
-                pst.setString(2, instructorName);
-                pst.setString(3, roomNo);
-                pst.setString(4, eTime);
-                pst.setString(5, sTime);
-                
-                result = pst.executeQuery();
-                if(result.next()){
-                    int count = result.getInt(1);
-                    if(count > 0){
-                        AlreadyBooked alreadybooked = new AlreadyBooked();
-                        alreadybooked.setVisible(true);
-                        new Timer().schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                alreadybooked.dispose();
-                            }
-                        }, 1000);
-                        temp = false;
-                    } else {
-                        temp = true;
+
+        // Overlap Check
+        String checkQuery = "SELECT COUNT(*) FROM `timetable` WHERE `day` = ? AND ((`instructorName` = ?) OR (`roomNo` = ?)) AND (`sTime` < ? AND `eTime` > ?)";
+        try {
+            pst = connect.prepareStatement(checkQuery);
+            pst.setString(1, day);
+            pst.setString(2, instructorName);
+            pst.setString(3, roomNo);
+            pst.setString(4, eTime);
+            pst.setString(5, sTime);
+            result = pst.executeQuery();
+            if(result.next() && result.getInt(1) > 0){
+                AlreadyBooked alreadybooked = new AlreadyBooked();
+                alreadybooked.setVisible(true);
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        alreadybooked.dispose();
                     }
+                }, 1000);
+                return;
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex);
+        }
+
+        String insertQuery = "INSERT INTO `timetable`(`day`, `sTime`, `eTime`,`courseCode`, `cName`, `instructorID`, `instructorName`, `roomNo`) VALUES (?,?,?,?,?,?,?,?)";
+        try {
+            pst = connect.prepareStatement(insertQuery);
+            pst.setString(1, day);
+            pst.setString(2, sTime);
+            pst.setString(3, eTime);
+            pst.setString(4, courseCode);
+            pst.setString(5, cName);
+            pst.setString(6, instructorID);
+            pst.setString(7, instructorName);
+            pst.setString(8, roomNo);
+
+            pst.execute();
+            DataAdded dataadded = new DataAdded();
+            dataadded.setVisible(true);
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    dataadded.dispose();
                 }
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null,ex);
-            }
-        }
-        if(temp == true){
-            String query = "INSERT INTO `timetable`(`day`, `sTime`, `eTime`, `cName`, `instructorName`, `roomNo`) VALUES (?,?,?,?,?,?)";
-            try {
-                pst = connect.prepareStatement(query);
-                pst.setString(1, day);
-                pst.setString(2, sTime);
-                pst.setString(3, eTime);
-                pst.setString(4, cName);
-                pst.setString(5, instructorName);
-                pst.setString(6, roomNo);
+            }, 1000);
+            show_Table("timetable", ViewTimeTable);
+            
+            DayCombo.setSelectedIndex(0);
+            HoursCombo.setSelectedIndex(0);
+            MinutesCombo.setSelectedIndex(0);
+            HoursCombo1.setSelectedIndex(0);
+            MinutesCombo1.setSelectedIndex(0);
+            CourseCombo.setSelectedIndex(0);
+            InstructorCombo.setSelectedIndex(0);
+            RoomCombo.setSelectedIndex(0);
 
-                pst.execute();
-                DataAdded dataadded = new DataAdded();
-                dataadded.setVisible(true);
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        dataadded.dispose();
-                    }
-                }, 1000);
-                show_Table("timetable", ViewTimeTable);
-                DayCombo.setSelectedIndex(0);
-                HoursCombo.setSelectedIndex(0);
-                MinutesCombo.setSelectedIndex(0);
-                HoursCombo1.setSelectedIndex(0);
-                MinutesCombo1.setSelectedIndex(0);
-                CourseCombo.setSelectedIndex(0);
-                InstructorCombo.setSelectedIndex(0);
-                RoomCombo.setSelectedIndex(0);
-
-            } catch (SQLException ex) {
-                Failed failed = new Failed();
-                failed.setVisible(true);
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        failed.dispose();
-                    }
-                }, 1000);
-                DayCombo.setSelectedIndex(0);
-                HoursCombo.setSelectedIndex(0);
-                MinutesCombo.setSelectedIndex(0);
-                HoursCombo1.setSelectedIndex(0);
-                MinutesCombo1.setSelectedIndex(0);
-                CourseCombo.setSelectedIndex(0);
-                InstructorCombo.setSelectedIndex(0);
-                RoomCombo.setSelectedIndex(0);
-                JOptionPane.showMessageDialog(null,ex);
-            }
+        } catch (SQLException ex) {
+            Failed failed = new Failed();
+            failed.setVisible(true);
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    failed.dispose();
+                }
+            }, 1000);
         }
     }//GEN-LAST:event_AddMouseClicked
 
@@ -4404,6 +4366,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         String sMinutes = (String)MinutesCombo.getSelectedItem();
         String eHour = (String)HoursCombo1.getSelectedItem();
         String eMinutes = (String)MinutesCombo1.getSelectedItem();
+        
         String tempDay = (String)DayCombo.getSelectedItem();
         String tempSTime = sHour + ':' + sMinutes;
         String tempETime = eHour + ':' + eMinutes;
@@ -4411,66 +4374,23 @@ public class HomePageAdmin extends javax.swing.JFrame {
         String tempInstructorName = (String)InstructorCombo.getSelectedItem();
         String tempRoomNo = (String)RoomCombo.getSelectedItem();
         
-        String[] sparts = tempSTime.split(":");
-        String[] eparts = tempETime.split(":");
+        String tempCourseCode = courseMap.get(tempCName);
+        String tempInstructorID = instructorMap.get(tempInstructorName);
         
-        boolean overlap = tempDay.equals(day) && tempSTime.equals(sTime) && tempETime.equals(eTime) && tempInstructorName.equals(instructorName) && tempRoomNo.equals(roomNo);
-        System.out.println(overlap);
-        if(tempDay.equals("Select Day")){
-            Day.setForeground(Color.RED);
-            temp = false;
-            overlap = false;
-        } else {
-            Day.setForeground(Color.BLACK);
-            temp = true;
+        boolean noChanges = tempDay.equals(day) && tempSTime.equals(sTime) && 
+                            tempETime.equals(eTime) && tempInstructorName.equals(instructorName) && 
+                            tempRoomNo.equals(roomNo);
+
+        if(tempDay.equals("Select Day") || sHour.equals("Select Hour") || eHour.equals("Select Hour") || 
+        tempCName.equals("Select Course") || tempInstructorName.equals("Select Instructor")) {
+            JOptionPane.showMessageDialog(null, "Please fill all required fields.");
+            return;
         }
-        if(sparts[0].equals("Select Hour") || sparts[1].equals("Select Minute")){
-            StartTime.setForeground(Color.RED);
-            temp = false;
-            overlap = false;
-        } else {
-            StartTime.setForeground(Color.BLACK);
-            temp = true;
-        }
-        if(eparts[0].equals("Select Hour") || eparts[1].equals("Select Minute")){
-            EndTime.setForeground(Color.RED);
-            temp = false;
-            overlap = false;
-        } else {
-            EndTime.setForeground(Color.BLACK);
-            temp = true;
-        }
-        if(tempCName.equals("Select Course")){
-            Course.setForeground(Color.RED);
-            temp = false;
-            overlap = false;
-        } else {
-            Course.setForeground(Color.BLACK);
-            temp = true;
-        }
-        if(tempInstructorName.equals("Select Instructor")){
-            Instructor.setForeground(Color.RED);
-            temp = false;
-            overlap = false;
-        } else {
-            Instructor.setForeground(Color.BLACK);
-            temp = true;
-        }
-        if(tempRoomNo.equals("Select Room")){
-            Room.setForeground(Color.RED);
-            temp = false;
-            overlap = false;
-        } else {
-            Room.setForeground(Color.BLACK);
-            temp = true;
-        }
-        if(!overlap){
-            String query = "SELECT COUNT(*) FROM `timetable` WHERE " +
-                "    `day` = ? AND " +
-                "    (`instructorName` = ? OR `roomNo` = ?) AND " +
-                "    (`sTime` < ? AND `eTime` > ?) AND " +
-                // EXCLUDE the original record being updated itself from the overlap check
-                "    NOT (`cName` = ? AND `instructorName` = ? AND `day` = ? AND `sTime` = ? AND `eTime` = ? AND `roomNo` = ?)";
+
+        // Overlap Check
+        if(!noChanges){
+            String query = "SELECT COUNT(*) FROM `timetable` WHERE `day` = ? AND (`instructorName` = ? OR `roomNo` = ?) " +
+                        "AND (`sTime` < ? AND `eTime` > ?) AND NOT (`cName` = ? AND `day` = ? AND `sTime` = ?)";
             try {
                 pst = connect.prepareStatement(query);
                 pst.setString(1, tempDay);
@@ -4478,92 +4398,76 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 pst.setString(3, tempRoomNo);
                 pst.setString(4, tempETime);
                 pst.setString(5, tempSTime);
-                // Exclude Clause
-                pst.setString(6, cName);
-                pst.setString(7, instructorName);
-                pst.setString(8, day);
-                pst.setString(9, sTime);
-                pst.setString(10, eTime);
-                pst.setString(11, roomNo);
+                // Exclude current record
+                pst.setString(6, cName); 
+                pst.setString(7, day);
+                pst.setString(8, sTime);
                 
                 result = pst.executeQuery();
-                if(result.next()){
-                    int count = result.getInt(1);
-                    if(count > 0){
-                        AlreadyBooked alreadybooked = new AlreadyBooked();
-                        alreadybooked.setVisible(true);
-                        new Timer().schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                alreadybooked.dispose();
-                            }
-                        }, 1000);
-                        temp = false;
-                    } else {
-                        temp = true;
-                    }
+                if(result.next() && result.getInt(1) > 0){
+                    AlreadyBooked alreadybooked = new AlreadyBooked();
+                    alreadybooked.setVisible(true);
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            alreadybooked.dispose();
+                        }
+                    }, 1000);
+                    return;
                 }
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null,ex);
+                JOptionPane.showMessageDialog(null, ex);
             }
         }
         
-        if(temp == true){
-            String query = "UPDATE `timetable` SET `day` = ?, `sTime` = ?, `eTime` = ?, `cName` = ?, `instructorName` = ?, `roomNo` = ? WHERE `day` = ? AND `sTime` = ? AND `eTime` = ? AND `cName` = ? AND `instructorName` = ? AND `roomNo` = ?";
-            try {
-                pst = connect.prepareStatement(query);
-                pst.setString(1, tempDay);
-                pst.setString(2, tempSTime);
-                pst.setString(3, tempETime);
-                pst.setString(4, tempCName);
-                pst.setString(5, tempInstructorName);
-                pst.setString(6, tempRoomNo);
-                // Where clause
-                pst.setString(7, day);
-                pst.setString(8, sTime);
-                pst.setString(9, eTime);
-                pst.setString(10, cName);
-                pst.setString(11, instructorName);
-                pst.setString(12, roomNo);
+        // Update the database using the retrieved Course Code and Instructor ID
+        String updateQuery = "UPDATE `timetable` SET `day` = ?, `sTime` = ?, `eTime` = ?, `courseCode` = ?, `cName` = ?, " +
+                            "`instructorID` = ?, `instructorName` = ?, `roomNo` = ? " +
+                            "WHERE `day` = ? AND `sTime` = ? AND `cName` = ?";
+        try {
+            pst = connect.prepareStatement(updateQuery);
+            pst.setString(1, tempDay);
+            pst.setString(2, tempSTime);
+            pst.setString(3, tempETime);
+            pst.setString(4, tempCourseCode);
+            pst.setString(5, tempCName);
+            pst.setString(6, tempInstructorID);
+            pst.setString(7, tempInstructorName);
+            pst.setString(8, tempRoomNo);
+            
+            pst.setString(9, day);
+            pst.setString(10, sTime);
+            pst.setString(11, cName);
 
-                pst.execute();
-                DataUpdated dataupdated = new DataUpdated();
-                dataupdated.setVisible(true);
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        dataupdated.dispose();
-                    }
-                }, 1000);
-                show_Table("timetable", ViewTimeTable);
-                DayCombo.setSelectedIndex(0);
-                HoursCombo.setSelectedIndex(0);
-                MinutesCombo.setSelectedIndex(0);
-                HoursCombo1.setSelectedIndex(0);
-                MinutesCombo1.setSelectedIndex(0);
-                CourseCombo.setSelectedIndex(0);
-                InstructorCombo.setSelectedIndex(0);
-                RoomCombo.setSelectedIndex(0);
-
-            } catch (SQLException ex) {
-                Failed failed = new Failed();
-                failed.setVisible(true);
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        failed.dispose();
-                    }
-                }, 1000);
-                DayCombo.setSelectedIndex(0);
-                HoursCombo.setSelectedIndex(0);
-                MinutesCombo.setSelectedIndex(0);
-                HoursCombo1.setSelectedIndex(0);
-                MinutesCombo1.setSelectedIndex(0);
-                CourseCombo.setSelectedIndex(0);
-                InstructorCombo.setSelectedIndex(0);
-                RoomCombo.setSelectedIndex(0);
-                JOptionPane.showMessageDialog(null,ex);
-            }
+            pst.execute();
+            DataUpdated dataupdated = new DataUpdated();
+            dataupdated.setVisible(true);
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    dataupdated.dispose();
+                }
+            }, 1000);
+            show_Table("timetable", ViewTimeTable);
+            
+            DayCombo.setSelectedIndex(0);
+            HoursCombo.setSelectedIndex(0);
+            MinutesCombo.setSelectedIndex(0);
+            HoursCombo1.setSelectedIndex(0);
+            MinutesCombo1.setSelectedIndex(0);
+            CourseCombo.setSelectedIndex(0);
+            InstructorCombo.setSelectedIndex(0);
+            RoomCombo.setSelectedIndex(0);
+            
+        } catch (SQLException ex) {
+            Failed failed = new Failed();
+            failed.setVisible(true);
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    failed.dispose();
+                }
+            }, 1000);
         }
     }//GEN-LAST:event_UpdateMouseClicked
 
