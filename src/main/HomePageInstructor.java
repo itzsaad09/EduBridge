@@ -1258,8 +1258,8 @@ public class HomePageInstructor extends javax.swing.JFrame {
                     updateStudentAttendance(studentId, courseCode, dateKey, status);
                 }
             }
-            JOptionPane.showMessageDialog(this, "Attendance saved successfully!");
-            loadAttendanceForSelectedDate(); // Refresh to update absence counts
+            new CustomMessageDialog(this, "Success", "Attendance saved successfully!", CustomMessageDialog.SUCCESS).setVisible(true);
+            loadAttendanceForSelectedDate();
 
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Error saving attendance: " + ex.getMessage());
@@ -1317,7 +1317,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
             }
 
             pst.executeBatch();
-            JOptionPane.showMessageDialog(this, "Results saved successfully!");
+            new CustomMessageDialog(this, "Success", "Results saved successfully!", CustomMessageDialog.SUCCESS).setVisible(true);
 
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Please enter valid numeric marks.");

@@ -444,19 +444,19 @@ public class HomePageStudent extends javax.swing.JFrame {
                     String session = result.getString("session");
                     int year = result.getInt("year");
 
-                    // 2. Parse and remove the course
+                    // 2. remove the course
                     java.util.List<String> codesList = new java.util.ArrayList<>(java.util.Arrays.asList(currentCourses.split(",\\s*")));
                     
                     if (codesList.remove(courseCode)) {
                         // Start Transaction
                         connect.setAutoCommit(false);
 
-                        // A. Return the seat to the course table
+                        // Return the seat to the course table
                         pst = connect.prepareStatement("UPDATE `course` SET `seats` = `seats` + 1 WHERE `coursecode` = ?");
                         pst.setString(1, courseCode);
                         pst.executeUpdate();
 
-                        // B. Update Enrollment Table
+                        // Update Enrollment Table
                         double totalFeeAmount = 0;
                         if (codesList.isEmpty()) {
                             // Delete row if no courses left
@@ -478,7 +478,7 @@ public class HomePageStudent extends javax.swing.JFrame {
                             pst.setInt(2, enrollmentId);
                             pst.executeUpdate();
 
-                            // C. Recalculate Fees for remaining courses
+                            // Recalculate Fees for remaining courses
                             int totalCredits = 0;
                             for (String code : codesList) {
                                 PreparedStatement cpst = connect.prepareStatement("SELECT `credithrs` FROM `course` WHERE `coursecode` = ?");
@@ -488,7 +488,7 @@ public class HomePageStudent extends javax.swing.JFrame {
                             }
                             totalFeeAmount = totalCredits * 6000;
 
-                            // D. Update Fee Table
+                            // Update Fee Table
                             pst = connect.prepareStatement("UPDATE `fee` SET `total_fee` = ? WHERE `student_id` = ? AND `session` = ? AND `year` = ?");
                             pst.setDouble(1, totalFeeAmount);
                             pst.setString(2, this.id);
@@ -508,6 +508,458 @@ public class HomePageStudent extends javax.swing.JFrame {
             } catch (SQLException ex) {
                 try { connect.rollback(); } catch (SQLException e) { }
                 JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void showFee() {
+        try {
+            String query = "SELECT `year`, `session`, `total_fee`, `status` FROM `fee` WHERE `student_id` = ?";
+            pst = connect.prepareStatement(query);
+            pst.setString(1, this.id);
+            result = pst.executeQuery();
+            
+            DTM = (DefaultTableModel) FeeTable.getModel();
+            DTM.setRowCount(0);
+
+            while (result.next()) {
+                Vector v = new Vector();
+                v.add(result.getString("year"));
+                v.add(result.getString("session"));
+                v.add(result.getString("total_fee"));
+                v.add(result.getString("status"));
+                DTM.addRow(v);
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error fetching fee data: " + ex.getMessage());
+        }
+    }
+
+    private void downloadFeeVoucherPDF(String year, String session, String amount, String status) {
+        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+        fileChooser.setDialogTitle("Save Fee Voucher");
+        fileChooser.setSelectedFile(new java.io.File("FeeVoucher_" + session + "_" + year + ".pdf"));
+        
+        if (fileChooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
+            com.itextpdf.text.Document document = new com.itextpdf.text.Document();
+            try {
+                com.itextpdf.text.pdf.PdfWriter writer = com.itextpdf.text.pdf.PdfWriter.getInstance(document, new java.io.FileOutputStream(fileChooser.getSelectedFile()));
+                document.open();
+
+                // 1. UNIVERSITY LOGO
+                java.net.URL logoUrl = getClass().getResource("/images/edubridge.png");
+                if (logoUrl != null) {
+                    com.itextpdf.text.Image logo = com.itextpdf.text.Image.getInstance(logoUrl);
+                    logo.scaleToFit(80, 80);
+                    logo.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                    document.add(logo);
+                }
+
+                // 2. FONTS
+                com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD);
+                com.itextpdf.text.Font smallBold = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD);
+                com.itextpdf.text.Font normalFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL);
+                com.itextpdf.text.Font redBold = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor.RED);
+
+                // 3. HEADERS
+                com.itextpdf.text.Paragraph title = new com.itextpdf.text.Paragraph("EduBridge University", boldFont);
+                title.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                document.add(title);
+                
+                com.itextpdf.text.Paragraph subTitle = new com.itextpdf.text.Paragraph("Official Fee Challan", smallBold);
+                subTitle.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                document.add(subTitle);
+                document.add(new com.itextpdf.text.Paragraph(" "));
+
+                // 4. CALCULATE DUE DATE (Current Date + 7 Days)
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMMM dd, yyyy");
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                String issueDate = sdf.format(cal.getTime());
+                cal.add(java.util.Calendar.DAY_OF_MONTH, 7);
+                String dueDate = sdf.format(cal.getTime());
+
+                // 5. STUDENT & VOUCHER DETAILS
+                com.itextpdf.text.pdf.PdfPTable detailsTable = new com.itextpdf.text.pdf.PdfPTable(2);
+                detailsTable.setWidthPercentage(100);
+                detailsTable.getDefaultCell().setBorder(com.itextpdf.text.Rectangle.NO_BORDER);
+
+                detailsTable.addCell(new com.itextpdf.text.Phrase("Student ID: " + this.id, normalFont));
+                detailsTable.addCell(new com.itextpdf.text.Phrase("Issue Date: " + issueDate, normalFont));
+                detailsTable.addCell(new com.itextpdf.text.Phrase("Name: " + NameField.getText(), normalFont));
+                detailsTable.addCell(new com.itextpdf.text.Phrase("Due Date: " + dueDate, redBold)); // Highlighted due date
+                detailsTable.addCell(new com.itextpdf.text.Phrase("Session: " + session + " " + year, normalFont));
+                detailsTable.addCell(new com.itextpdf.text.Phrase("Status: " + status, smallBold));
+                
+                document.add(detailsTable);
+                document.add(new com.itextpdf.text.Paragraph(" "));
+
+                // 6. FEE TABLE
+                com.itextpdf.text.pdf.PdfPTable feeTable = new com.itextpdf.text.pdf.PdfPTable(2);
+                feeTable.setWidthPercentage(100);
+                feeTable.addCell(new com.itextpdf.text.Phrase("Description", smallBold));
+                feeTable.addCell(new com.itextpdf.text.Phrase("Amount (PKR)", smallBold));
+                
+                feeTable.addCell("Tuition Fee (Enrolled Courses)");
+                feeTable.addCell(amount);
+                
+                feeTable.addCell(new com.itextpdf.text.Phrase("TOTAL PAYABLE", smallBold));
+                feeTable.addCell(new com.itextpdf.text.Phrase(amount, smallBold));
+                document.add(feeTable);
+
+                // 7. FOOTER (BANK SECTION)
+                com.itextpdf.text.pdf.PdfPTable footerTable = new com.itextpdf.text.pdf.PdfPTable(1);
+                footerTable.setTotalWidth(200);
+                com.itextpdf.text.pdf.PdfPCell cell = new com.itextpdf.text.pdf.PdfPCell();
+                cell.setBorder(com.itextpdf.text.Rectangle.NO_BORDER);
+                cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+
+                com.itextpdf.text.Paragraph line = new com.itextpdf.text.Paragraph("\n\n__________________________", normalFont);
+                line.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+                cell.addElement(line);
+                
+                com.itextpdf.text.Paragraph bankPara = new com.itextpdf.text.Paragraph("Bank Cashier Signature", smallBold);
+                bankPara.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+                cell.addElement(bankPara);
+
+                footerTable.addCell(cell);
+                footerTable.writeSelectedRows(0, -1, 370, 100, writer.getDirectContent());
+
+                document.close();
+                CustomMessageDialog messageDialog = new CustomMessageDialog(this, "Success", "Fee Voucher generated.", CustomMessageDialog.SUCCESS);
+                messageDialog.setVisible(true);
+
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+            }
+        }
+    }
+
+    private void showAttendance() {
+        DefaultTableModel model = (DefaultTableModel) AttendanceTable.getModel();
+        model.setRowCount(0);
+
+        try {
+            String enrollQuery = "SELECT `coursecode` FROM `enrollment` WHERE `student_id` = ?";
+            pst = connect.prepareStatement(enrollQuery);
+            pst.setString(1, this.id);
+            result = pst.executeQuery();
+
+            if (result.next()) {
+                String combinedCodes = result.getString("coursecode");
+                String[] codes = combinedCodes.split(",\\s*");
+
+                for (String code : codes) {
+                    String attendanceQuery = "SELECT `log` FROM `attendance_json` WHERE `student_id` = ? AND `coursecode` = ?";
+                    pst = connect.prepareStatement(attendanceQuery);
+                    pst.setString(1, this.id);
+                    pst.setString(2, code);
+                    result = pst.executeQuery();
+
+                    int presentCount = 0;
+                    int absentCount = 0;
+
+                    if (result.next()) {
+                        String jsonLog = result.getString("log");
+                        if (jsonLog != null) {
+                            // Simple counting by checking occurrences in the JSON-like string
+                            presentCount = (jsonLog.length() - jsonLog.replace("Present", "").length()) / "Present".length();
+                            absentCount = (jsonLog.length() - jsonLog.replace("Absent", "").length()) / "Absent".length();
+                        }
+                    }
+
+                    String nameQuery = "SELECT `coursename` FROM `course` WHERE `coursecode` = ?";
+                    pst = connect.prepareStatement(nameQuery);
+                    pst.setString(1, code);
+                    result = pst.executeQuery();
+                    String courseName = result.next() ? result.getString("coursename") : code;
+
+                    double total = presentCount + absentCount;
+                    String percentage = (total > 0) ? String.format("%.1f%%", (presentCount / total) * 100) : "0%";
+                    
+                    model.addRow(new Object[]{courseName, presentCount, absentCount, percentage});
+                }
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error loading attendance: " + ex.getMessage());
+        }
+    }
+
+    private void showDetailedAttendance(String courseCode) {
+        try {
+            String query = "SELECT log FROM attendance_json WHERE student_id = ? AND coursecode = ?";
+            pst = connect.prepareStatement(query);
+            pst.setString(1, this.id);
+            pst.setString(2, courseCode);
+            result = pst.executeQuery();
+
+            if (result.next()) {
+                String jsonLog = result.getString("log");
+                if (jsonLog == null || jsonLog.equals("{}")) {
+                    new CustomMessageDialog(this, "Attendance", "No logs found.", CustomMessageDialog.ERROR).setVisible(true);
+                    return;
+                }
+
+                String cleanLog = jsonLog.replace("{", "").replace("}", "").replace("\"", "");
+                String[] entries = cleanLog.split(", ");
+                
+                StringBuilder report = new StringBuilder("<html><div style='text-align: center;'>");
+                report.append("<b>Attendance History for ").append(courseCode).append("</b><br><br>");
+                for (String entry : entries) {
+                    report.append(entry.replace(":", " &rarr; ")).append("<br>");
+                }
+                report.append("</div></html>");
+
+                CustomMessageDialog detailDialog = new CustomMessageDialog(this, "Attendance Details", report.toString(), -1);
+                detailDialog.setVisible(true);
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        }
+    }
+
+    private void showResults() {
+        DefaultTableModel model = (DefaultTableModel) ResultTable.getModel();
+        model.setRowCount(0);
+
+        // Query to get GPA and CGPA data
+        String query = "SELECT e.year, e.session, " +
+                    "GROUP_CONCAT(r.total) as all_totals, " +
+                    "GROUP_CONCAT(c.credithrs) as all_credits " +
+                    "FROM results r " +
+                    "JOIN course c ON r.course_code = c.coursecode " +
+                    "JOIN enrollment e ON r.student_id = e.student_id AND e.coursecode LIKE CONCAT('%', r.course_code, '%') " +
+                    "WHERE r.student_id = ? " +
+                    "GROUP BY e.year, e.session ORDER BY e.year DESC, e.session DESC";
+
+        try {
+            pst = connect.prepareStatement(query);
+            pst.setString(1, this.id);
+            result = pst.executeQuery();
+
+            double totalGP = 0;
+            int totalCr = 0;
+
+            while (result.next()) {
+                String[] totals = result.getString("all_totals").split(",");
+                String[] credits = result.getString("all_credits").split(",");
+                
+                double semGP = 0;
+                int semCr = 0;
+
+                for (int i = 0; i < totals.length; i++) {
+                    int score = Integer.parseInt(totals[i]);
+                    int cr = Integer.parseInt(credits[i]);
+                    double gp = calculateGP(score);
+                    semGP += (gp * cr);
+                    semCr += cr;
+                }
+
+                double gpa = (semCr > 0) ? semGP / semCr : 0;
+                totalGP += semGP;
+                totalCr += semCr;
+                double cgpa = (totalCr > 0) ? totalGP / totalCr : 0;
+
+                model.addRow(new Object[]{
+                    result.getString("year"),
+                    result.getString("session"),
+                    String.format("%.2f", gpa),
+                    String.format("%.2f", cgpa)
+                });
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        }
+    }
+
+    // GPA Calculation Helper
+    private double calculateGP(int marks) {
+        if (marks >= 85) return 4.0;
+        if (marks >= 80) return 3.7;
+        if (marks >= 75) return 3.3;
+        if (marks >= 70) return 3.0;
+        if (marks >= 65) return 2.7;
+        if (marks >= 60) return 2.3;
+        if (marks >= 50) return 2.0;
+        return 0.0;
+    }
+
+    private void showDetailedResults(String year, String session) {
+        try {
+            String query = "SELECT c.coursename, r.total " +
+                        "FROM results r " +
+                        "JOIN course c ON r.course_code = c.coursecode " +
+                        "JOIN enrollment e ON r.student_id = e.student_id AND e.coursecode LIKE CONCAT('%', r.course_code, '%') " +
+                        "WHERE r.student_id = ? AND e.year = ? AND e.session = ?";
+            
+            pst = connect.prepareStatement(query);
+            pst.setString(1, this.id);
+            pst.setString(2, year);
+            pst.setString(3, session);
+            result = pst.executeQuery();
+
+            StringBuilder report = new StringBuilder("<html><div style='text-align: center;'>");
+            report.append("<b>Transcript: ").append(session).append(" ").append(year).append("</b><br><br>");
+
+            boolean hasData = false;
+            while (result.next()) {
+                hasData = true;
+                String course = result.getString("coursename");
+                double total = result.getDouble("total");
+                report.append(course).append(" &rarr; <b>").append(total).append("</b><br>");
+            }
+
+            if (!hasData) {
+                report.append("No records found for this semester.");
+            }
+            
+            report.append("</div></html>");
+
+            CustomMessageDialog detailDialog = new CustomMessageDialog(this, "Academic Record", report.toString(), -1);
+            detailDialog.setVisible(true);
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        }
+    }
+
+    private void downloadTranscriptPDF(String year, String session) {
+        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+        fileChooser.setDialogTitle("Save Transcript");
+        fileChooser.setSelectedFile(new java.io.File("Transcript_" + session + "_" + year + ".pdf"));
+        
+        if (fileChooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
+            com.itextpdf.text.Document document = new com.itextpdf.text.Document();
+            try {
+                com.itextpdf.text.pdf.PdfWriter.getInstance(document, new java.io.FileOutputStream(fileChooser.getSelectedFile()));
+                // Update this line at the start of your try block
+                com.itextpdf.text.pdf.PdfWriter writer = com.itextpdf.text.pdf.PdfWriter.getInstance(document, new java.io.FileOutputStream(fileChooser.getSelectedFile()));
+                document.open();
+
+                // 1. UNIVERSITY LOGO
+                try {
+                    java.net.URL logoUrl = getClass().getResource("/images/edubridge.png");
+                    if (logoUrl != null) {
+                        com.itextpdf.text.Image logo = com.itextpdf.text.Image.getInstance(logoUrl);
+                        logo.scaleToFit(80, 80); 
+                        logo.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                        document.add(logo);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Logo error: " + e.getMessage());
+                }
+
+                // 2. FONTS AND HEADERS
+                com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD);
+                com.itextpdf.text.Font smallBold = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD);
+                com.itextpdf.text.Font normalFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL);
+                
+                com.itextpdf.text.Paragraph title = new com.itextpdf.text.Paragraph("EduBridge University", boldFont);
+                title.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                document.add(title);
+                
+                com.itextpdf.text.Paragraph subTitle = new com.itextpdf.text.Paragraph("Official Academic Transcript", smallBold);
+                subTitle.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                document.add(subTitle);
+                
+                document.add(new com.itextpdf.text.Paragraph(" ")); 
+                document.add(new com.itextpdf.text.Paragraph("Student ID: " + this.id, normalFont));
+                document.add(new com.itextpdf.text.Paragraph("Semester: " + session + " " + year, normalFont));
+                document.add(new com.itextpdf.text.Paragraph(" ")); 
+
+                // 3. RESULT TABLE
+                com.itextpdf.text.pdf.PdfPTable table = new com.itextpdf.text.pdf.PdfPTable(4);
+                table.setWidthPercentage(100);
+                table.addCell(new com.itextpdf.text.Phrase("Course Name", smallBold));
+                table.addCell(new com.itextpdf.text.Phrase("Sessional", smallBold));
+                table.addCell(new com.itextpdf.text.Phrase("Final", smallBold));
+                table.addCell(new com.itextpdf.text.Phrase("Total", smallBold));
+
+                String currentSemQuery = "SELECT c.coursename, r.sessional, r.final, r.total, c.credithrs " +
+                                        "FROM results r " +
+                                        "JOIN course c ON r.course_code = c.coursecode " +
+                                        "JOIN enrollment e ON r.student_id = e.student_id AND e.coursecode LIKE CONCAT('%', r.course_code, '%') " +
+                                        "WHERE r.student_id = ? AND e.year = ? AND e.session = ?";
+                
+                pst = connect.prepareStatement(currentSemQuery);
+                pst.setString(1, this.id);
+                pst.setString(2, year);
+                pst.setString(3, session);
+                result = pst.executeQuery();
+
+                double semGP = 0;
+                int semCr = 0;
+
+                while (result.next()) {
+                    table.addCell(result.getString("coursename"));
+                    table.addCell(String.valueOf(result.getDouble("sessional")));
+                    table.addCell(String.valueOf(result.getDouble("final")));
+                    table.addCell(String.valueOf(result.getDouble("total")));
+
+                    int totalMarks = (int) result.getDouble("total");
+                    int credits = result.getInt("credithrs");
+                    semGP += (calculateGP(totalMarks) * credits);
+                    semCr += credits;
+                }
+                document.add(table);
+                document.add(new com.itextpdf.text.Paragraph(" "));
+
+                // 4. CGPA CALCULATION
+                String allSemQuery = "SELECT r.total, c.credithrs FROM results r JOIN course c ON r.course_code = c.coursecode WHERE r.student_id = ?";
+                pst = connect.prepareStatement(allSemQuery);
+                pst.setString(1, this.id);
+                java.sql.ResultSet rsAll = pst.executeQuery();
+
+                double totalGP = 0;
+                int totalCr = 0;
+
+                while (rsAll.next()) {
+                    int totalMarks = (int) rsAll.getDouble("total");
+                    int credits = rsAll.getInt("credithrs");
+                    totalGP += (calculateGP(totalMarks) * credits);
+                    totalCr += credits;
+                }
+
+                double gpa = (semCr > 0) ? semGP / semCr : 0;
+                double cgpa = (totalCr > 0) ? totalGP / totalCr : 0;
+
+                document.add(new com.itextpdf.text.Paragraph("Semester GPA: " + String.format("%.2f", gpa), smallBold));
+                document.add(new com.itextpdf.text.Paragraph("Cumulative CGPA: " + String.format("%.2f", cgpa), smallBold));
+                
+                // 5. SIGNATURE AND DATE SECTION (PINNED TO BOTTOM)
+                com.itextpdf.text.pdf.PdfPTable footerTable = new com.itextpdf.text.pdf.PdfPTable(1);
+                footerTable.setTotalWidth(200); // Width of the signature area
+                
+                // Create the signature cell
+                com.itextpdf.text.pdf.PdfPCell cell = new com.itextpdf.text.pdf.PdfPCell();
+                cell.setBorder(com.itextpdf.text.Rectangle.NO_BORDER);
+                cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+
+                // Add the line
+                com.itextpdf.text.Paragraph line = new com.itextpdf.text.Paragraph("__________________________", normalFont);
+                line.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+                cell.addElement(line);
+                
+                // Add Registrar Title
+                com.itextpdf.text.Paragraph registrarPara = new com.itextpdf.text.Paragraph("University Registrar", smallBold);
+                registrarPara.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+                cell.addElement(registrarPara);
+                
+                // Add Date
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMMM dd, yyyy");
+                com.itextpdf.text.Paragraph datePara = new com.itextpdf.text.Paragraph("Date: " + sdf.format(new java.util.Date()), normalFont);
+                datePara.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+                cell.addElement(datePara);
+
+                footerTable.addCell(cell);
+
+                footerTable.writeSelectedRows(0, -1, 350, 100, writer.getDirectContent());
+
+                document.close();
+                CustomMessageDialog messageDialog = new CustomMessageDialog(this, "Success", "Transcript Saved Successfully", CustomMessageDialog.SUCCESS);
+                messageDialog.setVisible(true);
+
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
             }
         }
     }
@@ -557,10 +1009,16 @@ public class HomePageStudent extends javax.swing.JFrame {
         EnrolledTable = new RoundedTable();
         FeePanel = new javax.swing.JPanel();
         ProfileButton3 = new javax.swing.JLabel();
+        FeeScrollPane = new javax.swing.JScrollPane();
+        FeeTable = new RoundedTable();
         AttendancePanel = new javax.swing.JPanel();
         ProfileButton4 = new javax.swing.JLabel();
+        AttendanceScrollPane = new javax.swing.JScrollPane();
+        AttendanceTable = new RoundedTable();
         ResultPanel = new javax.swing.JPanel();
         ProfileButton5 = new javax.swing.JLabel();
+        ResultScrollPane = new javax.swing.JScrollPane();
+        ResultTable = new RoundedTable();
         NotificationPanel = new javax.swing.JPanel();
         ProfileButton6 = new javax.swing.JLabel();
 
@@ -1051,6 +1509,45 @@ public class HomePageStudent extends javax.swing.JFrame {
             }
         });
 
+        FeeTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Year", "Session", "Total Fee", "Status"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        FeeTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        FeeTable.setRowHeight(50);
+        FeeTable.setRowSelectionAllowed(false);
+        FeeTable.setShowGrid(true);
+        FeeTable.getTableHeader().setResizingAllowed(false);
+        FeeTable.getTableHeader().setReorderingAllowed(false);
+        FeeTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                FeeTableMouseClicked(evt);
+            }
+        });
+        FeeScrollPane.setViewportView(FeeTable);
+
         javax.swing.GroupLayout FeePanelLayout = new javax.swing.GroupLayout(FeePanel);
         FeePanel.setLayout(FeePanelLayout);
         FeePanelLayout.setHorizontalGroup(
@@ -1058,12 +1555,18 @@ public class HomePageStudent extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, FeePanelLayout.createSequentialGroup()
                 .addGap(0, 663, Short.MAX_VALUE)
                 .addComponent(ProfileButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(FeePanelLayout.createSequentialGroup()
+                .addGap(40, 40, 40)
+                .addComponent(FeeScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         FeePanelLayout.setVerticalGroup(
             FeePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(FeePanelLayout.createSequentialGroup()
                 .addComponent(ProfileButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(548, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(FeeScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 536, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         MainPagePanel.add(FeePanel, "Card4");
@@ -1082,19 +1585,64 @@ public class HomePageStudent extends javax.swing.JFrame {
             }
         });
 
+        AttendanceTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Course Name", "Present", "Absent", "Percentage"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        AttendanceTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        AttendanceTable.setRowHeight(50);
+        AttendanceTable.setRowSelectionAllowed(false);
+        AttendanceTable.setShowGrid(true);
+        AttendanceTable.getTableHeader().setResizingAllowed(false);
+        AttendanceTable.getTableHeader().setReorderingAllowed(false);
+        AttendanceTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                AttendanceTableMouseClicked(evt);
+            }
+        });
+        AttendanceScrollPane.setViewportView(AttendanceTable);
+
         javax.swing.GroupLayout AttendancePanelLayout = new javax.swing.GroupLayout(AttendancePanel);
         AttendancePanel.setLayout(AttendancePanelLayout);
         AttendancePanelLayout.setHorizontalGroup(
             AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AttendancePanelLayout.createSequentialGroup()
-                .addGap(0, 663, Short.MAX_VALUE)
+                .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(ProfileButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AttendancePanelLayout.createSequentialGroup()
+                .addContainerGap(40, Short.MAX_VALUE)
+                .addComponent(AttendanceScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(40, 40, 40))
         );
         AttendancePanelLayout.setVerticalGroup(
             AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(AttendancePanelLayout.createSequentialGroup()
                 .addComponent(ProfileButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(548, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(AttendanceScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 536, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         MainPagePanel.add(AttendancePanel, "Card5");
@@ -1113,6 +1661,45 @@ public class HomePageStudent extends javax.swing.JFrame {
             }
         });
 
+        ResultTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Year", "Session", "GPA", "CGPA"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        ResultTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        ResultTable.setRowHeight(50);
+        ResultTable.setRowSelectionAllowed(false);
+        ResultTable.setShowGrid(true);
+        ResultTable.getTableHeader().setResizingAllowed(false);
+        ResultTable.getTableHeader().setReorderingAllowed(false);
+        ResultTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                ResultTableMouseClicked(evt);
+            }
+        });
+        ResultScrollPane.setViewportView(ResultTable);
+
         javax.swing.GroupLayout ResultPanelLayout = new javax.swing.GroupLayout(ResultPanel);
         ResultPanel.setLayout(ResultPanelLayout);
         ResultPanelLayout.setHorizontalGroup(
@@ -1120,12 +1707,18 @@ public class HomePageStudent extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ResultPanelLayout.createSequentialGroup()
                 .addGap(0, 663, Short.MAX_VALUE)
                 .addComponent(ProfileButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ResultPanelLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(ResultScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(40, 40, 40))
         );
         ResultPanelLayout.setVerticalGroup(
             ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(ResultPanelLayout.createSequentialGroup()
                 .addComponent(ProfileButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(548, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(ResultScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 536, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         MainPagePanel.add(ResultPanel, "Card6");
@@ -1244,6 +1837,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card4");
+        showFee();
     }//GEN-LAST:event_FeeSummaryMouseClicked
 
     private void FeeSummaryKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_FeeSummaryKeyPressed
@@ -1257,6 +1851,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card5");
+        showAttendance();
     }//GEN-LAST:event_MyAttendanceMouseClicked
 
     private void MyAttendanceKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_MyAttendanceKeyPressed
@@ -1270,6 +1865,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card6");
+        showResults();
     }//GEN-LAST:event_MyResultsMouseClicked
 
     private void MyResultsKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_MyResultsKeyPressed
@@ -1425,6 +2021,26 @@ public class HomePageStudent extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_ProfileButton3MouseExited
 
+    private void FeeTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_FeeTableMouseClicked
+        // TODO add your handling code here:
+        int row = FeeTable.getSelectedRow();
+        if (row != -1) {
+            String year = FeeTable.getValueAt(row, 0).toString();
+            String session = FeeTable.getValueAt(row, 1).toString();
+            String amount = FeeTable.getValueAt(row, 2).toString();
+            String status = FeeTable.getValueAt(row, 3).toString();
+            
+            boolean confirmed = false;
+            String message = "Download Fee Voucher for " + session + " " + year + "?";
+            CustomConfirmDialog customDialog = new CustomConfirmDialog(this, "Download Transcript", message);
+            customDialog.setVisible(true);
+            confirmed = customDialog.isConfirmed();
+            if (confirmed == true) {
+                downloadFeeVoucherPDF(year, session, amount, status);
+            }
+        }
+    }//GEN-LAST:event_FeeTableMouseClicked
+
     private void ProfileButton4MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton4MouseEntered
         // TODO add your handling code here:
         showProfilePopup(ProfileButton4, evt);
@@ -1437,6 +2053,23 @@ public class HomePageStudent extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_ProfileButton4MouseExited
 
+    private void AttendanceTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_AttendanceTableMouseClicked
+        // TODO add your handling code here:
+        int row = AttendanceTable.getSelectedRow();
+        if (row != -1) {
+            String courseName = AttendanceTable.getValueAt(row, 0).toString();
+            
+            try {
+                PreparedStatement ps = connect.prepareStatement("SELECT coursecode FROM course WHERE coursename = ?");
+                ps.setString(1, courseName);
+                ResultSet rs = ps.executeQuery();
+                if(rs.next()) {
+                    showDetailedAttendance(rs.getString("coursecode"));
+                }
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+    }//GEN-LAST:event_AttendanceTableMouseClicked
+
     private void ProfileButton5MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton5MouseEntered
         // TODO add your handling code here:
         showProfilePopup(ProfileButton5, evt);
@@ -1448,6 +2081,25 @@ public class HomePageStudent extends javax.swing.JFrame {
             infoPopup.setVisible(false);
         }
     }//GEN-LAST:event_ProfileButton5MouseExited
+
+    private void ResultTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ResultTableMouseClicked
+        // TODO add your handling code here:
+        int row = ResultTable.getSelectedRow();
+        if (row != -1) {
+            String year = ResultTable.getValueAt(row, 0).toString();
+            String session = ResultTable.getValueAt(row, 1).toString();
+            boolean confirmed = false;
+            String message = "Would you like to download the transcript as PDF?";
+            CustomConfirmDialog customDialog = new CustomConfirmDialog(this, "Download Transcript", message);
+            customDialog.setVisible(true);
+            confirmed = customDialog.isConfirmed();
+            if (confirmed == true) {
+                downloadTranscriptPDF(year, session);
+            } else {
+                showDetailedResults(year, session);
+            }
+        }
+    }//GEN-LAST:event_ResultTableMouseClicked
 
     private void ProfileButton6MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton6MouseEntered
         // TODO add your handling code here:
@@ -1499,6 +2151,8 @@ public class HomePageStudent extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AttendancePanel;
+    private javax.swing.JScrollPane AttendanceScrollPane;
+    private javax.swing.JTable AttendanceTable;
     private javax.swing.JLabel CNIC;
     private javax.swing.JLabel CNICField;
     private javax.swing.JLabel DOB;
@@ -1513,7 +2167,9 @@ public class HomePageStudent extends javax.swing.JFrame {
     private javax.swing.JScrollPane EnrolledScrollPane;
     private javax.swing.JTable EnrolledTable;
     private javax.swing.JPanel FeePanel;
+    private javax.swing.JScrollPane FeeScrollPane;
     private javax.swing.JButton FeeSummary;
+    private javax.swing.JTable FeeTable;
     private javax.swing.JPanel HomePageStudentPanel;
     private javax.swing.JButton LogOut;
     private javax.swing.JPanel MainPagePanel;
@@ -1538,6 +2194,8 @@ public class HomePageStudent extends javax.swing.JFrame {
     private javax.swing.JLabel Program;
     private javax.swing.JLabel ProgramField;
     private javax.swing.JPanel ResultPanel;
+    private javax.swing.JScrollPane ResultScrollPane;
+    private javax.swing.JTable ResultTable;
     private javax.swing.JSeparator Separator;
     private javax.swing.JPanel SidePanel;
     // End of variables declaration//GEN-END:variables
