@@ -30,6 +30,7 @@ public class AttentionScreen extends javax.swing.JFrame {
         } catch (Exception e) {
             System.err.println("Error loading icon: " + e.getMessage());
         }
+        addEscapeListener();
         startFlickerEffect();
         MessageTextArea.setBackground(new java.awt.Color(0, 0, 0, 0));
         MessageTextArea.setCaret(null);
@@ -56,6 +57,21 @@ public class AttentionScreen extends javax.swing.JFrame {
         flickerTimer = new Timer(delay, taskPerformer);
         
         flickerTimer.start();
+    }
+    
+    private void addEscapeListener() {
+        // Define the action to be performed (disposing the frame)
+        ActionListener escListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        };
+
+        // Bind the ESCAPE key to the action in the RootPane
+        this.getRootPane().registerKeyboardAction(escListener,
+                javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ESCAPE, 0),
+                javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW);
     }
 
     /**

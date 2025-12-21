@@ -246,10 +246,6 @@ public class HomePageStudent extends javax.swing.JFrame {
                            + "FROM `course` c "
                            + "LEFT JOIN `timetable` t ON c.coursename = t.cName "
                            + "GROUP BY c.coursecode, c.coursename, c.credithrs, t.instructorName";
-        String enrollmentQuery = "SELECT c.coursecode, c.coursename, c.credithrs, e.enrollment_date "
-                               + "FROM `enrollment` e JOIN `course` c "
-                               + "ON e.coursecode = c.coursecode "
-                               + "WHERE e.student_id = ?";
         if(tableName.equals("course")){
             try {
                 pst = connect.prepareStatement(courseQuery);
@@ -272,23 +268,39 @@ public class HomePageStudent extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null,ex);
             }
         } else if(tableName.equals("enrollment")){
+            String enrollmentQuery = "SELECT `coursecode`, `enrollment_date` FROM `enrollment` WHERE `student_id` = ?";
+
+            String courseDetailQuery = "SELECT `coursename`, `credithrs` FROM `course` WHERE `coursecode` = ?";
+
             try {
                 pst = connect.prepareStatement(enrollmentQuery);
                 pst.setString(1, this.id);
                 result = pst.executeQuery();
-                RSMD = result.getMetaData();
-                int CC = RSMD.getColumnCount();
-                DTM = (DefaultTableModel)targetTable.getModel();
+
+                DTM = (DefaultTableModel) targetTable.getModel();
                 DTM.setRowCount(0);
-                while(result.next()) {
-                    Vector v2 = new Vector();
-                    for(int i=1; i<=CC; i++) {
-                        v2.add(result.getString("coursecode"));
-                        v2.add(result.getString("coursename"));
-                        v2.add(result.getString("credithrs"));
-                        v2.add(result.getString("enrollment_date"));
+
+                while (result.next()) {
+                    String combinedCodes = result.getString("coursecode");
+                    String enrollDate = result.getString("enrollment_date");
+
+                    String[] codes = combinedCodes.split(",\\s*");
+
+                    for (String code : codes) {
+                        pst = connect.prepareStatement(courseDetailQuery);
+                        pst.setString(1, code);
+                        result = pst.executeQuery();
+
+                        if (result.next()) {
+                            Vector row = new Vector();
+                            row.add(code);
+                            row.add(result.getString("coursename"));
+                            row.add(result.getString("credithrs"));
+                            row.add(enrollDate);
+                            row.add(DELETE_ICON);
+                            DTM.addRow(row);
+                        }
                     }
-                    DTM.addRow(v2);
                 }
 
             } catch (SQLException ex) {
@@ -316,69 +328,186 @@ public class HomePageStudent extends javax.swing.JFrame {
     }
     
     // Enroll Course
-    private void enrollCourse(String courseCode){
-        String checkQuery = "SELECT COUNT(*) FROM `enrollment` WHERE `student_id` = ? AND `coursecode` = ?";
-        String query = "INSERT INTO `enrollment`(`student_id`, `coursecode`, `enrollment_date`) VALUES (?, ?, NOW())";
+    private void enrollCourse(String courseCode) {
+        int currentYear = java.time.Year.now().getValue();
+        String session = "N/A";
+        int creditHrs = 0;
+        int availableSeats = 0;
+
         try {
-            pst = connect.prepareStatement(checkQuery);
-            pst.setString(1, this.id);
-            pst.setString(2, courseCode);
-            
-            result =  pst.executeQuery();
-            if(result.next() && result.getInt(1) > 0){
-                String failedMessage = "Already Enrolled";
-                CustomMessageDialog messageDialog = new CustomMessageDialog(this, "Failed", failedMessage, CustomMessageDialog.ERROR);
-                messageDialog.setVisible(true);
+            // Get session, credit hrs, seats from course
+            pst = connect.prepareStatement("SELECT `session`, `credithrs`, `seats` FROM `course` WHERE `coursecode` = ?");
+            pst.setString(1, courseCode);
+            result = pst.executeQuery();
+            if (result.next()) {
+                session = result.getString("session");
+                creditHrs = result.getInt("credithrs");
+                availableSeats = result.getInt("seats");
+            }
+
+            // Check Seats Availability
+            if (availableSeats <= 0) {
+                new CustomMessageDialog(this, "Failed", "No seats available in " + courseCode, CustomMessageDialog.ERROR).setVisible(true);
                 return;
             }
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null,ex);
-        }
-        
-        // Insert Enrollment
-        try {
-            pst = connect.prepareStatement(query);
+
+            // Check Already Available Row
+            String checkRowQuery = "SELECT `coursecode` FROM `enrollment` WHERE `student_id` = ? AND `session` = ? AND `year` = ?";
+            pst = connect.prepareStatement(checkRowQuery);
             pst.setString(1, this.id);
-            pst.setString(2, courseCode);
-            
-            pst.execute();
-            String successMessage = "Successfully Enrolled: " + courseCode;
-            CustomMessageDialog messageDialog = new CustomMessageDialog(this, "Success", successMessage, CustomMessageDialog.SUCCESS);
-            messageDialog.setVisible(true);
+            pst.setString(2, session);
+            pst.setInt(3, currentYear);
+            result = pst.executeQuery();
+
+            boolean isNewRow = !result.isBeforeFirst(); 
+            String updatedCourseString = "";
+
+            if (result.next()) {
+                String existingCourses = result.getString("coursecode");
+                if (existingCourses.contains(courseCode)) {
+                    new CustomMessageDialog(this, "Failed", "Already Enrolled", CustomMessageDialog.ERROR).setVisible(true);
+                    return;
+                }
+                updatedCourseString = existingCourses + ", " + courseCode;
+            } else {
+                updatedCourseString = courseCode;
+            }
+
+            connect.setAutoCommit(false); 
+
+            pst = connect.prepareStatement("UPDATE `course` SET `seats` = `seats` - 1 WHERE `coursecode` = ?");
+            pst.setString(1, courseCode);
+            pst.executeUpdate();
+
+            if (isNewRow) {
+                pst = connect.prepareStatement("INSERT INTO `enrollment`(`student_id`, `coursecode`, `session`, `year`, `enrollment_date`) VALUES (?, ?, ?, ?, NOW())");
+                pst.setString(1, this.id);
+                pst.setString(2, updatedCourseString);
+                pst.setString(3, session);
+                pst.setInt(4, currentYear);
+            } else {
+                pst = connect.prepareStatement("UPDATE `enrollment` SET `coursecode` = ? WHERE `student_id` = ? AND `session` = ? AND `year` = ?");
+                pst.setString(1, updatedCourseString);
+                pst.setString(2, this.id);
+                pst.setString(3, session);
+                pst.setInt(4, currentYear);
+            }
+            pst.executeUpdate();
+
+            String[] allCodes = updatedCourseString.split(",\\s*");
+            int totalCredits = 0;
+            for (String code : allCodes) {
+                PreparedStatement cpst = connect.prepareStatement("SELECT `credithrs` FROM `course` WHERE `coursecode` = ?");
+                cpst.setString(1, code);
+                ResultSet rs = cpst.executeQuery();
+                if (rs.next()) totalCredits += rs.getInt("credithrs");
+            }
+            double totalFeeAmount = totalCredits * 6000;
+
+            pst = connect.prepareStatement("INSERT INTO `fee` (`student_id`, `session`, `year`, `total_fee`) VALUES (?, ?, ?, ?) "
+                                        + "ON DUPLICATE KEY UPDATE `total_fee` = ?");
+            pst.setString(1, this.id);
+            pst.setString(2, session);
+            pst.setInt(3, currentYear);
+            pst.setDouble(4, totalFeeAmount);
+            pst.setDouble(5, totalFeeAmount);
+            pst.executeUpdate();
+
+            connect.commit();
+            connect.setAutoCommit(true);
+
+            new CustomMessageDialog(this, "Success", "Enrolled! Fee Updated: " + totalFeeAmount, CustomMessageDialog.SUCCESS).setVisible(true);
+
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null,ex);
+            try { connect.rollback(); } catch (SQLException e) { /* ignore */ }
+            JOptionPane.showMessageDialog(null, "Database Error: " + ex.getMessage());
         }
     }
     
     // Drop Course
     private void deleteEnrollment(String courseCode) {
         String message = "Are you sure you want to drop course " + courseCode + "?";
-
         CustomConfirmDialog dialog = new CustomConfirmDialog(this, "Confirm Course Drop", message);
         dialog.setVisible(true);
 
         if (dialog.isConfirmed()) {
-            String deleteQuery = "DELETE FROM `enrollment` WHERE `student_id` = ? AND `coursecode` = ?";
-
             try {
-                pst = connect.prepareStatement(deleteQuery);
+                // 1. Fetch current enrollment details
+                String fetchQuery = "SELECT enrollment_id, coursecode, session, year FROM `enrollment` WHERE `student_id` = ? ORDER BY enrollment_date DESC LIMIT 1";
+                pst = connect.prepareStatement(fetchQuery);
                 pst.setString(1, this.id);
-                pst.setString(2, courseCode);
+                result = pst.executeQuery();
 
-                int rowsAffected = pst.executeUpdate();
+                if (result.next()) {
+                    int enrollmentId = result.getInt("enrollment_id");
+                    String currentCourses = result.getString("coursecode");
+                    String session = result.getString("session");
+                    int year = result.getInt("year");
 
-                if (rowsAffected > 0) {
-                    String successMessage = "Successfully Dropped Course: " + courseCode;
-                    CustomMessageDialog messageDialog = new CustomMessageDialog(this, "Success", successMessage, CustomMessageDialog.SUCCESS);
-                    messageDialog.setVisible(true);
-                    show_Table("enrollment", EnrolledTable);
-                } else {
-                    String failedMessage = "Enrollment not found";
-                    CustomMessageDialog messageDialog = new CustomMessageDialog(this, "Failed", failedMessage, CustomMessageDialog.ERROR);
-                    messageDialog.setVisible(true);
+                    // 2. Parse and remove the course
+                    java.util.List<String> codesList = new java.util.ArrayList<>(java.util.Arrays.asList(currentCourses.split(",\\s*")));
+                    
+                    if (codesList.remove(courseCode)) {
+                        // Start Transaction
+                        connect.setAutoCommit(false);
+
+                        // A. Return the seat to the course table
+                        pst = connect.prepareStatement("UPDATE `course` SET `seats` = `seats` + 1 WHERE `coursecode` = ?");
+                        pst.setString(1, courseCode);
+                        pst.executeUpdate();
+
+                        // B. Update Enrollment Table
+                        double totalFeeAmount = 0;
+                        if (codesList.isEmpty()) {
+                            // Delete row if no courses left
+                            pst = connect.prepareStatement("DELETE FROM `enrollment` WHERE `enrollment_id` = ?");
+                            pst.setInt(1, enrollmentId);
+                            pst.executeUpdate();
+                            
+                            // Delete fee record as well
+                            pst = connect.prepareStatement("DELETE FROM `fee` WHERE `student_id` = ? AND `session` = ? AND `year` = ?");
+                            pst.setString(1, this.id);
+                            pst.setString(2, session);
+                            pst.setInt(3, year);
+                            pst.executeUpdate();
+                        } else {
+                            // Update with remaining courses
+                            String updatedCourses = String.join(", ", codesList);
+                            pst = connect.prepareStatement("UPDATE `enrollment` SET `coursecode` = ? WHERE `enrollment_id` = ?");
+                            pst.setString(1, updatedCourses);
+                            pst.setInt(2, enrollmentId);
+                            pst.executeUpdate();
+
+                            // C. Recalculate Fees for remaining courses
+                            int totalCredits = 0;
+                            for (String code : codesList) {
+                                PreparedStatement cpst = connect.prepareStatement("SELECT `credithrs` FROM `course` WHERE `coursecode` = ?");
+                                cpst.setString(1, code);
+                                ResultSet rs = cpst.executeQuery();
+                                if (rs.next()) totalCredits += rs.getInt("credithrs");
+                            }
+                            totalFeeAmount = totalCredits * 6000;
+
+                            // D. Update Fee Table
+                            pst = connect.prepareStatement("UPDATE `fee` SET `total_fee` = ? WHERE `student_id` = ? AND `session` = ? AND `year` = ?");
+                            pst.setDouble(1, totalFeeAmount);
+                            pst.setString(2, this.id);
+                            pst.setString(3, session);
+                            pst.setInt(4, year);
+                            pst.executeUpdate();
+                        }
+
+                        connect.commit();
+                        connect.setAutoCommit(true);
+
+                        String successMsg = "Course dropped. " + (codesList.isEmpty() ? "All fees cleared." : "New Fee: " + totalFeeAmount);
+                        new CustomMessageDialog(this, "Success", successMsg, CustomMessageDialog.SUCCESS).setVisible(true);
+                        show_Table("enrollment", EnrolledTable);
+                    }
                 }
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null, "Database Error: " + ex.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
+                try { connect.rollback(); } catch (SQLException e) { }
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
             }
         }
     }
@@ -426,6 +555,14 @@ public class HomePageStudent extends javax.swing.JFrame {
         ProfileButton2 = new javax.swing.JLabel();
         EnrolledScrollPane = new javax.swing.JScrollPane();
         EnrolledTable = new RoundedTable();
+        FeePanel = new javax.swing.JPanel();
+        ProfileButton3 = new javax.swing.JLabel();
+        AttendancePanel = new javax.swing.JPanel();
+        ProfileButton4 = new javax.swing.JLabel();
+        ResultPanel = new javax.swing.JPanel();
+        ProfileButton5 = new javax.swing.JLabel();
+        NotificationPanel = new javax.swing.JPanel();
+        ProfileButton6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -449,6 +586,11 @@ public class HomePageStudent extends javax.swing.JFrame {
                 ProfileMouseClicked(evt);
             }
         });
+        Profile.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                ProfileKeyPressed(evt);
+            }
+        });
 
         EnrollCourse.setBackground(new java.awt.Color(151, 137, 219));
         EnrollCourse.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
@@ -457,6 +599,11 @@ public class HomePageStudent extends javax.swing.JFrame {
         EnrollCourse.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 EnrollCourseMouseClicked(evt);
+            }
+        });
+        EnrollCourse.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                EnrollCourseKeyPressed(evt);
             }
         });
 
@@ -469,31 +616,86 @@ public class HomePageStudent extends javax.swing.JFrame {
                 EnrolledCoursesMouseClicked(evt);
             }
         });
+        EnrolledCourses.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                EnrolledCoursesKeyPressed(evt);
+            }
+        });
 
         FeeSummary.setBackground(new java.awt.Color(151, 137, 219));
         FeeSummary.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         FeeSummary.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         FeeSummary.setLabel("Fee Summary");
+        FeeSummary.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                FeeSummaryMouseClicked(evt);
+            }
+        });
+        FeeSummary.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                FeeSummaryKeyPressed(evt);
+            }
+        });
 
         MyAttendance.setBackground(new java.awt.Color(151, 137, 219));
         MyAttendance.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         MyAttendance.setText("My Attendance");
         MyAttendance.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        MyAttendance.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                MyAttendanceMouseClicked(evt);
+            }
+        });
+        MyAttendance.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                MyAttendanceKeyPressed(evt);
+            }
+        });
 
         MyResults.setBackground(new java.awt.Color(151, 137, 219));
         MyResults.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         MyResults.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         MyResults.setLabel("My Results");
+        MyResults.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                MyResultsMouseClicked(evt);
+            }
+        });
+        MyResults.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                MyResultsKeyPressed(evt);
+            }
+        });
 
         MyNotifications.setBackground(new java.awt.Color(151, 137, 219));
         MyNotifications.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         MyNotifications.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         MyNotifications.setLabel("Notifications");
+        MyNotifications.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                MyNotificationsMouseClicked(evt);
+            }
+        });
+        MyNotifications.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                MyNotificationsKeyPressed(evt);
+            }
+        });
 
         LogOut.setBackground(new java.awt.Color(151, 137, 219));
         LogOut.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         LogOut.setText("LogOut");
         LogOut.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        LogOut.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                LogOutMouseClicked(evt);
+            }
+        });
+        LogOut.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                LogOutKeyPressed(evt);
+            }
+        });
 
         javax.swing.GroupLayout SidePanelLayout = new javax.swing.GroupLayout(SidePanel);
         SidePanel.setLayout(SidePanelLayout);
@@ -835,6 +1037,130 @@ public class HomePageStudent extends javax.swing.JFrame {
 
         MainPagePanel.add(EnrolledPanel, "Card3");
 
+        FeePanel.setOpaque(false);
+
+        ProfileButton3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        ProfileButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/main/resources/boy.png"))); // NOI18N
+        ProfileButton3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        ProfileButton3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                ProfileButton3MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                ProfileButton3MouseExited(evt);
+            }
+        });
+
+        javax.swing.GroupLayout FeePanelLayout = new javax.swing.GroupLayout(FeePanel);
+        FeePanel.setLayout(FeePanelLayout);
+        FeePanelLayout.setHorizontalGroup(
+            FeePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, FeePanelLayout.createSequentialGroup()
+                .addGap(0, 663, Short.MAX_VALUE)
+                .addComponent(ProfileButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        FeePanelLayout.setVerticalGroup(
+            FeePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(FeePanelLayout.createSequentialGroup()
+                .addComponent(ProfileButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(548, Short.MAX_VALUE))
+        );
+
+        MainPagePanel.add(FeePanel, "Card4");
+
+        AttendancePanel.setOpaque(false);
+
+        ProfileButton4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        ProfileButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/main/resources/boy.png"))); // NOI18N
+        ProfileButton4.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        ProfileButton4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                ProfileButton4MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                ProfileButton4MouseExited(evt);
+            }
+        });
+
+        javax.swing.GroupLayout AttendancePanelLayout = new javax.swing.GroupLayout(AttendancePanel);
+        AttendancePanel.setLayout(AttendancePanelLayout);
+        AttendancePanelLayout.setHorizontalGroup(
+            AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AttendancePanelLayout.createSequentialGroup()
+                .addGap(0, 663, Short.MAX_VALUE)
+                .addComponent(ProfileButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        AttendancePanelLayout.setVerticalGroup(
+            AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(AttendancePanelLayout.createSequentialGroup()
+                .addComponent(ProfileButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(548, Short.MAX_VALUE))
+        );
+
+        MainPagePanel.add(AttendancePanel, "Card5");
+
+        ResultPanel.setOpaque(false);
+
+        ProfileButton5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        ProfileButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/main/resources/boy.png"))); // NOI18N
+        ProfileButton5.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        ProfileButton5.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                ProfileButton5MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                ProfileButton5MouseExited(evt);
+            }
+        });
+
+        javax.swing.GroupLayout ResultPanelLayout = new javax.swing.GroupLayout(ResultPanel);
+        ResultPanel.setLayout(ResultPanelLayout);
+        ResultPanelLayout.setHorizontalGroup(
+            ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ResultPanelLayout.createSequentialGroup()
+                .addGap(0, 663, Short.MAX_VALUE)
+                .addComponent(ProfileButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        ResultPanelLayout.setVerticalGroup(
+            ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(ResultPanelLayout.createSequentialGroup()
+                .addComponent(ProfileButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(548, Short.MAX_VALUE))
+        );
+
+        MainPagePanel.add(ResultPanel, "Card6");
+
+        NotificationPanel.setOpaque(false);
+
+        ProfileButton6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        ProfileButton6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/main/resources/boy.png"))); // NOI18N
+        ProfileButton6.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        ProfileButton6.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                ProfileButton6MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                ProfileButton6MouseExited(evt);
+            }
+        });
+
+        javax.swing.GroupLayout NotificationPanelLayout = new javax.swing.GroupLayout(NotificationPanel);
+        NotificationPanel.setLayout(NotificationPanelLayout);
+        NotificationPanelLayout.setHorizontalGroup(
+            NotificationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, NotificationPanelLayout.createSequentialGroup()
+                .addGap(0, 663, Short.MAX_VALUE)
+                .addComponent(ProfileButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        NotificationPanelLayout.setVerticalGroup(
+            NotificationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(NotificationPanelLayout.createSequentialGroup()
+                .addComponent(ProfileButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(548, Short.MAX_VALUE))
+        );
+
+        MainPagePanel.add(NotificationPanel, "Card7");
+
         javax.swing.GroupLayout HomePageStudentPanelLayout = new javax.swing.GroupLayout(HomePageStudentPanel);
         HomePageStudentPanel.setLayout(HomePageStudentPanelLayout);
         HomePageStudentPanelLayout.setHorizontalGroup(
@@ -872,6 +1198,116 @@ public class HomePageStudent extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void ProfileMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileMouseClicked
+        // TODO add your handling code here:
+        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
+        c1.show(MainPagePanel,"Card1");
+    }//GEN-LAST:event_ProfileMouseClicked
+
+    private void ProfileKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ProfileKeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+            ProfileMouseClicked(null);
+        }
+    }//GEN-LAST:event_ProfileKeyPressed
+
+    private void EnrollCourseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EnrollCourseMouseClicked
+        // TODO add your handling code here:
+        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
+        c1.show(MainPagePanel,"Card2");
+        show_Table("course", EnrollTable);
+    }//GEN-LAST:event_EnrollCourseMouseClicked
+
+    private void EnrollCourseKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_EnrollCourseKeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+            EnrollCourseMouseClicked(null);
+        }
+    }//GEN-LAST:event_EnrollCourseKeyPressed
+
+    private void EnrolledCoursesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EnrolledCoursesMouseClicked
+        // TODO add your handling code here:
+        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
+        c1.show(MainPagePanel,"Card3");
+        show_Table("enrollment", EnrolledTable);
+    }//GEN-LAST:event_EnrolledCoursesMouseClicked
+
+    private void EnrolledCoursesKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_EnrolledCoursesKeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+            EnrolledCoursesMouseClicked(null);
+        }
+    }//GEN-LAST:event_EnrolledCoursesKeyPressed
+
+    private void FeeSummaryMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_FeeSummaryMouseClicked
+        // TODO add your handling code here:
+        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
+        c1.show(MainPagePanel,"Card4");
+    }//GEN-LAST:event_FeeSummaryMouseClicked
+
+    private void FeeSummaryKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_FeeSummaryKeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+            FeeSummaryMouseClicked(null);
+        }
+    }//GEN-LAST:event_FeeSummaryKeyPressed
+
+    private void MyAttendanceMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_MyAttendanceMouseClicked
+        // TODO add your handling code here:
+        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
+        c1.show(MainPagePanel,"Card5");
+    }//GEN-LAST:event_MyAttendanceMouseClicked
+
+    private void MyAttendanceKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_MyAttendanceKeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+            MyAttendanceMouseClicked(null);
+        }
+    }//GEN-LAST:event_MyAttendanceKeyPressed
+
+    private void MyResultsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_MyResultsMouseClicked
+        // TODO add your handling code here:
+        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
+        c1.show(MainPagePanel,"Card6");
+    }//GEN-LAST:event_MyResultsMouseClicked
+
+    private void MyResultsKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_MyResultsKeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+            MyResultsMouseClicked(null);
+        }
+    }//GEN-LAST:event_MyResultsKeyPressed
+
+    private void MyNotificationsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_MyNotificationsMouseClicked
+        // TODO add your handling code here:
+        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
+        c1.show(MainPagePanel,"Card7");
+    }//GEN-LAST:event_MyNotificationsMouseClicked
+
+    private void MyNotificationsKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_MyNotificationsKeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+            MyNotificationsMouseClicked(null);
+        }
+    }//GEN-LAST:event_MyNotificationsKeyPressed
+
+    private void LogOutMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_LogOutMouseClicked
+        // TODO add your handling code here:
+        new Timer().schedule(new TimerTask() {
+            public void run() {
+                new LogIn().setVisible(true);
+            }
+        }, 1000);
+        this.dispose();
+    }//GEN-LAST:event_LogOutMouseClicked
+
+    private void LogOutKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_LogOutKeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+            LogOutMouseClicked(null);
+        }
+    }//GEN-LAST:event_LogOutKeyPressed
 
     private void ProfileButtonMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButtonMouseEntered
         // TODO add your handling code here:
@@ -933,19 +1369,6 @@ public class HomePageStudent extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_ProfilePicKeyPressed
 
-    private void ProfileMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileMouseClicked
-        // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card1");
-    }//GEN-LAST:event_ProfileMouseClicked
-
-    private void EnrollCourseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EnrollCourseMouseClicked
-        // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card2");
-        show_Table("course", EnrollTable);
-    }//GEN-LAST:event_EnrollCourseMouseClicked
-
     private void ProfileButton1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton1MouseEntered
         // TODO add your handling code here:
         showProfilePopup(ProfileButton1, evt);
@@ -980,22 +1403,63 @@ public class HomePageStudent extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_ProfileButton2MouseExited
 
-    private void EnrolledCoursesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EnrolledCoursesMouseClicked
-        // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card3");
-        show_Table("enrollment", EnrolledTable);
-    }//GEN-LAST:event_EnrolledCoursesMouseClicked
-
     private void EnrolledTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EnrolledTableMouseClicked
         // TODO add your handling code here:
         int row = EnrollTable.rowAtPoint(evt.getPoint());
         int col = EnrollTable.columnAtPoint(evt.getPoint());
         if(row >= 0 && col == 4){
-            String courseCode = (String)EnrollTable.getModel().getValueAt(row, 0);
+            String courseCode = (String)EnrolledTable.getModel().getValueAt(row, 0);
             deleteEnrollment(courseCode);
         }
     }//GEN-LAST:event_EnrolledTableMouseClicked
+
+    private void ProfileButton3MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton3MouseEntered
+        // TODO add your handling code here:
+        showProfilePopup(ProfileButton3, evt);
+    }//GEN-LAST:event_ProfileButton3MouseEntered
+
+    private void ProfileButton3MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton3MouseExited
+        // TODO add your handling code here:
+        if (infoPopup != null) {
+            infoPopup.setVisible(false);
+        }
+    }//GEN-LAST:event_ProfileButton3MouseExited
+
+    private void ProfileButton4MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton4MouseEntered
+        // TODO add your handling code here:
+        showProfilePopup(ProfileButton4, evt);
+    }//GEN-LAST:event_ProfileButton4MouseEntered
+
+    private void ProfileButton4MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton4MouseExited
+        // TODO add your handling code here:
+        if (infoPopup != null) {
+            infoPopup.setVisible(false);
+        }
+    }//GEN-LAST:event_ProfileButton4MouseExited
+
+    private void ProfileButton5MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton5MouseEntered
+        // TODO add your handling code here:
+        showProfilePopup(ProfileButton5, evt);
+    }//GEN-LAST:event_ProfileButton5MouseEntered
+
+    private void ProfileButton5MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton5MouseExited
+        // TODO add your handling code here:
+        if (infoPopup != null) {
+            infoPopup.setVisible(false);
+        }
+    }//GEN-LAST:event_ProfileButton5MouseExited
+
+    private void ProfileButton6MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton6MouseEntered
+        // TODO add your handling code here:
+        showProfilePopup(ProfileButton6, evt);
+    }//GEN-LAST:event_ProfileButton6MouseEntered
+
+    private void ProfileButton6MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton6MouseExited
+        // TODO add your handling code here:
+        if (infoPopup != null) {
+            infoPopup.setVisible(false);
+        }
+    }//GEN-LAST:event_ProfileButton6MouseExited
 
     /**
      * @param args the command line arguments
@@ -1034,6 +1498,7 @@ public class HomePageStudent extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel AttendancePanel;
     private javax.swing.JLabel CNIC;
     private javax.swing.JLabel CNICField;
     private javax.swing.JLabel DOB;
@@ -1047,6 +1512,7 @@ public class HomePageStudent extends javax.swing.JFrame {
     private javax.swing.JPanel EnrolledPanel;
     private javax.swing.JScrollPane EnrolledScrollPane;
     private javax.swing.JTable EnrolledTable;
+    private javax.swing.JPanel FeePanel;
     private javax.swing.JButton FeeSummary;
     private javax.swing.JPanel HomePageStudentPanel;
     private javax.swing.JButton LogOut;
@@ -1056,16 +1522,22 @@ public class HomePageStudent extends javax.swing.JFrame {
     private javax.swing.JButton MyResults;
     private javax.swing.JLabel Name;
     private javax.swing.JLabel NameField;
+    private javax.swing.JPanel NotificationPanel;
     private javax.swing.JLabel PhoneNo;
     private javax.swing.JLabel PhoneNoField;
     private javax.swing.JButton Profile;
     private javax.swing.JLabel ProfileButton;
     private javax.swing.JLabel ProfileButton1;
     private javax.swing.JLabel ProfileButton2;
+    private javax.swing.JLabel ProfileButton3;
+    private javax.swing.JLabel ProfileButton4;
+    private javax.swing.JLabel ProfileButton5;
+    private javax.swing.JLabel ProfileButton6;
     private javax.swing.JPanel ProfilePanel;
     private javax.swing.JLabel ProfilePic;
     private javax.swing.JLabel Program;
     private javax.swing.JLabel ProgramField;
+    private javax.swing.JPanel ResultPanel;
     private javax.swing.JSeparator Separator;
     private javax.swing.JPanel SidePanel;
     // End of variables declaration//GEN-END:variables

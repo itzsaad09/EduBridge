@@ -225,44 +225,37 @@ public class HomePageInstructor extends javax.swing.JFrame {
         java.util.Date selectedDate = SelectDate.getDate();
 
         if (selectedCourse == null || selectedCourse.equals("Select Course") || selectedDate == null) {
+            ((DefaultTableModel) AttendanceTable.getModel()).setRowCount(0);
             return;
         }
 
         DefaultTableModel model = (DefaultTableModel) AttendanceTable.getModel();
-        String[] options = {"Select Attendance","Present", "Absent"};
+        String[] options = {"Select Attendance", "Present", "Absent"};
         javax.swing.JComboBox<String> editorCombo = new RoundedComboBox<>(options);
 
         AttendanceTable.getColumnModel().getColumn(2).setCellEditor(new javax.swing.DefaultCellEditor(editorCombo));
-        
-        AttendanceTable.getColumnModel().getColumn(2).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {
-            @Override
-            public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
-                
-                javax.swing.JComboBox<String> renderCombo = new RoundedComboBox<>(options);
-                renderCombo.setSelectedItem(value);
-                
-                if (isSelected) {
-                    renderCombo.setBackground(table.getSelectionBackground());
-                } else {
-                    renderCombo.setBackground(table.getBackground());
-                }
-                return renderCombo;
-            }
-        });
         
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String dateKey = sdf.format(selectedDate);
         
         try {
+            String codeLookup = "SELECT coursecode FROM course WHERE coursename = ?";
+            pst = connect.prepareStatement(codeLookup);
+            pst.setString(1, selectedCourse);
+            result = pst.executeQuery();
+            
+            if (!result.next()) return;
+            String targetCode = result.getString("coursecode");
+
             String query = "SELECT s.fName, s.lName, aj.log " +
                         "FROM student s " +
                         "JOIN enrollment e ON s.ID = e.student_id " +
-                        "LEFT JOIN attendance_json aj ON s.ID = aj.student_id AND e.coursecode = aj.coursecode " +
-                        "WHERE e.coursecode = (SELECT coursecode FROM course WHERE coursename = ?)";
-            
+                        "LEFT JOIN attendance_json aj ON s.ID = aj.student_id AND aj.coursecode = ? " +
+                        "WHERE e.coursecode LIKE ?";
+                
             pst = connect.prepareStatement(query);
-            pst.setString(1, selectedCourse);
+            pst.setString(1, targetCode);
+            pst.setString(2, "%" + targetCode + "%");
             result = pst.executeQuery();
             
             model.setRowCount(0);
@@ -271,7 +264,6 @@ public class HomePageInstructor extends javax.swing.JFrame {
                 String jsonLog = result.getString("log");
                 
                 String status = "Select Attendance"; 
-                
                 if (jsonLog != null && !jsonLog.isEmpty()) {
                     if (jsonLog.contains("\"" + dateKey + "\": \"Present\"")) {
                         status = "Present";
@@ -287,7 +279,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
                 });
             }
         } catch (SQLException ex) {
-            System.err.println("Error loading attendance: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Error loading attendance: " + ex.getMessage());
         }
     }
 
@@ -474,21 +466,30 @@ public class HomePageInstructor extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) ResultTable.getModel();
         model.setRowCount(0);
         
+        // Set custom renderers for editing marks
         for (int i = 2; i <= 3; i++) {
             ResultTable.getColumnModel().getColumn(i).setCellRenderer(new RoundedTextFieldRenderer());
             ResultTable.getColumnModel().getColumn(i).setCellEditor(new RoundedTextFieldEditor());
         }
         
-        String query = "SELECT s.ID, CONCAT(s.fName, ' ', s.lName) AS name, r.sessional, r.final " +
-                       "FROM student s " +
-                       "JOIN enrollment e ON s.ID = e.student_id " +
-                       "JOIN course c ON e.coursecode = c.coursecode " +
-                       "LEFT JOIN results r ON s.ID = r.student_id AND c.coursecode = r.course_code " +
-                       "WHERE c.coursename = ?";
-
         try {
-            pst = connect.prepareStatement(query);
+            // Step 1: Get the specific Course Code
+            pst = connect.prepareStatement("SELECT coursecode FROM course WHERE coursename = ?");
             pst.setString(1, courseName);
+            result = pst.executeQuery();
+            if (!result.next()) return;
+            String targetCode = result.getString("coursecode");
+
+            // Step 2: Fetch students enrolled in this code and their current results
+            String query = "SELECT s.ID, CONCAT(s.fName, ' ', s.lName) AS name, r.sessional, r.final " +
+                        "FROM student s " +
+                        "JOIN enrollment e ON s.ID = e.student_id " +
+                        "LEFT JOIN results r ON s.ID = r.student_id AND r.course_code = ? " +
+                        "WHERE e.coursecode LIKE ?";
+
+            pst = connect.prepareStatement(query);
+            pst.setString(1, targetCode);
+            pst.setString(2, "%" + targetCode + "%");
             result = pst.executeQuery();
 
             while (result.next()) {
