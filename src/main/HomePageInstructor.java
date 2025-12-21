@@ -235,11 +235,9 @@ public class HomePageInstructor extends javax.swing.JFrame {
             public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, Object value,
                     boolean isSelected, boolean hasFocus, int row, int column) {
                 
-                // Create a temporary combo box just for painting the cell
                 javax.swing.JComboBox<String> renderCombo = new RoundedComboBox<>(options);
                 renderCombo.setSelectedItem(value);
                 
-                // Match the table's selection colors
                 if (isSelected) {
                     renderCombo.setBackground(table.getSelectionBackground());
                 } else {
@@ -253,7 +251,6 @@ public class HomePageInstructor extends javax.swing.JFrame {
         String dateKey = sdf.format(selectedDate);
         
         try {
-            // Query remains the same
             String query = "SELECT s.fName, s.lName, aj.log " +
                         "FROM student s " +
                         "JOIN enrollment e ON s.ID = e.student_id " +
@@ -269,11 +266,9 @@ public class HomePageInstructor extends javax.swing.JFrame {
                 String fullName = result.getString("fName") + " " + result.getString("lName");
                 String jsonLog = result.getString("log");
                 
-                // Default value if no record exists for this date
                 String status = "Select Attendance"; 
                 
                 if (jsonLog != null && !jsonLog.isEmpty()) {
-                    // Check if the specific date exists in the JSON string
                     if (jsonLog.contains("\"" + dateKey + "\": \"Present\"")) {
                         status = "Present";
                     } else if (jsonLog.contains("\"" + dateKey + "\": \"Absent\"")) {
@@ -281,7 +276,6 @@ public class HomePageInstructor extends javax.swing.JFrame {
                     }
                 }
                 
-                // Populate table
                 model.addRow(new Object[]{
                     fullName, 
                     calculateTotalAbsences(jsonLog), 
@@ -293,7 +287,6 @@ public class HomePageInstructor extends javax.swing.JFrame {
         }
     }
 
-    // Helper to keep absence count accurate
     private int calculateTotalAbsences(String jsonLog) {
         if (jsonLog == null || jsonLog.isEmpty()) return 0;
         return (jsonLog.length() - jsonLog.replace("Absent", "").length()) / "Absent".length();
@@ -302,13 +295,11 @@ public class HomePageInstructor extends javax.swing.JFrame {
     private void restrictDateAndMultipleDays(String session, java.util.List<Integer> allowedDays) {
         com.toedter.calendar.JDayChooser dayChooser = SelectDate.getJCalendar().getDayChooser();
 
-        // Clear previous custom evaluators using reflection (safe for jcalendar-1.4)
         try {
             java.lang.reflect.Field field = com.toedter.calendar.JDayChooser.class.getDeclaredField("dateEvaluators");
             field.setAccessible(true);
             @SuppressWarnings("unchecked")
             List<IDateEvaluator> evaluators = (List<IDateEvaluator>) field.get(dayChooser);
-            // Remove all except the built-in MinMaxDateEvaluator (index 0)
             while (evaluators.size() > 1) {
                 evaluators.remove(1);
             }
@@ -316,7 +307,6 @@ public class HomePageInstructor extends javax.swing.JFrame {
             System.err.println("Could not clear old evaluators: " + e.getMessage());
         }
 
-        // Set semester range
         Calendar cal = Calendar.getInstance();
         Date today = cal.getTime();
         int currentYear = cal.get(Calendar.YEAR);
@@ -328,7 +318,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
             cal.set(currentYear + 1, Calendar.JANUARY, 31);
             Date semesterEnd = cal.getTime();
             maxDate = today.before(semesterEnd) ? today : semesterEnd;
-        } else { // Spring
+        } else {
             cal.set(currentYear, Calendar.MARCH, 1);
             minDate = cal.getTime();
             cal.set(currentYear, Calendar.JUNE, 30);
@@ -399,7 +389,6 @@ public class HomePageInstructor extends javax.swing.JFrame {
     }
     
     private void updateStudentAttendance(String studentId, String courseCode, String dateKey, String status) throws SQLException {
-        // Check if record exists
         String selectQuery = "SELECT log FROM attendance_json WHERE student_id = ? AND coursecode = ?";
         pst = connect.prepareStatement(selectQuery);
         pst.setString(1, studentId);
@@ -415,34 +404,31 @@ public class HomePageInstructor extends javax.swing.JFrame {
             exists = true;
         }
 
-        // Simple JSON manipulation (string-based for compatibility)
         String newEntry = "\"" + dateKey + "\": \"" + status + "\"";
         String updatedLog;
 
         if (currentLog.isEmpty() || currentLog.equals("{}")) {
             updatedLog = "{" + newEntry + "}";
         } else if (currentLog.contains("\"" + dateKey + "\"")) {
-            // Replace existing date status using regex
             updatedLog = currentLog.replaceAll("\"" + dateKey + "\": \"[^\"]*\"", newEntry);
         } else {
-            // Append to existing JSON
             updatedLog = currentLog.substring(0, currentLog.length() - 1) + ", " + newEntry + "}";
         }
 
         if (exists) {
-            String updateSQL = "UPDATE attendance_json SET log = ? WHERE student_id = ? AND coursecode = ?";
-            PreparedStatement pstUpd = connect.prepareStatement(updateSQL);
-            pstUpd.setString(1, updatedLog);
-            pstUpd.setString(2, studentId);
-            pstUpd.setString(3, courseCode);
-            pstUpd.executeUpdate();
+            String updateQuery = "UPDATE attendance_json SET log = ? WHERE student_id = ? AND coursecode = ?";
+            pst = connect.prepareStatement(updateQuery);
+            pst.setString(1, updatedLog);
+            pst.setString(2, studentId);
+            pst.setString(3, courseCode);
+            pst.executeUpdate();
         } else {
-            String insertSQL = "INSERT INTO attendance_json (student_id, coursecode, log) VALUES (?, ?, ?)";
-            PreparedStatement pstIns = connect.prepareStatement(insertSQL);
-            pstIns.setString(1, studentId);
-            pstIns.setString(2, courseCode);
-            pstIns.setString(3, updatedLog);
-            pstIns.executeUpdate();
+            String insertQuery = "INSERT INTO attendance_json (student_id, coursecode, log) VALUES (?, ?, ?)";
+            pst = connect.prepareStatement(insertQuery);
+            pst.setString(1, studentId);
+            pst.setString(2, courseCode);
+            pst.setString(3, updatedLog);
+            pst.executeUpdate();
         }
     }
 
@@ -576,7 +562,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
                 .addComponent(MarkAttendance)
                 .addGap(50, 50, 50)
                 .addComponent(UploadResult)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 263, Short.MAX_VALUE)
                 .addComponent(LogOut)
                 .addGap(20, 20, 20))
         );
@@ -732,6 +718,11 @@ public class HomePageInstructor extends javax.swing.JFrame {
                 SaveBtnMouseClicked(evt);
             }
         });
+        SaveBtn.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                SaveBtnKeyPressed(evt);
+            }
+        });
 
         javax.swing.GroupLayout AttendancePanelLayout = new javax.swing.GroupLayout(AttendancePanel);
         AttendancePanel.setLayout(AttendancePanelLayout);
@@ -832,8 +823,8 @@ public class HomePageInstructor extends javax.swing.JFrame {
             .addGroup(HomePageInstuctorPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(HomePageInstuctorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(MainPagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 592, Short.MAX_VALUE)
-                    .addComponent(SidePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 592, Short.MAX_VALUE))
+                    .addComponent(MainPagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 592, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(SidePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 588, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -943,7 +934,9 @@ public class HomePageInstructor extends javax.swing.JFrame {
 
     private void LogOutKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_LogOutKeyPressed
         // TODO add your handling code here:
-        LogOutMouseClicked(null);
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+            LogOutMouseClicked(null);
+        }
     }//GEN-LAST:event_LogOutKeyPressed
 
     private void ProfileButtonMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButtonMouseEntered
@@ -1081,6 +1074,13 @@ public class HomePageInstructor extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Error saving attendance: " + ex.getMessage());
         }
     }//GEN-LAST:event_SaveBtnMouseClicked
+
+    private void SaveBtnKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_SaveBtnKeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+            SaveBtnMouseClicked(null);
+        }
+    }//GEN-LAST:event_SaveBtnKeyPressed
 
     /**
      * @param args the command line arguments

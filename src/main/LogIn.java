@@ -252,10 +252,10 @@ public class LogIn extends javax.swing.JFrame {
                         @Override
                         public void run() {
                             loginsuccessful.dispose();
+                            new HomePageAdmin(id).setVisible(true);
                         }
                     }, 1000);
                     this.dispose();
-                    new HomePageAdmin(id).setVisible(true);
                 } else {
                     if(result != null) result.close();
                     if(pst != null) pst.close();
@@ -273,10 +273,10 @@ public class LogIn extends javax.swing.JFrame {
                             @Override
                             public void run() {
                                 loginsuccessful.dispose();
+                                new HomePageInstructor(id).setVisible(true);
                             }
                         }, 1000);
                         this.dispose();
-                        new HomePageInstructor(id).setVisible(true);
                     } else {
                         if(result != null) result.close();
                         if(pst != null) pst.close();
@@ -294,10 +294,10 @@ public class LogIn extends javax.swing.JFrame {
                                 @Override
                                 public void run() {
                                     loginsuccessful.dispose();
+                                    new HomePageStudent(id).setVisible(true);
                                 }
                             }, 1000);
                             this.dispose();
-                            new HomePageAdmin(id).setVisible(true);
                         } else {
                             LogInFailed loginfailed = new LogInFailed();
                             loginfailed.setVisible(true);
