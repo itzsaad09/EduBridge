@@ -106,13 +106,13 @@ public class HomePageStudent extends javax.swing.JFrame {
     }
     
     private void startDateTimeUpdater() {
-        Timer timer = new Timer(true); // 'true' means it's a daemon thread
+        Timer timer = new Timer(true);
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 updateDateTime();
             }
-        }, 0, 1000); // Start immediately (0 delay), repeat every 1000ms (1 second)
+        }, 0, 1000);
     }
     
     private void showProfilePopup(javax.swing.JLabel sourceButton, java.awt.event.MouseEvent evt) {

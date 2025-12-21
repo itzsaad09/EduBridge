@@ -58,7 +58,7 @@ public class CustomConfirmDialog extends JDialog {
         
         // Yes Button
         RoundedButton yesButton = new RoundedButton();
-        yesButton.setText("Yes, Delete");
+        yesButton.setText("Yes");
         yesButton.setBackground(PRIMARY_COLOR);
         yesButton.setFont(new Font("Bodoni MT", Font.BOLD, 14));
         yesButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
