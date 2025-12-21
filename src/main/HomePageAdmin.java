@@ -475,9 +475,9 @@ public class HomePageAdmin extends javax.swing.JFrame {
         RoomCombo = new RoundedComboBox<>();
         Instructor = new javax.swing.JLabel();
         InstructorCombo = new RoundedComboBox<>();
-        Add = new javax.swing.JButton();
-        Update = new javax.swing.JButton();
-        Delete = new javax.swing.JButton();
+        Add = new RoundedButton();
+        Update = new RoundedButton();
+        Delete = new RoundedButton();
         TimeTableScrollPane = new javax.swing.JScrollPane();
         ViewTimeTable = new RoundedTable();
         ResultPanel = new javax.swing.JPanel();
