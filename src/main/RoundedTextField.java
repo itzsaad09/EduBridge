@@ -12,7 +12,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import javax.swing.JTextField;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.Shape;
 import java.awt.geom.RoundRectangle2D;

@@ -7,6 +7,7 @@ package main;
 import com.toedter.calendar.IDateEvaluator;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
@@ -18,7 +19,10 @@ import java.util.List;
 import java.text.SimpleDateFormat;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -431,6 +435,74 @@ public class HomePageInstructor extends javax.swing.JFrame {
             pst.executeUpdate();
         }
     }
+    
+    public class RoundedTextFieldEditor extends DefaultCellEditor {
+        private RoundedTextField textField;
+
+        public RoundedTextFieldEditor() {
+            super(new RoundedTextField(20)); 
+            textField = (RoundedTextField) getComponent();
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            textField.setText(value != null ? value.toString() : "");
+            return textField;
+        }
+    }
+    
+    public class RoundedTextFieldRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+
+            RoundedTextField rtf = new RoundedTextField(20);
+            rtf.setText(value != null ? value.toString() : "");
+
+            if (isSelected) {
+                rtf.setBackground(table.getSelectionBackground());
+            } else {
+                rtf.setBackground(table.getBackground());
+            }
+
+            return rtf;
+        }
+    }
+    
+    private void fillResultsTable(String courseName) {
+        DefaultTableModel model = (DefaultTableModel) ResultTable.getModel();
+        model.setRowCount(0);
+        
+        for (int i = 2; i <= 3; i++) {
+            ResultTable.getColumnModel().getColumn(i).setCellRenderer(new RoundedTextFieldRenderer());
+            ResultTable.getColumnModel().getColumn(i).setCellEditor(new RoundedTextFieldEditor());
+        }
+        
+        String query = "SELECT s.ID, CONCAT(s.fName, ' ', s.lName) AS name, r.sessional, r.final " +
+                       "FROM student s " +
+                       "JOIN enrollment e ON s.ID = e.student_id " +
+                       "JOIN course c ON e.coursecode = c.coursecode " +
+                       "LEFT JOIN results r ON s.ID = r.student_id AND c.coursecode = r.course_code " +
+                       "WHERE c.coursename = ?";
+
+        try {
+            pst = connect.prepareStatement(query);
+            pst.setString(1, courseName);
+            result = pst.executeQuery();
+
+            while (result.next()) {
+                model.addRow(new Object[]{
+                    result.getString("ID"),
+                    result.getString("name"),
+                    result.getObject("sessional") == null ? 0.0 : result.getDouble("sessional"),
+                    result.getObject("final") == null ? 0.0 : result.getDouble("final")
+                });
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error loading results: " + ex.getMessage());
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -464,6 +536,11 @@ public class HomePageInstructor extends javax.swing.JFrame {
         SaveBtn = new RoundedButton();
         ResultsPanel = new javax.swing.JPanel();
         ProfileButton2 = new javax.swing.JLabel();
+        Course1 = new javax.swing.JLabel();
+        CourseCombo1 = new RoundedComboBox<>();
+        ResultTableScrollPane = new javax.swing.JScrollPane();
+        ResultTable = new RoundedTable();
+        SaveBtn1 = new RoundedButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -790,19 +867,97 @@ public class HomePageInstructor extends javax.swing.JFrame {
             }
         });
 
+        Course1.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
+        Course1.setText("Course");
+
+        CourseCombo1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Course" }));
+        CourseCombo1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CourseCombo1ActionPerformed(evt);
+            }
+        });
+
+        ResultTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Name", "Name", "Sessional", "Final"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, true, true
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        ResultTable.setRowHeight(50);
+        ResultTable.setRowSelectionAllowed(false);
+        ResultTable.setShowHorizontalLines(true);
+        ResultTable.setShowVerticalLines(true);
+        ResultTable.getTableHeader().setResizingAllowed(false);
+        ResultTable.getTableHeader().setReorderingAllowed(false);
+        ResultTableScrollPane.setViewportView(ResultTable);
+
+        SaveBtn1.setBackground(new java.awt.Color(151, 137, 219));
+        SaveBtn1.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
+        SaveBtn1.setText("Save");
+        SaveBtn1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                SaveBtn1MouseClicked(evt);
+            }
+        });
+        SaveBtn1.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                SaveBtn1KeyPressed(evt);
+            }
+        });
+
         javax.swing.GroupLayout ResultsPanelLayout = new javax.swing.GroupLayout(ResultsPanel);
         ResultsPanel.setLayout(ResultsPanelLayout);
         ResultsPanelLayout.setHorizontalGroup(
             ResultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ResultsPanelLayout.createSequentialGroup()
-                .addGap(0, 663, Short.MAX_VALUE)
+                .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(ProfileButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(ResultsPanelLayout.createSequentialGroup()
+                .addGroup(ResultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(ResultsPanelLayout.createSequentialGroup()
+                        .addGap(40, 40, 40)
+                        .addGroup(ResultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(CourseCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(Course1)
+                            .addComponent(ResultTableScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(ResultsPanelLayout.createSequentialGroup()
+                        .addGap(302, 302, 302)
+                        .addComponent(SaveBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(40, Short.MAX_VALUE))
         );
         ResultsPanelLayout.setVerticalGroup(
             ResultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(ResultsPanelLayout.createSequentialGroup()
                 .addComponent(ProfileButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 552, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(Course1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(CourseCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(ResultTableScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 393, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(SaveBtn1)
+                .addContainerGap(18, Short.MAX_VALUE))
         );
 
         MainPagePanel.add(ResultsPanel, "Card3");
@@ -913,6 +1068,41 @@ public class HomePageInstructor extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card3");
+        CourseCombo1.removeAllItems();
+        CourseCombo1.addItem("Select Course");
+
+        try {
+            String instructorFullName = "";
+            String nameQuery = "SELECT CONCAT(`fName`, ' ', `lName`) AS `fullName` FROM `instructor` WHERE `ID` = ?";
+            pst = connect.prepareStatement(nameQuery);
+            pst.setString(1, this.id);
+            result = pst.executeQuery();
+
+            if (result.next()) {
+                instructorFullName = result.getString("fullName");
+            } else {
+                return;
+            }
+
+            String courseQuery = "SELECT DISTINCT `cName` FROM `timetable` WHERE `instructorName` = ?";
+            pst = connect.prepareStatement(courseQuery);
+            pst.setString(1, instructorFullName);
+            result = pst.executeQuery();
+
+            while (result.next()) {
+                CourseCombo1.addItem(result.getString("cName"));
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error loading courses: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (pst != null) pst.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }//GEN-LAST:event_UploadResultMouseClicked
 
     private void UploadResultKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_UploadResultKeyPressed
@@ -1082,6 +1272,66 @@ public class HomePageInstructor extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_SaveBtnKeyPressed
 
+    private void CourseCombo1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CourseCombo1ActionPerformed
+        // TODO add your handling code here:
+        String selectedCourse = (String) CourseCombo1.getSelectedItem();
+
+        // Check if the selection is valid and not the default prompt
+        if (selectedCourse != null && !selectedCourse.equals("Select Course")) {
+            fillResultsTable(selectedCourse);
+        } else {
+            ((DefaultTableModel) ResultTable.getModel()).setRowCount(0);
+        }
+    }//GEN-LAST:event_CourseCombo1ActionPerformed
+
+    private void SaveBtn1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SaveBtn1MouseClicked
+        // TODO add your handling code here:
+        DefaultTableModel model = (DefaultTableModel) ResultTable.getModel();
+        String selectedCourse = (String) CourseCombo1.getSelectedItem();
+
+        if (selectedCourse == null || selectedCourse.equals("Select Course")) {
+            JOptionPane.showMessageDialog(this, "Please select a course first.");
+            return;
+        }
+
+        try {
+            pst = connect.prepareStatement("SELECT coursecode FROM course WHERE coursename = ?");
+            pst.setString(1, selectedCourse);
+            result= pst.executeQuery();
+            if (!result.next()) return;
+            String courseCode = result.getString("coursecode");
+
+            String query = "INSERT INTO results (student_id, course_code, sessional, final, is_published) " +
+                               "VALUES (?, ?, ?, ?, 0) " +
+                               "ON DUPLICATE KEY UPDATE sessional = VALUES(sessional), final = VALUES(final)";
+
+            pst = connect.prepareStatement(query);
+
+            for (int i = 0; i < model.getRowCount(); i++) {
+                pst.setString(1, model.getValueAt(i, 0).toString());
+                pst.setString(2, courseCode);
+                pst.setDouble(3, Double.parseDouble(model.getValueAt(i, 2).toString()));
+                pst.setDouble(4, Double.parseDouble(model.getValueAt(i, 3).toString()));
+                pst.addBatch();
+            }
+
+            pst.executeBatch();
+            JOptionPane.showMessageDialog(this, "Results saved successfully!");
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numeric marks.");
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage());
+        }
+    }//GEN-LAST:event_SaveBtn1MouseClicked
+
+    private void SaveBtn1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_SaveBtn1KeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+            SaveBtn1MouseClicked(null);
+        }
+    }//GEN-LAST:event_SaveBtn1KeyPressed
+
     /**
      * @param args the command line arguments
      */
@@ -1122,7 +1372,9 @@ public class HomePageInstructor extends javax.swing.JFrame {
     private javax.swing.JTable AttendanceTable;
     private javax.swing.JScrollPane AttendanceTableScrollPane;
     private javax.swing.JLabel Course;
+    private javax.swing.JLabel Course1;
     private javax.swing.JComboBox<String> CourseCombo;
+    private javax.swing.JComboBox<String> CourseCombo1;
     private javax.swing.JLabel Date;
     private javax.swing.JLabel DateTime;
     private javax.swing.JPanel HomePageInstuctorPanel;
@@ -1132,8 +1384,11 @@ public class HomePageInstructor extends javax.swing.JFrame {
     private javax.swing.JLabel ProfileButton;
     private javax.swing.JLabel ProfileButton1;
     private javax.swing.JLabel ProfileButton2;
+    private javax.swing.JTable ResultTable;
+    private javax.swing.JScrollPane ResultTableScrollPane;
     private javax.swing.JPanel ResultsPanel;
     private javax.swing.JButton SaveBtn;
+    private javax.swing.JButton SaveBtn1;
     private com.toedter.calendar.JDateChooser SelectDate;
     private javax.swing.JPanel SidePanel;
     private javax.swing.JButton UploadResult;
