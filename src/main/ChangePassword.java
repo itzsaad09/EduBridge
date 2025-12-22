@@ -240,6 +240,8 @@ public class ChangePassword extends javax.swing.JFrame {
         // TODO add your handling code here:
         String password = String.valueOf(PasswordField.getPassword());
         String confirmpassword = String.valueOf(ConfirmPasswordField.getPassword());
+        String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+        boolean isValid = true;
         
         if (password.equals("password") || password.isBlank()) {
             PasswordLabel.setForeground(Color.RED);
@@ -253,11 +255,20 @@ public class ChangePassword extends javax.swing.JFrame {
             ConfirmPasswordLabel.setForeground(Color.BLACK);
             temp = true;
         }
+        if(!password.matches(passwordRegex)){
+            PasswordLabel.setForeground(Color.RED);
+            ConfirmPasswordLabel.setForeground(Color.RED);
+            new CustomMessageDialog(this, "Failed", "Password must be at least 8 characters, include uppercase, lowercase, number and special character", CustomMessageDialog.ERROR).setVisible(true);
+            isValid = false;
+        } else {
+            PasswordLabel.setForeground(Color.BLACK);
+            ConfirmPasswordLabel.setForeground(Color.BLACK);
+        }
         if(temp ==true && !password.equals(confirmpassword)){
             PasswordLabel.setForeground(Color.RED);
             ConfirmPasswordLabel.setForeground(Color.RED);
             temp = false;
-        } else if(temp == true){
+        } else if(temp == true && isValid == true){
             String query = "UPDATE `" + role + "` SET `ID`='"+id+"',`password`='"+confirmpassword+"' WHERE `ID`='"+id+"'";
             try {
                 pst = connect.prepareStatement(query);
