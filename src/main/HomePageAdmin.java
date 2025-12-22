@@ -77,6 +77,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
         this.UdateTextField2 = (JTextField) UDateOfBirthField2.getDateEditor().getUiComponent();
         UdateTextField2.setText("DD-MM-YYYY");
         UdateTextField2.setForeground(new Color(153,153,153));
+        // Active Manage Student Button
+        setActiveTab(ManageStudent);
         // Show Table
         show_Table("student", ViewStudentsTable);
     }
@@ -104,8 +106,38 @@ public class HomePageAdmin extends javax.swing.JFrame {
         this.UdateTextField = (JTextField) UDateOfBirthField.getDateEditor().getUiComponent();
         UdateTextField.setText("DD-MM-YYYY");
         UdateTextField.setForeground(new Color(153,153,153));
+        // Active Manage Student Button
+        setActiveTab(ManageStudent);
         // Show Table
         show_Table("student", ViewStudentsTable);
+    }
+
+    // Active Tab Styling
+    private void setActiveTab(javax.swing.JButton selectedBtn) {
+        Color activeColor = new Color(100, 80, 200);
+        Color defaultColor = new Color(151, 137, 219);
+        Color activeTextColor = Color.WHITE;
+        Color defaultTextColor = new Color(60, 60, 60);
+
+        javax.swing.JButton[] sideButtons = {
+            ManageStudent, ManageInstructor, ManageCourse, 
+            TimeTable, PublishResult, LogOut
+        };
+
+        for (javax.swing.JButton btn : sideButtons) {
+            if (btn == selectedBtn) {
+                btn.setBackground(activeColor);
+                btn.setForeground(activeTextColor);
+                btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 19)); 
+            } else {
+                btn.setBackground(defaultColor);
+                btn.setForeground(defaultTextColor);
+                btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 18));
+            }
+            
+            btn.revalidate();
+            btn.repaint();
+        }
     }
     
     // Check Email Already Exist or Not
@@ -2522,6 +2554,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card1");
+        setActiveTab(ManageStudent);
         show_Table("student", ViewStudentsTable);
     }//GEN-LAST:event_ManageStudentMouseClicked
 
@@ -2536,6 +2569,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card2");
+        setActiveTab(ManageInstructor);
         show_Table("instructor", ViewInstructorsTable);
     }//GEN-LAST:event_ManageInstructorMouseClicked
 
@@ -2550,6 +2584,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card3");
+        setActiveTab(ManageCourse);
         show_Table("course", ViewCoursesTable);
     }//GEN-LAST:event_ManageCourseMouseClicked
 
@@ -2564,6 +2599,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card4");
+        setActiveTab(TimeTable);
         show_Table("timetable", ViewTimeTable);
         
         // 1. Populate Course Combo and Map
@@ -2614,6 +2650,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card5");
+        setActiveTab(PublishResult);
         
         CourseCombo1.removeAllItems();
         CourseCombo1.addItem("Select Course");
