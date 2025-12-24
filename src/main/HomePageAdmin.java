@@ -121,7 +121,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
 
         javax.swing.JButton[] sideButtons = {
             ManageStudent, ManageInstructor, ManageCourse, 
-            TimeTable, PublishResult, LogOut
+            TimeTable, PublishResult, Notification, LogOut
         };
 
         for (javax.swing.JButton btn : sideButtons) {
@@ -244,7 +244,9 @@ public class HomePageAdmin extends javax.swing.JFrame {
         } else if(tableName.equals("course")){
             setIconRenderer(4, VIEW_ICON, tableName);
             setIconRenderer(5, DELETE_ICON, tableName);
-        }     
+        } else if(tableName.equals("notification")){
+            setIconRenderer(2, DELETE_ICON, tableName);
+        }
         String query = "SELECT * FROM `"+ tableName +"` ";
         try {
             // Database Connection
@@ -283,7 +285,10 @@ public class HomePageAdmin extends javax.swing.JFrame {
                         v2.add(result.getString("sTime"));
                         v2.add(result.getString("eTime"));
                         v2.add(result.getString("roomNo"));
-                    }    
+                    } else if (tableName.equals("notification")){
+                        v2.add(result.getString("title"));
+                        v2.add(result.getString("message"));
+                    }   
                 }
                 DTM.addRow(v2);
             }
@@ -309,8 +314,10 @@ public class HomePageAdmin extends javax.swing.JFrame {
         if(tableName.equals("student") || tableName.equals("course")){
             ViewStudentsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
             ViewCoursesTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
-        }else if(tableName.equals("instructor")){
+        } else if(tableName.equals("instructor")){
             ViewInstructorsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
+        } else if(tableName.equals("notification")){
+            ViewNotificationsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
         }
     }
     
@@ -352,7 +359,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Error fetching results: " + ex.getMessage());
         }
-    }
+    }  
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -370,6 +377,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         ManageCourse = new RoundedButton();
         TimeTable = new RoundedButton();
         PublishResult = new RoundedButton();
+        Notification = new RoundedButton();
         LogOut = new RoundedButton();
         MainPagePanel = new javax.swing.JPanel();
         StudentPanel = new javax.swing.JPanel();
@@ -549,6 +557,18 @@ public class HomePageAdmin extends javax.swing.JFrame {
         ResultTableScrollPane = new javax.swing.JScrollPane();
         ResultTable = new RoundedTable();
         Publish = new RoundedButton();
+        NotificationPanel = new javax.swing.JPanel();
+        NotificationTabs = new javax.swing.JTabbedPane();
+        AddNotification = new javax.swing.JPanel();
+        Title = new javax.swing.JLabel();
+        TitleField = new RoundedTextField(20);
+        Message = new javax.swing.JLabel();
+        MessageScrollPane = new javax.swing.JScrollPane();
+        MessageTextArea = new javax.swing.JTextArea();
+        SendBtn = new RoundedButton();
+        ViewNotifications = new javax.swing.JPanel();
+        ViewNotificationsScrollPane = new javax.swing.JScrollPane();
+        ViewNotificationsTable = new RoundedTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -633,6 +653,21 @@ public class HomePageAdmin extends javax.swing.JFrame {
             }
         });
 
+        Notification.setBackground(new java.awt.Color(151, 137, 219));
+        Notification.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
+        Notification.setText("Notification");
+        Notification.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        Notification.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                NotificationMouseClicked(evt);
+            }
+        });
+        Notification.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                NotificationKeyPressed(evt);
+            }
+        });
+
         LogOut.setBackground(new java.awt.Color(151, 137, 219));
         LogOut.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         LogOut.setText("LogOut");
@@ -655,6 +690,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             .addGroup(SidePanelLayout.createSequentialGroup()
                 .addGap(30, 30, 30)
                 .addGroup(SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(Notification, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(ManageStudent, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(ManageCourse, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(ManageInstructor, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -666,17 +702,19 @@ public class HomePageAdmin extends javax.swing.JFrame {
         SidePanelLayout.setVerticalGroup(
             SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(SidePanelLayout.createSequentialGroup()
-                .addGap(70, 70, 70)
+                .addGap(45, 45, 45)
                 .addComponent(ManageStudent)
-                .addGap(50, 50, 50)
+                .addGap(45, 45, 45)
                 .addComponent(ManageInstructor)
-                .addGap(50, 50, 50)
+                .addGap(45, 45, 45)
                 .addComponent(ManageCourse)
-                .addGap(50, 50, 50)
+                .addGap(45, 45, 45)
                 .addComponent(TimeTable)
-                .addGap(50, 50, 50)
+                .addGap(45, 45, 45)
                 .addComponent(PublishResult)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 116, Short.MAX_VALUE)
+                .addGap(45, 45, 45)
+                .addComponent(Notification)
+                .addGap(45, 45, 45)
                 .addComponent(LogOut)
                 .addGap(22, 22, 22))
         );
@@ -2512,6 +2550,164 @@ public class HomePageAdmin extends javax.swing.JFrame {
 
         MainPagePanel.add(ResultPanel, "Card5");
 
+        NotificationPanel.setOpaque(false);
+
+        NotificationTabs.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        NotificationTabs.setFont(new java.awt.Font("Bodoni MT", 1, 14)); // NOI18N
+
+        AddNotification.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        AddNotification.setOpaque(false);
+
+        Title.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
+        Title.setText("Title");
+
+        Message.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
+        Message.setText("Message");
+
+        MessageScrollPane.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
+
+        MessageTextArea.setColumns(20);
+        MessageTextArea.setLineWrap(true);
+        MessageTextArea.setRows(5);
+        MessageScrollPane.setViewportView(MessageTextArea);
+
+        SendBtn.setBackground(new java.awt.Color(151, 137, 219));
+        SendBtn.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
+        SendBtn.setText("Send");
+        SendBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                SendBtnMouseClicked(evt);
+            }
+        });
+        SendBtn.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                SendBtnKeyPressed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout AddNotificationLayout = new javax.swing.GroupLayout(AddNotification);
+        AddNotification.setLayout(AddNotificationLayout);
+        AddNotificationLayout.setHorizontalGroup(
+            AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 693, Short.MAX_VALUE)
+            .addGroup(AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(AddNotificationLayout.createSequentialGroup()
+                    .addGap(44, 44, 44)
+                    .addGroup(AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(AddNotificationLayout.createSequentialGroup()
+                            .addGap(252, 252, 252)
+                            .addComponent(SendBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(TitleField)
+                            .addComponent(Title, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(Message, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(MessageScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 605, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addContainerGap(44, Short.MAX_VALUE)))
+        );
+        AddNotificationLayout.setVerticalGroup(
+            AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 546, Short.MAX_VALUE)
+            .addGroup(AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(AddNotificationLayout.createSequentialGroup()
+                    .addGap(9, 9, 9)
+                    .addComponent(Title)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(TitleField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(18, 18, 18)
+                    .addComponent(Message)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(MessageScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 363, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(18, 18, 18)
+                    .addComponent(SendBtn)
+                    .addContainerGap(10, Short.MAX_VALUE)))
+        );
+
+        NotificationTabs.addTab("Add Notification", new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-add-16.png")), AddNotification); // NOI18N
+
+        ViewNotifications.setOpaque(false);
+
+        ViewNotificationsTable.setFont(new java.awt.Font("Bodoni MT", 0, 14)); // NOI18N
+        ViewNotificationsTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "Title", "Message", "Delete"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.Object.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        ViewNotificationsTable.setRowHeight(50);
+        ViewNotificationsTable.setRowSelectionAllowed(false);
+        ViewNotificationsTable.setShowGrid(false);
+        ViewNotificationsTable.setShowHorizontalLines(true);
+        ViewNotificationsTable.setShowVerticalLines(true);
+        ViewNotificationsTable.getTableHeader().setResizingAllowed(false);
+        ViewNotificationsTable.getTableHeader().setReorderingAllowed(false);
+        ViewNotificationsTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                ViewNotificationsTableMouseClicked(evt);
+            }
+        });
+        ViewNotificationsScrollPane.setViewportView(ViewNotificationsTable);
+
+        javax.swing.GroupLayout ViewNotificationsLayout = new javax.swing.GroupLayout(ViewNotifications);
+        ViewNotifications.setLayout(ViewNotificationsLayout);
+        ViewNotificationsLayout.setHorizontalGroup(
+            ViewNotificationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(ViewNotificationsLayout.createSequentialGroup()
+                .addGap(50, 50, 50)
+                .addComponent(ViewNotificationsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 617, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(26, Short.MAX_VALUE))
+        );
+        ViewNotificationsLayout.setVerticalGroup(
+            ViewNotificationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(ViewNotificationsLayout.createSequentialGroup()
+                .addGap(25, 25, 25)
+                .addComponent(ViewNotificationsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 515, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        NotificationTabs.addTab("View Notifications", new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-view-16.png")), ViewNotifications); // NOI18N
+
+        javax.swing.GroupLayout NotificationPanelLayout = new javax.swing.GroupLayout(NotificationPanel);
+        NotificationPanel.setLayout(NotificationPanelLayout);
+        NotificationPanelLayout.setHorizontalGroup(
+            NotificationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(NotificationPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(NotificationTabs)
+                .addContainerGap())
+        );
+        NotificationPanelLayout.setVerticalGroup(
+            NotificationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(NotificationPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(NotificationTabs)
+                .addContainerGap())
+        );
+
+        NotificationTabs.getAccessibleContext().setAccessibleName("Add Notification");
+
+        MainPagePanel.add(NotificationPanel, "Card6");
+
         javax.swing.GroupLayout HomePageAdminPanelLayout = new javax.swing.GroupLayout(HomePageAdminPanel);
         HomePageAdminPanel.setLayout(HomePageAdminPanelLayout);
         HomePageAdminPanelLayout.setHorizontalGroup(
@@ -2676,6 +2872,21 @@ public class HomePageAdmin extends javax.swing.JFrame {
             PublishResultMouseClicked(null);
         }
     }//GEN-LAST:event_PublishResultKeyPressed
+
+    private void NotificationMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_NotificationMouseClicked
+        // TODO add your handling code here:
+        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
+        c1.show(MainPagePanel,"Card6");
+        setActiveTab(Notification);
+        show_Table("notification", ViewNotificationsTable);
+    }//GEN-LAST:event_NotificationMouseClicked
+
+    private void NotificationKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_NotificationKeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+            NotificationMouseClicked(null);
+        }
+    }//GEN-LAST:event_NotificationKeyPressed
 
     private void LogOutMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_LogOutMouseClicked
         // TODO add your handling code here:
@@ -4854,6 +5065,94 @@ public class HomePageAdmin extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_PublishKeyPressed
 
+    private void SendBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SendBtnMouseClicked
+        // TODO add your handling code here:
+        String title = TitleField.getText();
+        String message = MessageTextArea.getText();
+
+        if(title.isBlank()){
+            Title.setForeground(Color.RED);
+        } else {
+            Title.setForeground(Color.BLACK);
+            temp = true;
+        }
+        if(message.isBlank()){
+            Message.setForeground(Color.RED);
+        } else {
+            Message.setForeground(Color.BLACK);
+            temp = true;
+        }
+        if(temp == true){
+            String query = "INSERT INTO `notification`(`title`, `message`) VALUES (?,?)";
+            try {
+                pst = connect.prepareStatement(query);
+
+                pst.setString(1, TitleField.getText());
+                pst.setString(2, MessageTextArea.getText());
+
+                pst.execute();
+                DataAdded dataadded = new DataAdded();
+                dataadded.setVisible(true);
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        dataadded.dispose();
+                    }
+                }, 1000);
+                TitleField.setText("");
+                MessageTextArea.setText("");
+
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null,ex);
+            }
+        }
+    }//GEN-LAST:event_SendBtnMouseClicked
+
+    private void SendBtnKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_SendBtnKeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+            SendBtnMouseClicked(null);
+        }
+    }//GEN-LAST:event_SendBtnKeyPressed
+
+    private void ViewNotificationsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ViewNotificationsTableMouseClicked
+        // TODO add your handling code here:
+        boolean confirmed = false;
+        int row = ViewNotificationsTable.rowAtPoint(evt.getPoint());
+        int col = ViewNotificationsTable.columnAtPoint(evt.getPoint());
+        if(row >= 0 && col >= 0){
+            Object cellValue = ViewNotificationsTable.getModel().getValueAt(row, 0);
+            if(col == 2){
+                String message = "Are you sure want to delete?";
+                CustomConfirmDialog customDialog = new CustomConfirmDialog(this, "Confirm Student Deletion", message);
+                customDialog.setVisible(true);
+                confirmed = customDialog.isConfirmed();
+                if(confirmed == true){
+                    String query = "DELETE FROM `notification` WHERE `ID`=?";
+                    try {
+                        pst = connect.prepareStatement(query);
+
+                        pst.setString(1, (String)cellValue);
+
+                        pst.execute();
+                        DataDeleted datadeleted = new DataDeleted();
+                        datadeleted.setVisible(true);
+                        new Timer().schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                datadeleted.dispose();
+                            }
+                        }, 1000);
+                        show_Table("notification", ViewNotificationsTable);
+
+                    } catch (SQLException ex) {
+                        JOptionPane.showMessageDialog(null,ex);
+                    }
+                }
+            }
+        }
+    }//GEN-LAST:event_ViewNotificationsTableMouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -4948,6 +5247,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
     private javax.swing.JButton Add;
     private javax.swing.JPanel AddCourse;
     private javax.swing.JPanel AddInstructor;
+    private javax.swing.JPanel AddNotification;
     private javax.swing.JPanel AddStudent;
     private javax.swing.JLabel Course;
     private javax.swing.JLabel Course1;
@@ -4971,8 +5271,14 @@ public class HomePageAdmin extends javax.swing.JFrame {
     private javax.swing.JButton ManageCourse;
     private javax.swing.JButton ManageInstructor;
     private javax.swing.JButton ManageStudent;
+    private javax.swing.JLabel Message;
+    private javax.swing.JScrollPane MessageScrollPane;
+    private javax.swing.JTextArea MessageTextArea;
     private javax.swing.JComboBox<String> MinutesCombo;
     private javax.swing.JComboBox<String> MinutesCombo1;
+    private javax.swing.JButton Notification;
+    private javax.swing.JPanel NotificationPanel;
+    private javax.swing.JTabbedPane NotificationTabs;
     private javax.swing.JButton Publish;
     private javax.swing.JButton PublishResult;
     private javax.swing.JPanel ResultPanel;
@@ -4980,6 +5286,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
     private javax.swing.JScrollPane ResultTableScrollPane;
     private javax.swing.JLabel Room;
     private javax.swing.JComboBox<String> RoomCombo;
+    private javax.swing.JButton SendBtn;
     private javax.swing.JPanel SidePanel;
     private javax.swing.JLabel StartTime;
     private javax.swing.JPanel StudentPanel;
@@ -4987,6 +5294,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
     private javax.swing.JButton TimeTable;
     private javax.swing.JPanel TimeTablePanel;
     private javax.swing.JScrollPane TimeTableScrollPane;
+    private javax.swing.JLabel Title;
+    private javax.swing.JTextField TitleField;
     private javax.swing.JLabel UAcademicYear;
     private javax.swing.JTextField UAcademicYearField;
     private javax.swing.JRadioButton UActive;
@@ -5066,6 +5375,9 @@ public class HomePageAdmin extends javax.swing.JFrame {
     private javax.swing.JPanel ViewInstructors;
     private javax.swing.JScrollPane ViewInstructorsScrollPane;
     private javax.swing.JTable ViewInstructorsTable;
+    private javax.swing.JPanel ViewNotifications;
+    private javax.swing.JScrollPane ViewNotificationsScrollPane;
+    private javax.swing.JTable ViewNotificationsTable;
     private javax.swing.JPanel ViewStudents;
     private javax.swing.JScrollPane ViewStudentsScrollPane;
     private javax.swing.JTable ViewStudentsTable;

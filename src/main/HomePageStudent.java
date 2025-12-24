@@ -548,6 +548,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         }
     }
 
+    // Fee
     private void showFee() {
         try {
             String query = "SELECT `year`, `session`, `total_fee`, `status` FROM `fee` WHERE `student_id` = ?";
@@ -571,6 +572,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         }
     }
 
+    // Download Fee PDF
     private void downloadFeeVoucherPDF(String year, String session, String amount, String status) {
         javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
         fileChooser.setDialogTitle("Save Fee Voucher");
@@ -670,6 +672,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         }
     }
 
+    // Attendance
     private void showAttendance() {
         DefaultTableModel model = (DefaultTableModel) AttendanceTable.getModel();
         model.setRowCount(0);
@@ -720,6 +723,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         }
     }
 
+    // Detailed Attendance
     private void showDetailedAttendance(String courseCode) {
         try {
             String query = "SELECT log FROM attendance_json WHERE student_id = ? AND coursecode = ?";
@@ -753,19 +757,22 @@ public class HomePageStudent extends javax.swing.JFrame {
         }
     }
 
+    // Result
     private void showResults() {
         DefaultTableModel model = (DefaultTableModel) ResultTable.getModel();
         model.setRowCount(0);
 
         // Query to get GPA and CGPA data
         String query = "SELECT e.year, e.session, " +
-                    "GROUP_CONCAT(r.total) as all_totals, " +
-                    "GROUP_CONCAT(c.credithrs) as all_credits " +
-                    "FROM results r " +
-                    "JOIN course c ON r.course_code = c.coursecode " +
-                    "JOIN enrollment e ON r.student_id = e.student_id AND e.coursecode LIKE CONCAT('%', r.course_code, '%') " +
-                    "WHERE r.student_id = ? " +
-                    "GROUP BY e.year, e.session ORDER BY e.year DESC, e.session DESC";
+                "GROUP_CONCAT(r.total) as all_totals, " +
+                "GROUP_CONCAT(c.credithrs) as all_credits " +
+                "FROM results r " +
+                "JOIN course c ON r.course_code = c.coursecode " +
+                "JOIN enrollment e ON r.student_id = e.student_id AND e.coursecode LIKE CONCAT('%', r.course_code, '%') " +
+                "WHERE r.student_id = ? " +
+                "GROUP BY e.year, e.session " +
+                "HAVING MIN(r.is_published) = 1 " +
+                "ORDER BY e.year DESC, e.session DESC";
 
         try {
             pst = connect.prepareStatement(query);
@@ -999,6 +1006,69 @@ public class HomePageStudent extends javax.swing.JFrame {
             }
         }
     }
+    
+    private void loadNotifications() {
+        DefaultTableModel model = (DefaultTableModel) NotificationTable.getModel();
+        model.setRowCount(0);
+
+        String query = "SELECT title, message, date_sent FROM notification ORDER BY date_sent DESC";
+        try {
+            pst = connect.prepareStatement(query);
+            result = pst.executeQuery();
+
+            while (result.next()) {
+                Vector v = new Vector();
+                v.add(result.getString("title"));
+                v.add(result.getString("message"));
+                v.add(result.getString("date_sent"));
+                model.addRow(v);
+            }
+        } catch (SQLException ex) {
+            System.err.println("Database Error: " + ex.getMessage());
+        }
+    }
+    
+    private void showNotificationDetailWindow(String title, String message, String date) {
+        // 1. Setup the Dialog
+        javax.swing.JDialog detailWindow = new javax.swing.JDialog(this, "Notification Detail", true);
+        detailWindow.setSize(500, 450);
+        detailWindow.setLocationRelativeTo(this);
+        detailWindow.setLayout(new java.awt.BorderLayout(10, 10));
+
+        // 2. Create components
+        javax.swing.JPanel mainPanel = new javax.swing.JPanel();
+        mainPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        mainPanel.setLayout(new java.awt.BorderLayout(10, 10));
+
+        // Title and Date Header
+        javax.swing.JLabel titleLabel = new javax.swing.JLabel("<html><body style='width: 300px'><b>Title: </b>" + title + "</body></html>");
+        titleLabel.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 16));
+
+        javax.swing.JLabel dateLabel = new javax.swing.JLabel("Sent: " + date);
+        dateLabel.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.ITALIC, 12));
+
+        javax.swing.JPanel headerPanel = new javax.swing.JPanel(new java.awt.GridLayout(0, 1));
+        headerPanel.add(titleLabel);
+        headerPanel.add(dateLabel);
+
+        // Message Body
+        javax.swing.JTextArea msgArea = new javax.swing.JTextArea(message);
+        msgArea.setEditable(false);
+        msgArea.setLineWrap(true);
+        msgArea.setWrapStyleWord(true);
+        msgArea.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 14));
+        msgArea.setBackground(new java.awt.Color(245, 245, 245));
+
+        javax.swing.JScrollPane scrollPane = new javax.swing.JScrollPane(msgArea);
+        scrollPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Message Content"));
+
+        // 3. Assemble and Show
+        mainPanel.add(headerPanel, java.awt.BorderLayout.NORTH);
+        mainPanel.add(scrollPane, java.awt.BorderLayout.CENTER);
+
+        detailWindow.add(mainPanel);
+        detailWindow.setVisible(true);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -1057,6 +1127,8 @@ public class HomePageStudent extends javax.swing.JFrame {
         ResultTable = new RoundedTable();
         NotificationPanel = new javax.swing.JPanel();
         ProfileButton6 = new javax.swing.JLabel();
+        NotificationScrollPane = new javax.swing.JScrollPane();
+        NotificationTable = new RoundedTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -1773,6 +1845,45 @@ public class HomePageStudent extends javax.swing.JFrame {
             }
         });
 
+        NotificationTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "Title", "Message", "Date"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        NotificationTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        NotificationTable.setRowHeight(50);
+        NotificationTable.setRowSelectionAllowed(false);
+        NotificationTable.setShowGrid(true);
+        NotificationTable.getTableHeader().setResizingAllowed(false);
+        NotificationTable.getTableHeader().setReorderingAllowed(false);
+        NotificationTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                NotificationTableMouseClicked(evt);
+            }
+        });
+        NotificationScrollPane.setViewportView(NotificationTable);
+
         javax.swing.GroupLayout NotificationPanelLayout = new javax.swing.GroupLayout(NotificationPanel);
         NotificationPanel.setLayout(NotificationPanelLayout);
         NotificationPanelLayout.setHorizontalGroup(
@@ -1780,12 +1891,18 @@ public class HomePageStudent extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, NotificationPanelLayout.createSequentialGroup()
                 .addGap(0, 663, Short.MAX_VALUE)
                 .addComponent(ProfileButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(NotificationPanelLayout.createSequentialGroup()
+                .addGap(40, 40, 40)
+                .addComponent(NotificationScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         NotificationPanelLayout.setVerticalGroup(
             NotificationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(NotificationPanelLayout.createSequentialGroup()
                 .addComponent(ProfileButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(548, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(NotificationScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 536, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         MainPagePanel.add(NotificationPanel, "Card7");
@@ -1922,6 +2039,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card7");
         setActiveTab(MyNotifications);
+        loadNotifications();
     }//GEN-LAST:event_MyNotificationsMouseClicked
 
     private void MyNotificationsKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_MyNotificationsKeyPressed
@@ -2156,6 +2274,20 @@ public class HomePageStudent extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_ProfileButton6MouseExited
 
+    private void NotificationTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_NotificationTableMouseClicked
+        // TODO add your handling code here:
+        int row = NotificationTable.getSelectedRow();
+        if (row != -1) {
+            // Get data from the selected row
+            String title = NotificationTable.getValueAt(row, 0).toString();
+            String message = NotificationTable.getValueAt(row, 1).toString();
+            String date = NotificationTable.getValueAt(row, 2).toString();
+
+            // Create a separate window (Dialog) to show the details
+            showNotificationDetailWindow(title, message, date);
+        }
+    }//GEN-LAST:event_NotificationTableMouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -2222,6 +2354,8 @@ public class HomePageStudent extends javax.swing.JFrame {
     private javax.swing.JLabel Name;
     private javax.swing.JLabel NameField;
     private javax.swing.JPanel NotificationPanel;
+    private javax.swing.JScrollPane NotificationScrollPane;
+    private javax.swing.JTable NotificationTable;
     private javax.swing.JLabel PhoneNo;
     private javax.swing.JLabel PhoneNoField;
     private javax.swing.JButton Profile;
