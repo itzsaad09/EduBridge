@@ -5,6 +5,7 @@
 package main;
 
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.Point;
@@ -56,8 +57,12 @@ public class HomePageStudent extends javax.swing.JFrame {
         } catch (Exception e) {
             System.err.println("Error loading icon: " + e.getMessage());
         }
+        // Active Profile Button
+        setActiveTab(Profile);
         updateDateTime();
         startDateTimeUpdater();
+        loadAndDisplayImage();
+        loadStudentDetails();
     }
     
     public HomePageStudent(String id){
@@ -91,10 +96,41 @@ public class HomePageStudent extends javax.swing.JFrame {
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null,ex);
         }
+        // Active Profile Button
+        setActiveTab(Profile);
         updateDateTime();
         startDateTimeUpdater();
         loadAndDisplayImage();
         loadStudentDetails();
+    }
+    
+    // Active Tab Styling
+    private void setActiveTab(javax.swing.JButton selectedBtn) {
+        Color activeColor = new Color(100, 80, 200);
+        Color defaultColor = new Color(151, 137, 219);
+        Color activeTextColor = Color.WHITE;
+        Color defaultTextColor = new Color(60, 60, 60);
+
+        javax.swing.JButton[] sideButtons = {
+            Profile, EnrollCourse, EnrolledCourses, 
+            FeeSummary, MyAttendance, MyResults,
+            MyNotifications, LogOut
+        };
+
+        for (javax.swing.JButton btn : sideButtons) {
+            if (btn == selectedBtn) {
+                btn.setBackground(activeColor);
+                btn.setForeground(activeTextColor);
+                btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 19)); 
+            } else {
+                btn.setBackground(defaultColor);
+                btn.setForeground(defaultTextColor);
+                btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 18));
+            }
+            
+            btn.revalidate();
+            btn.repaint();
+        }
     }
     
     private void updateDateTime() {
@@ -1796,6 +1832,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card1");
+        setActiveTab(Profile);
     }//GEN-LAST:event_ProfileMouseClicked
 
     private void ProfileKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ProfileKeyPressed
@@ -1809,6 +1846,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card2");
+        setActiveTab(EnrollCourse);
         show_Table("course", EnrollTable);
     }//GEN-LAST:event_EnrollCourseMouseClicked
 
@@ -1823,6 +1861,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card3");
+        setActiveTab(EnrolledCourses);
         show_Table("enrollment", EnrolledTable);
     }//GEN-LAST:event_EnrolledCoursesMouseClicked
 
@@ -1837,6 +1876,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card4");
+        setActiveTab(FeeSummary);
         showFee();
     }//GEN-LAST:event_FeeSummaryMouseClicked
 
@@ -1851,6 +1891,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card5");
+        setActiveTab(MyAttendance);
         showAttendance();
     }//GEN-LAST:event_MyAttendanceMouseClicked
 
@@ -1865,6 +1906,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card6");
+        setActiveTab(MyResults);
         showResults();
     }//GEN-LAST:event_MyResultsMouseClicked
 
@@ -1879,6 +1921,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card7");
+        setActiveTab(MyNotifications);
     }//GEN-LAST:event_MyNotificationsMouseClicked
 
     private void MyNotificationsKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_MyNotificationsKeyPressed

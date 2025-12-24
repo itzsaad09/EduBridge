@@ -50,6 +50,8 @@ public class HomePageInstructor extends javax.swing.JFrame {
         } catch (Exception e) {
             System.err.println("Error loading icon: " + e.getMessage());
         }
+        // Active View Courses Button
+        setActiveTab(ViewCourses);
         updateDateTime();
         startDateTimeUpdater();
         showInstructorTimetable();
@@ -86,9 +88,38 @@ public class HomePageInstructor extends javax.swing.JFrame {
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null,ex);
         }
+        // Active View Courses Button
+        setActiveTab(ViewCourses);
         updateDateTime();
         startDateTimeUpdater();
         showInstructorTimetable();
+    }
+    
+    // Active Tab Styling
+    private void setActiveTab(javax.swing.JButton selectedBtn) {
+        Color activeColor = new Color(100, 80, 200);
+        Color defaultColor = new Color(151, 137, 219);
+        Color activeTextColor = Color.WHITE;
+        Color defaultTextColor = new Color(60, 60, 60);
+
+        javax.swing.JButton[] sideButtons = {
+            ViewCourses, MarkAttendance, UploadResult, LogOut
+        };
+
+        for (javax.swing.JButton btn : sideButtons) {
+            if (btn == selectedBtn) {
+                btn.setBackground(activeColor);
+                btn.setForeground(activeTextColor);
+                btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 19)); 
+            } else {
+                btn.setBackground(defaultColor);
+                btn.setForeground(defaultTextColor);
+                btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 18));
+            }
+            
+            btn.revalidate();
+            btn.repaint();
+        }
     }
     
     private void updateDateTime() {
@@ -1007,6 +1038,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card1");
+        setActiveTab(ViewCourses);
         showInstructorTimetable();
     }//GEN-LAST:event_ViewCoursesMouseClicked
 
@@ -1021,6 +1053,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card2");
+        setActiveTab(MarkAttendance);
         CourseCombo.removeAllItems();
         CourseCombo.addItem("Select Course");
 
@@ -1069,6 +1102,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
         // TODO add your handling code here:
         CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
         c1.show(MainPagePanel,"Card3");
+        setActiveTab(UploadResult);
         CourseCombo1.removeAllItems();
         CourseCombo1.addItem("Select Course");
 
