@@ -242,8 +242,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             setIconRenderer(5, VIEW_ICON, tableName);
             setIconRenderer(6, DELETE_ICON, tableName);
         } else if(tableName.equals("course")){
-            setIconRenderer(4, VIEW_ICON, tableName);
-            setIconRenderer(5, DELETE_ICON, tableName);
+            setIconRenderer(6, DELETE_ICON, tableName);
         } else if(tableName.equals("notification")){
             setIconRenderer(2, DELETE_ICON, tableName);
         }
@@ -277,6 +276,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
                         v2.add(result.getString("coursecode"));
                         v2.add(result.getString("coursename"));
                         v2.add(result.getString("credithrs"));
+                        v2.add(result.getString("session"));
+                        v2.add(result.getString("academicyear"));
                         v2.add(result.getString("seats"));
                     } else if (tableName.equals("timetable")){
                         v2.add(result.getString("cName"));
@@ -311,11 +312,12 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 return label;
             }
         };
-        if(tableName.equals("student") || tableName.equals("course")){
+        if(tableName.equals("student")){
             ViewStudentsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
-            ViewCoursesTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
         } else if(tableName.equals("instructor")){
             ViewInstructorsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
+        } else if(tableName.equals("course")){
+            ViewCoursesTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
         } else if(tableName.equals("notification")){
             ViewNotificationsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
         }
@@ -2179,21 +2181,21 @@ public class HomePageAdmin extends javax.swing.JFrame {
         ViewCoursesTable.setFont(new java.awt.Font("Bodoni MT", 0, 14)); // NOI18N
         ViewCoursesTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
             },
             new String [] {
-                "Course Code", "Course Name", "Credit Hours", "Seats", "View", "Delete"
+                "Course Code", "Course Name", "Credit Hours", "Session", "Year", "Seats", "Delete"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -3598,8 +3600,9 @@ public class HomePageAdmin extends javax.swing.JFrame {
         if(row >= 0 && col >= 0){
             Object cellValue = ViewStudentsTable.getModel().getValueAt(row, 0);
             if(col == 4){
-                ViewStudent viewstudent = new ViewStudent();
-                viewstudent.setVisible(true);
+                String studentID = ViewStudentsTable.getValueAt(row, 0).toString();
+                // Open the new Detail Window
+                new StudentFullProfile(studentID).setVisible(true);
             } else if(col == 5){
                 String message = "Are you sure want to delete?";
                 CustomConfirmDialog customDialog = new CustomConfirmDialog(this, "Confirm Student Deletion", message);
@@ -4275,8 +4278,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         if(row >= 0 && col >= 0){
             Object cellValue = ViewInstructorsTable.getModel().getValueAt(row, 0);
             if(col == 5){
-                ViewStudent viewstudent = new ViewStudent();
-                viewstudent.setVisible(true);
+                
             } else if(col == 6){
                 String message = "Are you sure want to delete?";
                 CustomConfirmDialog customDialog = new CustomConfirmDialog(this, "Confirm Instructor Deletion", message);
@@ -4567,10 +4569,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         int col = ViewCoursesTable.columnAtPoint(evt.getPoint());
         if(row >= 0 && col >= 0){
             Object cellValue = ViewCoursesTable.getModel().getValueAt(row, 0);
-            if(col == 4){
-                ViewStudent viewstudent = new ViewStudent();
-                viewstudent.setVisible(true);
-            } else if(col == 5){
+            if(col == 6){
                 String message = "Are you sure want to delete?";
                 CustomConfirmDialog customDialog = new CustomConfirmDialog(this, "Confirm Course Deletion", message);
                 customDialog.setVisible(true);
