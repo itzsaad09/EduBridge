@@ -2929,7 +2929,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 AFirstName.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_AFirstNameFieldFocusLost
@@ -2957,7 +2956,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 ALastName.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_ALastNameFieldFocusLost
@@ -3000,7 +2998,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 ACNIC.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_ACNICFieldFocusLost
@@ -3027,7 +3024,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 APhoneNo.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_APhoneNoFieldFocusLost
@@ -3070,7 +3066,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 AEmail.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_AEmailFieldFocusLost
@@ -3090,63 +3085,63 @@ public class HomePageAdmin extends javax.swing.JFrame {
 
         if(fName.equals("John") || fName.isBlank()){
             AFirstName.setForeground(Color.RED);
+            temp = false;
         } else {
             AFirstName.setForeground(Color.BLACK);
-            temp = true;
         }
         if(lName.equals("Doe") || lName.isBlank()){
             ALastName.setForeground(Color.RED);
+            temp = false;
         } else {
             ALastName.setForeground(Color.BLACK);
-            temp = true;
         }
         if(dob.equals("DD-MM-YYYY") || fName.isBlank()){
             ADateOfBirth.setForeground(Color.RED);
+            temp = false;
         } else {
             ADateOfBirth.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cnic.equals("00000-0000000-0") || cnic.isBlank()){
             ACNIC.setForeground(Color.RED);
+            temp = false;
         } else {
             ACNIC.setForeground(Color.BLACK);
-            temp = true;
         }
         if(phoneno.equals("0333-1234567") || phoneno.isBlank()){
             APhoneNo.setForeground(Color.RED);
+            temp = false;
         } else {
             APhoneNo.setForeground(Color.BLACK);
-            temp = true;
         }
         if(gender.equals("Select Gender")){
             AGender.setForeground(Color.RED);
+            temp = false;
         } else {
             AGender.setForeground(Color.BLACK);
-            temp = true;
         }
         if(department.equals("Select Department")){
             ADepartment.setForeground(Color.RED);
+            temp = false;
         } else {
             ADepartment.setForeground(Color.BLACK);
-            temp = true;
         }
         if(program.equals("Program Name") || program.isBlank()){
             AProgram.setForeground(Color.RED);
+            temp = false;
         } else {
             AProgram.setForeground(Color.BLACK);
-            temp = true;
         }
         if(address.isBlank()){
             AAddress.setForeground(Color.RED);
+            temp = false;
         } else {
             AAddress.setForeground(Color.BLACK);
-            temp = true;
         }
         if(email.equals("user@domain.com") || email.isBlank()){
             AEmail.setForeground(Color.RED);
+            temp = false;
         } else {
             AEmail.setForeground(Color.BLACK);
-            temp = true;
         }
         if(checkEmail(email) || checkCNIC(cnic)){
             UserAlreadyExists useralreadyexists = new UserAlreadyExists();
@@ -3198,6 +3193,15 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 } catch (SQLException ex) {
                     JOptionPane.showMessageDialog(null,ex);
                 }
+            } else {
+                Failed failed = new Failed();
+                    failed.setVisible(true);
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            failed.dispose();
+                        }
+                    }, 1000);
             }
         }
     }//GEN-LAST:event_ASubmitBtnMouseClicked
@@ -3228,7 +3232,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 UFirstName.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_UFirstNameFieldFocusLost
@@ -3252,7 +3255,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 ULastName.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_ULastNameFieldFocusLost
@@ -3276,7 +3278,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 UPhoneNo.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_UPhoneNoFieldFocusLost
@@ -3326,7 +3327,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 UEmail.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_UEmailFieldFocusLost
@@ -3457,67 +3457,56 @@ public class HomePageAdmin extends javax.swing.JFrame {
             UFirstName.setForeground(Color.RED);
         } else {
             UFirstName.setForeground(Color.BLACK);
-            temp = true;
         }
         if(lName.equals("Doe") || lName.isBlank()){
             ULastName.setForeground(Color.RED);
         } else {
             ULastName.setForeground(Color.BLACK);
-            temp = true;
         }
         if(dob.equals("DD-MM-YYYY") || fName.isBlank()){
             UDateOfBirth.setForeground(Color.RED);
         } else {
             UDateOfBirth.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cnic.equals("00000-0000000-0") || cnic.isBlank()){
             UCNIC.setForeground(Color.RED);
         } else {
             UCNIC.setForeground(Color.BLACK);
-            temp = true;
         }
         if(phoneno.equals("0333-1234567") || phoneno.isBlank()){
             UPhoneNo.setForeground(Color.RED);
         } else {
             UPhoneNo.setForeground(Color.BLACK);
-            temp = true;
         }
         if(gender.equals("Select Gender")){
             UGender.setForeground(Color.RED);
         } else {
             UGender.setForeground(Color.BLACK);
-            temp = true;
         }
         if(department.equals("Select Department")){
             UDepartment.setForeground(Color.RED);
         } else {
             UDepartment.setForeground(Color.BLACK);
-            temp = true;
         }
         if(program.equals("Program Name") || program.isBlank()){
             UProgram.setForeground(Color.RED);
         } else {
             UProgram.setForeground(Color.BLACK);
-            temp = true;
         }
         if(address.isBlank()){
             UAddress.setForeground(Color.RED);
         } else {
             UAddress.setForeground(Color.BLACK);
-            temp = true;
         }
         if(email.equals("user@domain.com") || email.isBlank()){
             UEmail.setForeground(Color.RED);
         } else {
             UEmail.setForeground(Color.BLACK);
-            temp = true;
         }
         if(password.isBlank()){
             UPassword.setForeground(Color.RED);
         } else {
             UPassword.setForeground(Color.BLACK);
-            temp = true;
         }
         if(checkEmail(email) || checkCNIC(cnic)){
             UserAlreadyExists useralreadyexists = new UserAlreadyExists();
@@ -3582,7 +3571,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 UCNIC.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_UCNICFieldFocusLost
@@ -3656,7 +3644,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 AFirstName2.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_AFirstNameField2FocusLost
@@ -3683,7 +3670,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 ALastName2.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_ALastNameField2FocusLost
@@ -3710,7 +3696,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 APhoneNo2.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_APhoneNoField2FocusLost
@@ -3737,7 +3722,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 ACNIC2.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_ACNICField2FocusLost
@@ -3780,7 +3764,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 AEmail2.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_AEmailField2FocusLost
@@ -3802,55 +3785,46 @@ public class HomePageAdmin extends javax.swing.JFrame {
             AFirstName2.setForeground(Color.RED);
         } else {
             AFirstName2.setForeground(Color.BLACK);
-            temp = true;
         }
         if(lName.equals("Doe") || lName.isBlank()){
             ALastName2.setForeground(Color.RED);
         } else {
             ALastName2.setForeground(Color.BLACK);
-            temp = true;
         }
         if(dob.equals("DD-MM-YYYY") || fName.isBlank()){
             ADateOfBirth2.setForeground(Color.RED);
         } else {
             ADateOfBirth2.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cnic.equals("00000-0000000-0") || cnic.isBlank()){
             ACNIC2.setForeground(Color.RED);
         } else {
             ACNIC2.setForeground(Color.BLACK);
-            temp = true;
         }
         if(phoneno.equals("0333-1234567") || phoneno.isBlank()){
             APhoneNo2.setForeground(Color.RED);
         } else {
             APhoneNo2.setForeground(Color.BLACK);
-            temp = true;
         }
         if(gender.equals("Select Gender")){
             AGender2.setForeground(Color.RED);
         } else {
             AGender2.setForeground(Color.BLACK);
-            temp = true;
         }
         if(department.equals("Select Department")){
             ADepartment2.setForeground(Color.RED);
         } else {
             ADepartment2.setForeground(Color.BLACK);
-            temp = true;
         }
         if(address.isBlank()){
             AAddress2.setForeground(Color.RED);
         } else {
             AAddress2.setForeground(Color.BLACK);
-            temp = true;
         }
         if(email.equals("user@domain.com") || email.isBlank()){
             AEmail2.setForeground(Color.RED);
         } else {
             AEmail2.setForeground(Color.BLACK);
-            temp = true;
         }
         if(checkEmail(email) || checkCNIC(cnic)){
             UserAlreadyExists useralreadyexists = new UserAlreadyExists();
@@ -4011,7 +3985,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 UFirstName.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_UFirstNameField2FocusLost
@@ -4035,7 +4008,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 ULastName.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_ULastNameField2FocusLost
@@ -4059,7 +4031,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 UPhoneNo.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_UPhoneNoField2FocusLost
@@ -4083,7 +4054,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 temp = false;
             } else {
                 UCNIC.setForeground(Color.BLACK);
-                temp = true;
             }
         }
     }//GEN-LAST:event_UCNICField2FocusLost
@@ -4165,61 +4135,51 @@ public class HomePageAdmin extends javax.swing.JFrame {
             UFirstName.setForeground(Color.RED);
         } else {
             UFirstName.setForeground(Color.BLACK);
-            temp = true;
         }
         if(lName.equals("Doe") || lName.isBlank()){
             ULastName.setForeground(Color.RED);
         } else {
             ULastName.setForeground(Color.BLACK);
-            temp = true;
         }
         if(dob.equals("DD-MM-YYYY") || fName.isBlank()){
             UDateOfBirth.setForeground(Color.RED);
         } else {
             UDateOfBirth.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cnic.equals("00000-0000000-0") || cnic.isBlank()){
             UCNIC.setForeground(Color.RED);
         } else {
             UCNIC.setForeground(Color.BLACK);
-            temp = true;
         }
         if(phoneno.equals("0333-1234567") || phoneno.isBlank()){
             UPhoneNo.setForeground(Color.RED);
         } else {
             UPhoneNo.setForeground(Color.BLACK);
-            temp = true;
         }
         if(gender.equals("Select Gender")){
             UGender.setForeground(Color.RED);
         } else {
             UGender.setForeground(Color.BLACK);
-            temp = true;
         }
         if(department.equals("Select Department")){
             UDepartment.setForeground(Color.RED);
         } else {
             UDepartment.setForeground(Color.BLACK);
-            temp = true;
         }
         if(address.isBlank()){
             UAddress.setForeground(Color.RED);
         } else {
             UAddress.setForeground(Color.BLACK);
-            temp = true;
         }
         if(email.equals("user@domain.com") || email.isBlank()){
             UEmail.setForeground(Color.RED);
         } else {
             UEmail.setForeground(Color.BLACK);
-            temp = true;
         }
         if(password.isBlank()){
             UPassword.setForeground(Color.RED);
         } else {
             UPassword.setForeground(Color.BLACK);
-            temp = true;
         }
         if(checkEmail(email) || checkCNIC(cnic)){
             UserAlreadyExists useralreadyexists = new UserAlreadyExists();
@@ -4324,43 +4284,36 @@ public class HomePageAdmin extends javax.swing.JFrame {
             ACourseCode.setForeground(Color.RED);
         } else {
             ACourseCode.setForeground(Color.BLACK);
-            temp = true;
         }
         if(courseName.isBlank()){
             ACourseName.setForeground(Color.RED);
         } else {
             ACourseName.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cCreditHr.isBlank()){
             ACreditHrs.setForeground(Color.RED);
         } else {
             ACreditHrs.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cSession.equals("Select Session")){
             ASession.setForeground(Color.RED);
         } else {
             ASession.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cAcademicYear.isBlank()){
             AAcademicYear.setForeground(Color.RED);
         } else {
             AAcademicYear.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cDepartment.equals("Select Department")){
             ACDepartment.setForeground(Color.RED);
         } else {
             ACDepartment.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cSeats.isBlank()){
             ASeats.setForeground(Color.RED);
         } else {
             ASeats.setForeground(Color.BLACK);
-            temp = true;
         }
         if(checkCourseCode(cCode)){
             UserAlreadyExists useralreadyexists = new UserAlreadyExists();
@@ -4486,43 +4439,36 @@ public class HomePageAdmin extends javax.swing.JFrame {
             UCourseCode.setForeground(Color.RED);
         } else {
             UCourseCode.setForeground(Color.BLACK);
-            temp = true;
         }
         if(courseName.isBlank()){
             UCourseName.setForeground(Color.RED);
         } else {
             UCourseName.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cCreditHr.isBlank()){
             UCreditHrs.setForeground(Color.RED);
         } else {
             UCreditHrs.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cSession.equals("Select Session")){
             USession.setForeground(Color.RED);
         } else {
             USession.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cAcademicYear.isBlank()){
             UAcademicYear.setForeground(Color.RED);
         } else {
             UAcademicYear.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cDepartment.equals("Select Department")){
             UCDepartment.setForeground(Color.RED);
         } else {
             UCDepartment.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cSeats.isBlank()){
             USeatsField.setForeground(Color.RED);
         } else {
             USeatsField.setForeground(Color.BLACK);
-            temp = true;
         }
         if(temp == true){
             String query = "UPDATE `course` SET `coursecode`='"+cCode+"',`coursename`='"+courseName+"',`credithrs`='"+cCreditHr+"',`session`='"+cSession+"',`academicyear`='"+cAcademicYear+"',`department`='"+cDepartment+"',`seats`='"+cSeats+"' WHERE `coursecode`='"+cCode+"'";
@@ -4882,42 +4828,36 @@ public class HomePageAdmin extends javax.swing.JFrame {
             temp = false;
         } else {
             Day.setForeground(Color.BLACK);
-            temp = true;
         }
         if(sparts[0].equals("Select Hour") || sparts[1].equals("Select Minute")){
             StartTime.setForeground(Color.RED);
             temp = false;
         } else {
             StartTime.setForeground(Color.BLACK);
-            temp = true;
         }
         if(eparts[0].equals("Select Hour") || eparts[1].equals("Select Minute")){
             EndTime.setForeground(Color.RED);
             temp = false;
         } else {
             EndTime.setForeground(Color.BLACK);
-            temp = true;
         }
         if(cName.equals("Select Course")){
             Course.setForeground(Color.RED);
             temp = false;
         } else {
             Course.setForeground(Color.BLACK);
-            temp = true;
         }
         if(instructorName.equals("Select Instructor")){
             Instructor.setForeground(Color.RED);
             temp = false;
         } else {
             Instructor.setForeground(Color.BLACK);
-            temp = true;
         }
         if(roomNo.equals("Select Room")){
             Room.setForeground(Color.RED);
             temp = false;
         } else {
             Room.setForeground(Color.BLACK);
-            temp = true;
         }
         boolean confirmed = false;
         if (temp == true){
@@ -5073,13 +5013,11 @@ public class HomePageAdmin extends javax.swing.JFrame {
             Title.setForeground(Color.RED);
         } else {
             Title.setForeground(Color.BLACK);
-            temp = true;
         }
         if(message.isBlank()){
             Message.setForeground(Color.RED);
         } else {
             Message.setForeground(Color.BLACK);
-            temp = true;
         }
         if(temp == true){
             String query = "INSERT INTO `notification`(`title`, `message`) VALUES (?,?)";
