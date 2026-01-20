@@ -38,11 +38,12 @@ public class HomePageStudent extends javax.swing.JFrame {
     PreparedStatement pst = null;
     ResultSetMetaData RSMD;
     DefaultTableModel DTM;
-    
+
     String id;
     private HoverPopup infoPopup;
     private final ImageIcon ENROLL_ICON = new ImageIcon(getClass().getResource("/main/resources/enroll (2).png"));
     private final ImageIcon DELETE_ICON = new ImageIcon(getClass().getResource("/main/resources/icons8-delete-24.png"));
+
     public HomePageStudent() {
         initComponents();
         // Set Title
@@ -64,8 +65,8 @@ public class HomePageStudent extends javax.swing.JFrame {
         loadAndDisplayImage();
         loadStudentDetails();
     }
-    
-    public HomePageStudent(String id){
+
+    public HomePageStudent(String id) {
         initComponents();
         // Set Title
         this.setTitle("EduBridge University");
@@ -84,17 +85,17 @@ public class HomePageStudent extends javax.swing.JFrame {
         try {
             pst = connect.prepareStatement(query);
             pst.setString(1, id);
-            
+
             result = pst.executeQuery();
-            if(result.next()){
+            if (result.next()) {
                 String password = result.getString("password");
-                if(password.equals("Student123")){
+                if (password.equals("Student123")) {
                     new ChangePassword(id, "student").setVisible(true);
                 }
             }
-                
+
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null,ex);
+            JOptionPane.showMessageDialog(null, ex);
         }
         // Active Profile Button
         setActiveTab(Profile);
@@ -103,7 +104,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         loadAndDisplayImage();
         loadStudentDetails();
     }
-    
+
     // Active Tab Styling
     private void setActiveTab(javax.swing.JButton selectedBtn) {
         Color activeColor = new Color(100, 80, 200);
@@ -112,27 +113,27 @@ public class HomePageStudent extends javax.swing.JFrame {
         Color defaultTextColor = new Color(60, 60, 60);
 
         javax.swing.JButton[] sideButtons = {
-            Profile, EnrollCourse, EnrolledCourses, 
-            FeeSummary, MyAttendance, MyResults,
-            MyNotifications, LogOut
+                Profile, EnrollCourse, EnrolledCourses,
+                FeeSummary, MyAttendance, MyResults,
+                MyNotifications, LogOut
         };
 
         for (javax.swing.JButton btn : sideButtons) {
             if (btn == selectedBtn) {
                 btn.setBackground(activeColor);
                 btn.setForeground(activeTextColor);
-                btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 19)); 
+                btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 19));
             } else {
                 btn.setBackground(defaultColor);
                 btn.setForeground(defaultTextColor);
                 btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 18));
             }
-            
+
             btn.revalidate();
             btn.repaint();
         }
     }
-    
+
     private void updateDateTime() {
         // Format for time and date (e.g., 04:25:30 PM, Dec 09, 2025)
         SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss a, MMM dd, yyyy");
@@ -140,7 +141,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         // Set the formatted string to the JLabel
         DateTime.setText(formatter.format(date));
     }
-    
+
     private void startDateTimeUpdater() {
         Timer timer = new Timer(true);
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -150,18 +151,18 @@ public class HomePageStudent extends javax.swing.JFrame {
             }
         }, 0, 1000);
     }
-    
+
     private void showProfilePopup(javax.swing.JLabel sourceButton, java.awt.event.MouseEvent evt) {
         String instructorName = "";
         String instructorEmail = "";
         String instructorDepartment = "";
-        
+
         String query = "SELECT `fName`, `lName`, `email`, `department` FROM `student` WHERE `ID` = ?";
         try {
             pst = connect.prepareStatement(query);
             pst.setString(1, this.id);
             result = pst.executeQuery();
-            
+
             if (result.next()) {
                 instructorName = result.getString("fName") + " " + result.getString("lName");
                 instructorEmail = result.getString("email");
@@ -175,31 +176,30 @@ public class HomePageStudent extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Database Error fetching profile data: " + ex.getMessage());
             instructorName = "Database Error";
         }
-        
-        String message = "<html><b>Full Name:</b> " + instructorName + 
-                         "<br><b>Email:</b> " + instructorEmail + 
-                         "<br><b>Department:</b> " + instructorDepartment + 
-                         "</html>";
-        
-        
+
+        String message = "<html><b>Full Name:</b> " + instructorName +
+                "<br><b>Email:</b> " + instructorEmail +
+                "<br><b>Department:</b> " + instructorDepartment +
+                "</html>";
+
         if (infoPopup == null) {
             infoPopup = new HoverPopup(HomePageStudent.this, message);
         } else {
-            infoPopup.updateMessage(message); 
+            infoPopup.updateMessage(message);
         }
 
         Point buttonLocation = sourceButton.getLocationOnScreen();
-        
+
         int popupX = buttonLocation.x + sourceButton.getWidth() - infoPopup.getWidth();
-        
+
         int popupY = buttonLocation.y + sourceButton.getHeight();
-        
+
         infoPopup.showAtLocation(popupX, popupY);
     }
 
     private void saveImageToDatabase(byte[] imageBytes) throws SQLException {
         String query = "UPDATE `student` SET `profile` = ? WHERE `ID` = ?";
-        
+
         try (PreparedStatement updatePst = connect.prepareStatement(query)) {
             updatePst.setBytes(1, imageBytes);
             updatePst.setString(2, this.id);
@@ -209,10 +209,10 @@ public class HomePageStudent extends javax.swing.JFrame {
 
     private void loadAndDisplayImage() {
         String query = "SELECT `profile` FROM `student` WHERE `ID` = ?";
-        
+
         try (PreparedStatement selectPst = connect.prepareStatement(query)) {
             selectPst.setString(1, this.id);
-            
+
             try (ResultSet rs = selectPst.executeQuery()) {
                 if (rs.next()) {
                     byte[] imageBytes = rs.getBytes("profile");
@@ -229,81 +229,83 @@ public class HomePageStudent extends javax.swing.JFrame {
     private void displayImageFromBytes(byte[] imageBytes) {
         ImageIcon imageIcon = new ImageIcon(imageBytes);
         Image image = imageIcon.getImage();
-        
-        int width = ProfilePic.getWidth() > 0 ? ProfilePic.getWidth() : 134; 
-        int height = ProfilePic.getHeight() > 0 ? ProfilePic.getHeight() : 172; 
-        
+
+        int width = ProfilePic.getWidth() > 0 ? ProfilePic.getWidth() : 134;
+        int height = ProfilePic.getHeight() > 0 ? ProfilePic.getHeight() : 172;
+
         Image scaledImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        
+
         ProfilePic.setIcon(new ImageIcon(scaledImage));
     }
-    
+
     private void loadStudentDetails() {
         String query = "SELECT `fName`, `lName`, `program`, `phoneNo`, `cnic`, `dob` FROM `student` WHERE `ID` = ?";
-        
+
         try {
             pst = connect.prepareStatement(query);
             pst.setString(1, this.id);
-            
+
             result = pst.executeQuery();
-            
+
             if (result.next()) {
                 String fullName = result.getString("fName") + " " + result.getString("lName");
                 String program = result.getString("program");
                 String phoneNo = result.getString("phoneNo");
                 String cnic = result.getString("cnic");
-                String dob = result.getString("dob"); 
-                
+                String dob = result.getString("dob");
+
                 NameField.setText(fullName);
                 ProgramField.setText(program);
                 PhoneNoField.setText(phoneNo);
                 CNICField.setText(cnic);
                 DOBField.setText(dob);
-                
+
             } else {
                 NameField.setText("Student Not Found");
-                JOptionPane.showMessageDialog(this, "Error: Student ID " + this.id + " not found in database.", "Data Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error: Student ID " + this.id + " not found in database.",
+                        "Data Error", JOptionPane.ERROR_MESSAGE);
             }
-                
+
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
-        } 
+            JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage(), "SQL Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
-    
+
     // Show Table
     private void show_Table(String tableName, JTable targetTable) {
         // Icons
-        if(tableName.equals("course")){
+        if (tableName.equals("course")) {
             setIconRenderer(4, ENROLL_ICON);
-        } else if(tableName.equals("enrollment")){
+        } else if (tableName.equals("enrollment")) {
             setIconRenderer(4, DELETE_ICON);
         }
         String courseQuery = "SELECT c.coursecode, c.coursename, c.credithrs, t.instructorName "
-                           + "FROM `course` c "
-                           + "LEFT JOIN `timetable` t ON c.coursename = t.cName "
-                           + "GROUP BY c.coursecode, c.coursename, c.credithrs, t.instructorName";
-        if(tableName.equals("course")){
+                + "FROM `course` c "
+                + "LEFT JOIN `timetable` t ON c.coursename = t.cName "
+                + "GROUP BY c.coursecode, c.coursename, c.credithrs, t.instructorName";
+        if (tableName.equals("course")) {
             try {
                 pst = connect.prepareStatement(courseQuery);
                 result = pst.executeQuery();
                 RSMD = result.getMetaData();
                 int CC = RSMD.getColumnCount();
-                DTM = (DefaultTableModel)targetTable.getModel();
+                DTM = (DefaultTableModel) targetTable.getModel();
                 DTM.setRowCount(0);
-                while(result.next()) {
+                while (result.next()) {
                     Vector v2 = new Vector();
-                    for(int i=1; i<=CC; i++) {
+                    for (int i = 1; i <= CC; i++) {
                         v2.add(result.getString("coursecode"));
                         v2.add(result.getString("coursename"));
                         v2.add(result.getString("credithrs"));
-                        v2.add(result.getString("instructorName")); 
+                        v2.add(result.getString("instructorName"));
                     }
                     DTM.addRow(v2);
                 }
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null,ex);
+                JOptionPane.showMessageDialog(null, ex);
             }
-        } else if(tableName.equals("enrollment")){
+        } else if (tableName.equals("enrollment")) {
             String enrollmentQuery = "SELECT `coursecode`, `enrollment_date` FROM `enrollment` WHERE `student_id` = ?";
 
             String courseDetailQuery = "SELECT `coursename`, `credithrs` FROM `course` WHERE `coursecode` = ?";
@@ -340,16 +342,17 @@ public class HomePageStudent extends javax.swing.JFrame {
                 }
 
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null,ex);
+                JOptionPane.showMessageDialog(null, ex);
             }
         }
     }
-    
+
     // Set Icon
     private void setIconRenderer(int columnIndex, ImageIcon icon) {
         DefaultTableCellRenderer iconRenderer = new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable ViewTable, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            public Component getTableCellRendererComponent(JTable ViewTable, Object value, boolean isSelected,
+                    boolean hasFocus, int row, int column) {
                 JLabel label = new JLabel(icon);
                 label.setHorizontalAlignment(JLabel.CENTER);
                 if (isSelected) {
@@ -362,7 +365,7 @@ public class HomePageStudent extends javax.swing.JFrame {
         EnrollTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
         EnrolledTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
     }
-    
+
     // Enroll Course
     private void enrollCourse(String courseCode) {
         int currentYear = java.time.Year.now().getValue();
@@ -372,7 +375,8 @@ public class HomePageStudent extends javax.swing.JFrame {
 
         try {
             // Get session, credit hrs, seats from course
-            pst = connect.prepareStatement("SELECT `session`, `credithrs`, `seats` FROM `course` WHERE `coursecode` = ?");
+            pst = connect
+                    .prepareStatement("SELECT `session`, `credithrs`, `seats` FROM `course` WHERE `coursecode` = ?");
             pst.setString(1, courseCode);
             result = pst.executeQuery();
             if (result.next()) {
@@ -383,7 +387,31 @@ public class HomePageStudent extends javax.swing.JFrame {
 
             // Check Seats Availability
             if (availableSeats <= 0) {
-                new CustomMessageDialog(this, "Failed", "No seats available in " + courseCode, CustomMessageDialog.ERROR).setVisible(true);
+                new CustomMessageDialog(this, "Failed", "No seats available in " + courseCode,
+                        CustomMessageDialog.ERROR).setVisible(true);
+                return;
+            }
+            
+            try (PreparedStatement checkAllPst = connect
+                    .prepareStatement("SELECT `coursecode` FROM `enrollment` WHERE `student_id` = ?")) {
+                checkAllPst.setString(1, this.id);
+                try (ResultSet allRs = checkAllPst.executeQuery()) {
+                    while (allRs.next()) {
+                        String existingCourses = allRs.getString("coursecode");
+                        if (existingCourses != null && !existingCourses.isEmpty()) {
+                            String[] enrolled = existingCourses.split(",\\s*");
+                            for (String code : enrolled) {
+                                if (code.equals(courseCode)) {
+                                    new CustomMessageDialog(this, "Failed", "Already Enrolled in " + courseCode,
+                                            CustomMessageDialog.ERROR).setVisible(true);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Database Error during duplicate check: " + e.getMessage());
                 return;
             }
 
@@ -395,13 +423,14 @@ public class HomePageStudent extends javax.swing.JFrame {
             pst.setInt(3, currentYear);
             result = pst.executeQuery();
 
-            boolean isNewRow = !result.isBeforeFirst(); 
+            boolean isNewRow = !result.isBeforeFirst();
             String updatedCourseString = "";
 
             if (result.next()) {
                 String existingCourses = result.getString("coursecode");
                 if (existingCourses.contains(courseCode)) {
-                    new CustomMessageDialog(this, "Failed", "Already Enrolled", CustomMessageDialog.ERROR).setVisible(true);
+                    new CustomMessageDialog(this, "Failed", "Already Enrolled", CustomMessageDialog.ERROR)
+                            .setVisible(true);
                     return;
                 }
                 updatedCourseString = existingCourses + ", " + courseCode;
@@ -409,20 +438,22 @@ public class HomePageStudent extends javax.swing.JFrame {
                 updatedCourseString = courseCode;
             }
 
-            connect.setAutoCommit(false); 
+            connect.setAutoCommit(false);
 
             pst = connect.prepareStatement("UPDATE `course` SET `seats` = `seats` - 1 WHERE `coursecode` = ?");
             pst.setString(1, courseCode);
             pst.executeUpdate();
 
             if (isNewRow) {
-                pst = connect.prepareStatement("INSERT INTO `enrollment`(`student_id`, `coursecode`, `session`, `year`, `enrollment_date`) VALUES (?, ?, ?, ?, NOW())");
+                pst = connect.prepareStatement(
+                        "INSERT INTO `enrollment`(`student_id`, `coursecode`, `session`, `year`, `enrollment_date`) VALUES (?, ?, ?, ?, NOW())");
                 pst.setString(1, this.id);
                 pst.setString(2, updatedCourseString);
                 pst.setString(3, session);
                 pst.setInt(4, currentYear);
             } else {
-                pst = connect.prepareStatement("UPDATE `enrollment` SET `coursecode` = ? WHERE `student_id` = ? AND `session` = ? AND `year` = ?");
+                pst = connect.prepareStatement(
+                        "UPDATE `enrollment` SET `coursecode` = ? WHERE `student_id` = ? AND `session` = ? AND `year` = ?");
                 pst.setString(1, updatedCourseString);
                 pst.setString(2, this.id);
                 pst.setString(3, session);
@@ -433,15 +464,18 @@ public class HomePageStudent extends javax.swing.JFrame {
             String[] allCodes = updatedCourseString.split(",\\s*");
             int totalCredits = 0;
             for (String code : allCodes) {
-                PreparedStatement cpst = connect.prepareStatement("SELECT `credithrs` FROM `course` WHERE `coursecode` = ?");
+                PreparedStatement cpst = connect
+                        .prepareStatement("SELECT `credithrs` FROM `course` WHERE `coursecode` = ?");
                 cpst.setString(1, code);
                 ResultSet rs = cpst.executeQuery();
-                if (rs.next()) totalCredits += rs.getInt("credithrs");
+                if (rs.next())
+                    totalCredits += rs.getInt("credithrs");
             }
             double totalFeeAmount = totalCredits * 6000;
 
-            pst = connect.prepareStatement("INSERT INTO `fee` (`student_id`, `session`, `year`, `total_fee`) VALUES (?, ?, ?, ?) "
-                                        + "ON DUPLICATE KEY UPDATE `total_fee` = ?");
+            pst = connect.prepareStatement(
+                    "INSERT INTO `fee` (`student_id`, `session`, `year`, `total_fee`) VALUES (?, ?, ?, ?) "
+                            + "ON DUPLICATE KEY UPDATE `total_fee` = ?");
             pst.setString(1, this.id);
             pst.setString(2, session);
             pst.setInt(3, currentYear);
@@ -452,14 +486,18 @@ public class HomePageStudent extends javax.swing.JFrame {
             connect.commit();
             connect.setAutoCommit(true);
 
-            new CustomMessageDialog(this, "Success", "Enrolled! Fee Updated: " + totalFeeAmount, CustomMessageDialog.SUCCESS).setVisible(true);
+            new CustomMessageDialog(this, "Success", "Enrolled! Fee Updated: " + totalFeeAmount,
+                    CustomMessageDialog.SUCCESS).setVisible(true);
 
         } catch (SQLException ex) {
-            try { connect.rollback(); } catch (SQLException e) { /* ignore */ }
+            try {
+                connect.rollback();
+            } catch (SQLException e) {
+                /* ignore */ }
             JOptionPane.showMessageDialog(null, "Database Error: " + ex.getMessage());
         }
     }
-    
+
     // Drop Course
     private void deleteEnrollment(String courseCode) {
         String message = "Are you sure you want to drop course " + courseCode + "?";
@@ -481,14 +519,16 @@ public class HomePageStudent extends javax.swing.JFrame {
                     int year = result.getInt("year");
 
                     // 2. remove the course
-                    java.util.List<String> codesList = new java.util.ArrayList<>(java.util.Arrays.asList(currentCourses.split(",\\s*")));
-                    
+                    java.util.List<String> codesList = new java.util.ArrayList<>(
+                            java.util.Arrays.asList(currentCourses.split(",\\s*")));
+
                     if (codesList.remove(courseCode)) {
                         // Start Transaction
                         connect.setAutoCommit(false);
 
                         // Return the seat to the course table
-                        pst = connect.prepareStatement("UPDATE `course` SET `seats` = `seats` + 1 WHERE `coursecode` = ?");
+                        pst = connect
+                                .prepareStatement("UPDATE `course` SET `seats` = `seats` + 1 WHERE `coursecode` = ?");
                         pst.setString(1, courseCode);
                         pst.executeUpdate();
 
@@ -499,9 +539,10 @@ public class HomePageStudent extends javax.swing.JFrame {
                             pst = connect.prepareStatement("DELETE FROM `enrollment` WHERE `enrollment_id` = ?");
                             pst.setInt(1, enrollmentId);
                             pst.executeUpdate();
-                            
+
                             // Delete fee record as well
-                            pst = connect.prepareStatement("DELETE FROM `fee` WHERE `student_id` = ? AND `session` = ? AND `year` = ?");
+                            pst = connect.prepareStatement(
+                                    "DELETE FROM `fee` WHERE `student_id` = ? AND `session` = ? AND `year` = ?");
                             pst.setString(1, this.id);
                             pst.setString(2, session);
                             pst.setInt(3, year);
@@ -509,7 +550,8 @@ public class HomePageStudent extends javax.swing.JFrame {
                         } else {
                             // Update with remaining courses
                             String updatedCourses = String.join(", ", codesList);
-                            pst = connect.prepareStatement("UPDATE `enrollment` SET `coursecode` = ? WHERE `enrollment_id` = ?");
+                            pst = connect.prepareStatement(
+                                    "UPDATE `enrollment` SET `coursecode` = ? WHERE `enrollment_id` = ?");
                             pst.setString(1, updatedCourses);
                             pst.setInt(2, enrollmentId);
                             pst.executeUpdate();
@@ -517,15 +559,18 @@ public class HomePageStudent extends javax.swing.JFrame {
                             // Recalculate Fees for remaining courses
                             int totalCredits = 0;
                             for (String code : codesList) {
-                                PreparedStatement cpst = connect.prepareStatement("SELECT `credithrs` FROM `course` WHERE `coursecode` = ?");
+                                PreparedStatement cpst = connect
+                                        .prepareStatement("SELECT `credithrs` FROM `course` WHERE `coursecode` = ?");
                                 cpst.setString(1, code);
                                 ResultSet rs = cpst.executeQuery();
-                                if (rs.next()) totalCredits += rs.getInt("credithrs");
+                                if (rs.next())
+                                    totalCredits += rs.getInt("credithrs");
                             }
                             totalFeeAmount = totalCredits * 6000;
 
                             // Update Fee Table
-                            pst = connect.prepareStatement("UPDATE `fee` SET `total_fee` = ? WHERE `student_id` = ? AND `session` = ? AND `year` = ?");
+                            pst = connect.prepareStatement(
+                                    "UPDATE `fee` SET `total_fee` = ? WHERE `student_id` = ? AND `session` = ? AND `year` = ?");
                             pst.setDouble(1, totalFeeAmount);
                             pst.setString(2, this.id);
                             pst.setString(3, session);
@@ -536,13 +581,18 @@ public class HomePageStudent extends javax.swing.JFrame {
                         connect.commit();
                         connect.setAutoCommit(true);
 
-                        String successMsg = "Course dropped. " + (codesList.isEmpty() ? "All fees cleared." : "New Fee: " + totalFeeAmount);
-                        new CustomMessageDialog(this, "Success", successMsg, CustomMessageDialog.SUCCESS).setVisible(true);
+                        String successMsg = "Course dropped. "
+                                + (codesList.isEmpty() ? "All fees cleared." : "New Fee: " + totalFeeAmount);
+                        new CustomMessageDialog(this, "Success", successMsg, CustomMessageDialog.SUCCESS)
+                                .setVisible(true);
                         show_Table("enrollment", EnrolledTable);
                     }
                 }
             } catch (SQLException ex) {
-                try { connect.rollback(); } catch (SQLException e) { }
+                try {
+                    connect.rollback();
+                } catch (SQLException e) {
+                }
                 JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
             }
         }
@@ -555,7 +605,7 @@ public class HomePageStudent extends javax.swing.JFrame {
             pst = connect.prepareStatement(query);
             pst.setString(1, this.id);
             result = pst.executeQuery();
-            
+
             DTM = (DefaultTableModel) FeeTable.getModel();
             DTM.setRowCount(0);
 
@@ -577,11 +627,12 @@ public class HomePageStudent extends javax.swing.JFrame {
         javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
         fileChooser.setDialogTitle("Save Fee Voucher");
         fileChooser.setSelectedFile(new java.io.File("FeeVoucher_" + session + "_" + year + ".pdf"));
-        
+
         if (fileChooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
             com.itextpdf.text.Document document = new com.itextpdf.text.Document();
             try {
-                com.itextpdf.text.pdf.PdfWriter writer = com.itextpdf.text.pdf.PdfWriter.getInstance(document, new java.io.FileOutputStream(fileChooser.getSelectedFile()));
+                com.itextpdf.text.pdf.PdfWriter writer = com.itextpdf.text.pdf.PdfWriter.getInstance(document,
+                        new java.io.FileOutputStream(fileChooser.getSelectedFile()));
                 document.open();
 
                 // 1. UNIVERSITY LOGO
@@ -594,17 +645,22 @@ public class HomePageStudent extends javax.swing.JFrame {
                 }
 
                 // 2. FONTS
-                com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD);
-                com.itextpdf.text.Font smallBold = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD);
-                com.itextpdf.text.Font normalFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL);
-                com.itextpdf.text.Font redBold = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor.RED);
+                com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(
+                        com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD);
+                com.itextpdf.text.Font smallBold = new com.itextpdf.text.Font(
+                        com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD);
+                com.itextpdf.text.Font normalFont = new com.itextpdf.text.Font(
+                        com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL);
+                com.itextpdf.text.Font redBold = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA,
+                        10, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor.RED);
 
                 // 3. HEADERS
                 com.itextpdf.text.Paragraph title = new com.itextpdf.text.Paragraph("EduBridge University", boldFont);
                 title.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
                 document.add(title);
-                
-                com.itextpdf.text.Paragraph subTitle = new com.itextpdf.text.Paragraph("Official Fee Challan", smallBold);
+
+                com.itextpdf.text.Paragraph subTitle = new com.itextpdf.text.Paragraph("Official Fee Challan",
+                        smallBold);
                 subTitle.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
                 document.add(subTitle);
                 document.add(new com.itextpdf.text.Paragraph(" "));
@@ -624,10 +680,11 @@ public class HomePageStudent extends javax.swing.JFrame {
                 detailsTable.addCell(new com.itextpdf.text.Phrase("Student ID: " + this.id, normalFont));
                 detailsTable.addCell(new com.itextpdf.text.Phrase("Issue Date: " + issueDate, normalFont));
                 detailsTable.addCell(new com.itextpdf.text.Phrase("Name: " + NameField.getText(), normalFont));
-                detailsTable.addCell(new com.itextpdf.text.Phrase("Due Date: " + dueDate, redBold)); // Highlighted due date
+                detailsTable.addCell(new com.itextpdf.text.Phrase("Due Date: " + dueDate, redBold)); // Highlighted due
+                                                                                                     // date
                 detailsTable.addCell(new com.itextpdf.text.Phrase("Session: " + session + " " + year, normalFont));
                 detailsTable.addCell(new com.itextpdf.text.Phrase("Status: " + status, smallBold));
-                
+
                 document.add(detailsTable);
                 document.add(new com.itextpdf.text.Paragraph(" "));
 
@@ -636,10 +693,10 @@ public class HomePageStudent extends javax.swing.JFrame {
                 feeTable.setWidthPercentage(100);
                 feeTable.addCell(new com.itextpdf.text.Phrase("Description", smallBold));
                 feeTable.addCell(new com.itextpdf.text.Phrase("Amount (PKR)", smallBold));
-                
+
                 feeTable.addCell("Tuition Fee (Enrolled Courses)");
                 feeTable.addCell(amount);
-                
+
                 feeTable.addCell(new com.itextpdf.text.Phrase("TOTAL PAYABLE", smallBold));
                 feeTable.addCell(new com.itextpdf.text.Phrase(amount, smallBold));
                 document.add(feeTable);
@@ -651,11 +708,13 @@ public class HomePageStudent extends javax.swing.JFrame {
                 cell.setBorder(com.itextpdf.text.Rectangle.NO_BORDER);
                 cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
 
-                com.itextpdf.text.Paragraph line = new com.itextpdf.text.Paragraph("\n\n__________________________", normalFont);
+                com.itextpdf.text.Paragraph line = new com.itextpdf.text.Paragraph("\n\n__________________________",
+                        normalFont);
                 line.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
                 cell.addElement(line);
-                
-                com.itextpdf.text.Paragraph bankPara = new com.itextpdf.text.Paragraph("Bank Cashier Signature", smallBold);
+
+                com.itextpdf.text.Paragraph bankPara = new com.itextpdf.text.Paragraph("Bank Cashier Signature",
+                        smallBold);
                 bankPara.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
                 cell.addElement(bankPara);
 
@@ -663,7 +722,8 @@ public class HomePageStudent extends javax.swing.JFrame {
                 footerTable.writeSelectedRows(0, -1, 370, 100, writer.getDirectContent());
 
                 document.close();
-                CustomMessageDialog messageDialog = new CustomMessageDialog(this, "Success", "Fee Voucher generated.", CustomMessageDialog.SUCCESS);
+                CustomMessageDialog messageDialog = new CustomMessageDialog(this, "Success", "Fee Voucher generated.",
+                        CustomMessageDialog.SUCCESS);
                 messageDialog.setVisible(true);
 
             } catch (Exception e) {
@@ -701,8 +761,10 @@ public class HomePageStudent extends javax.swing.JFrame {
                         String jsonLog = result.getString("log");
                         if (jsonLog != null) {
                             // Simple counting by checking occurrences in the JSON-like string
-                            presentCount = (jsonLog.length() - jsonLog.replace("Present", "").length()) / "Present".length();
-                            absentCount = (jsonLog.length() - jsonLog.replace("Absent", "").length()) / "Absent".length();
+                            presentCount = (jsonLog.length() - jsonLog.replace("Present", "").length())
+                                    / "Present".length();
+                            absentCount = (jsonLog.length() - jsonLog.replace("Absent", "").length())
+                                    / "Absent".length();
                         }
                     }
 
@@ -714,8 +776,8 @@ public class HomePageStudent extends javax.swing.JFrame {
 
                     double total = presentCount + absentCount;
                     String percentage = (total > 0) ? String.format("%.1f%%", (presentCount / total) * 100) : "0%";
-                    
-                    model.addRow(new Object[]{courseName, presentCount, absentCount, percentage});
+
+                    model.addRow(new Object[] { courseName, presentCount, absentCount, percentage });
                 }
             }
         } catch (SQLException ex) {
@@ -735,13 +797,14 @@ public class HomePageStudent extends javax.swing.JFrame {
             if (result.next()) {
                 String jsonLog = result.getString("log");
                 if (jsonLog == null || jsonLog.equals("{}")) {
-                    new CustomMessageDialog(this, "Attendance", "No logs found.", CustomMessageDialog.ERROR).setVisible(true);
+                    new CustomMessageDialog(this, "Attendance", "No logs found.", CustomMessageDialog.ERROR)
+                            .setVisible(true);
                     return;
                 }
 
                 String cleanLog = jsonLog.replace("{", "").replace("}", "").replace("\"", "");
                 String[] entries = cleanLog.split(", ");
-                
+
                 StringBuilder report = new StringBuilder("<html><div style='text-align: center;'>");
                 report.append("<b>Attendance History for ").append(courseCode).append("</b><br><br>");
                 for (String entry : entries) {
@@ -749,7 +812,8 @@ public class HomePageStudent extends javax.swing.JFrame {
                 }
                 report.append("</div></html>");
 
-                CustomMessageDialog detailDialog = new CustomMessageDialog(this, "Attendance Details", report.toString(), -1);
+                CustomMessageDialog detailDialog = new CustomMessageDialog(this, "Attendance Details",
+                        report.toString(), -1);
                 detailDialog.setVisible(true);
             }
         } catch (SQLException ex) {
@@ -768,7 +832,8 @@ public class HomePageStudent extends javax.swing.JFrame {
                 "GROUP_CONCAT(c.credithrs) as all_credits " +
                 "FROM results r " +
                 "JOIN course c ON r.course_code = c.coursecode " +
-                "JOIN enrollment e ON r.student_id = e.student_id AND e.coursecode LIKE CONCAT('%', r.course_code, '%') " +
+                "JOIN enrollment e ON r.student_id = e.student_id AND e.coursecode LIKE CONCAT('%', r.course_code, '%') "
+                +
                 "WHERE r.student_id = ? " +
                 "GROUP BY e.year, e.session " +
                 "HAVING MIN(r.is_published) = 1 " +
@@ -785,7 +850,7 @@ public class HomePageStudent extends javax.swing.JFrame {
             while (result.next()) {
                 String[] totals = result.getString("all_totals").split(",");
                 String[] credits = result.getString("all_credits").split(",");
-                
+
                 double semGP = 0;
                 int semCr = 0;
 
@@ -802,11 +867,11 @@ public class HomePageStudent extends javax.swing.JFrame {
                 totalCr += semCr;
                 double cgpa = (totalCr > 0) ? totalGP / totalCr : 0;
 
-                model.addRow(new Object[]{
-                    result.getString("year"),
-                    result.getString("session"),
-                    String.format("%.2f", gpa),
-                    String.format("%.2f", cgpa)
+                model.addRow(new Object[] {
+                        result.getString("year"),
+                        result.getString("session"),
+                        String.format("%.2f", gpa),
+                        String.format("%.2f", cgpa)
                 });
             }
         } catch (SQLException ex) {
@@ -816,24 +881,32 @@ public class HomePageStudent extends javax.swing.JFrame {
 
     // GPA Calculation Helper
     private double calculateGP(int marks) {
-        if (marks >= 85) return 4.0;
-        if (marks >= 80) return 3.7;
-        if (marks >= 75) return 3.3;
-        if (marks >= 70) return 3.0;
-        if (marks >= 65) return 2.7;
-        if (marks >= 60) return 2.3;
-        if (marks >= 50) return 2.0;
+        if (marks >= 85)
+            return 4.0;
+        if (marks >= 80)
+            return 3.7;
+        if (marks >= 75)
+            return 3.3;
+        if (marks >= 70)
+            return 3.0;
+        if (marks >= 65)
+            return 2.7;
+        if (marks >= 60)
+            return 2.3;
+        if (marks >= 50)
+            return 2.0;
         return 0.0;
     }
 
     private void showDetailedResults(String year, String session) {
         try {
             String query = "SELECT c.coursename, r.total " +
-                        "FROM results r " +
-                        "JOIN course c ON r.course_code = c.coursecode " +
-                        "JOIN enrollment e ON r.student_id = e.student_id AND e.coursecode LIKE CONCAT('%', r.course_code, '%') " +
-                        "WHERE r.student_id = ? AND e.year = ? AND e.session = ?";
-            
+                    "FROM results r " +
+                    "JOIN course c ON r.course_code = c.coursecode " +
+                    "JOIN enrollment e ON r.student_id = e.student_id AND e.coursecode LIKE CONCAT('%', r.course_code, '%') "
+                    +
+                    "WHERE r.student_id = ? AND e.year = ? AND e.session = ?";
+
             pst = connect.prepareStatement(query);
             pst.setString(1, this.id);
             pst.setString(2, year);
@@ -854,7 +927,7 @@ public class HomePageStudent extends javax.swing.JFrame {
             if (!hasData) {
                 report.append("No records found for this semester.");
             }
-            
+
             report.append("</div></html>");
 
             CustomMessageDialog detailDialog = new CustomMessageDialog(this, "Academic Record", report.toString(), -1);
@@ -869,13 +942,15 @@ public class HomePageStudent extends javax.swing.JFrame {
         javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
         fileChooser.setDialogTitle("Save Transcript");
         fileChooser.setSelectedFile(new java.io.File("Transcript_" + session + "_" + year + ".pdf"));
-        
+
         if (fileChooser.showSaveDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
             com.itextpdf.text.Document document = new com.itextpdf.text.Document();
             try {
-                com.itextpdf.text.pdf.PdfWriter.getInstance(document, new java.io.FileOutputStream(fileChooser.getSelectedFile()));
+                com.itextpdf.text.pdf.PdfWriter.getInstance(document,
+                        new java.io.FileOutputStream(fileChooser.getSelectedFile()));
                 // Update this line at the start of your try block
-                com.itextpdf.text.pdf.PdfWriter writer = com.itextpdf.text.pdf.PdfWriter.getInstance(document, new java.io.FileOutputStream(fileChooser.getSelectedFile()));
+                com.itextpdf.text.pdf.PdfWriter writer = com.itextpdf.text.pdf.PdfWriter.getInstance(document,
+                        new java.io.FileOutputStream(fileChooser.getSelectedFile()));
                 document.open();
 
                 // 1. UNIVERSITY LOGO
@@ -883,7 +958,7 @@ public class HomePageStudent extends javax.swing.JFrame {
                     java.net.URL logoUrl = getClass().getResource("/images/edubridge.png");
                     if (logoUrl != null) {
                         com.itextpdf.text.Image logo = com.itextpdf.text.Image.getInstance(logoUrl);
-                        logo.scaleToFit(80, 80); 
+                        logo.scaleToFit(80, 80);
                         logo.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
                         document.add(logo);
                     }
@@ -892,22 +967,26 @@ public class HomePageStudent extends javax.swing.JFrame {
                 }
 
                 // 2. FONTS AND HEADERS
-                com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD);
-                com.itextpdf.text.Font smallBold = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD);
-                com.itextpdf.text.Font normalFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL);
-                
+                com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(
+                        com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD);
+                com.itextpdf.text.Font smallBold = new com.itextpdf.text.Font(
+                        com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD);
+                com.itextpdf.text.Font normalFont = new com.itextpdf.text.Font(
+                        com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL);
+
                 com.itextpdf.text.Paragraph title = new com.itextpdf.text.Paragraph("EduBridge University", boldFont);
                 title.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
                 document.add(title);
-                
-                com.itextpdf.text.Paragraph subTitle = new com.itextpdf.text.Paragraph("Official Academic Transcript", smallBold);
+
+                com.itextpdf.text.Paragraph subTitle = new com.itextpdf.text.Paragraph("Official Academic Transcript",
+                        smallBold);
                 subTitle.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
                 document.add(subTitle);
-                
-                document.add(new com.itextpdf.text.Paragraph(" ")); 
+
+                document.add(new com.itextpdf.text.Paragraph(" "));
                 document.add(new com.itextpdf.text.Paragraph("Student ID: " + this.id, normalFont));
                 document.add(new com.itextpdf.text.Paragraph("Semester: " + session + " " + year, normalFont));
-                document.add(new com.itextpdf.text.Paragraph(" ")); 
+                document.add(new com.itextpdf.text.Paragraph(" "));
 
                 // 3. RESULT TABLE
                 com.itextpdf.text.pdf.PdfPTable table = new com.itextpdf.text.pdf.PdfPTable(4);
@@ -918,11 +997,12 @@ public class HomePageStudent extends javax.swing.JFrame {
                 table.addCell(new com.itextpdf.text.Phrase("Total", smallBold));
 
                 String currentSemQuery = "SELECT c.coursename, r.sessional, r.final, r.total, c.credithrs " +
-                                        "FROM results r " +
-                                        "JOIN course c ON r.course_code = c.coursecode " +
-                                        "JOIN enrollment e ON r.student_id = e.student_id AND e.coursecode LIKE CONCAT('%', r.course_code, '%') " +
-                                        "WHERE r.student_id = ? AND e.year = ? AND e.session = ?";
-                
+                        "FROM results r " +
+                        "JOIN course c ON r.course_code = c.coursecode " +
+                        "JOIN enrollment e ON r.student_id = e.student_id AND e.coursecode LIKE CONCAT('%', r.course_code, '%') "
+                        +
+                        "WHERE r.student_id = ? AND e.year = ? AND e.session = ?";
+
                 pst = connect.prepareStatement(currentSemQuery);
                 pst.setString(1, this.id);
                 pst.setString(2, year);
@@ -966,30 +1046,34 @@ public class HomePageStudent extends javax.swing.JFrame {
                 double cgpa = (totalCr > 0) ? totalGP / totalCr : 0;
 
                 document.add(new com.itextpdf.text.Paragraph("Semester GPA: " + String.format("%.2f", gpa), smallBold));
-                document.add(new com.itextpdf.text.Paragraph("Cumulative CGPA: " + String.format("%.2f", cgpa), smallBold));
-                
+                document.add(
+                        new com.itextpdf.text.Paragraph("Cumulative CGPA: " + String.format("%.2f", cgpa), smallBold));
+
                 // 5. SIGNATURE AND DATE SECTION (PINNED TO BOTTOM)
                 com.itextpdf.text.pdf.PdfPTable footerTable = new com.itextpdf.text.pdf.PdfPTable(1);
                 footerTable.setTotalWidth(200); // Width of the signature area
-                
+
                 // Create the signature cell
                 com.itextpdf.text.pdf.PdfPCell cell = new com.itextpdf.text.pdf.PdfPCell();
                 cell.setBorder(com.itextpdf.text.Rectangle.NO_BORDER);
                 cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
 
                 // Add the line
-                com.itextpdf.text.Paragraph line = new com.itextpdf.text.Paragraph("__________________________", normalFont);
+                com.itextpdf.text.Paragraph line = new com.itextpdf.text.Paragraph("__________________________",
+                        normalFont);
                 line.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
                 cell.addElement(line);
-                
+
                 // Add Registrar Title
-                com.itextpdf.text.Paragraph registrarPara = new com.itextpdf.text.Paragraph("University Registrar", smallBold);
+                com.itextpdf.text.Paragraph registrarPara = new com.itextpdf.text.Paragraph("University Registrar",
+                        smallBold);
                 registrarPara.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
                 cell.addElement(registrarPara);
-                
+
                 // Add Date
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMMM dd, yyyy");
-                com.itextpdf.text.Paragraph datePara = new com.itextpdf.text.Paragraph("Date: " + sdf.format(new java.util.Date()), normalFont);
+                com.itextpdf.text.Paragraph datePara = new com.itextpdf.text.Paragraph(
+                        "Date: " + sdf.format(new java.util.Date()), normalFont);
                 datePara.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
                 cell.addElement(datePara);
 
@@ -998,7 +1082,8 @@ public class HomePageStudent extends javax.swing.JFrame {
                 footerTable.writeSelectedRows(0, -1, 350, 100, writer.getDirectContent());
 
                 document.close();
-                CustomMessageDialog messageDialog = new CustomMessageDialog(this, "Success", "Transcript Saved Successfully", CustomMessageDialog.SUCCESS);
+                CustomMessageDialog messageDialog = new CustomMessageDialog(this, "Success",
+                        "Transcript Saved Successfully", CustomMessageDialog.SUCCESS);
                 messageDialog.setVisible(true);
 
             } catch (Exception e) {
@@ -1006,7 +1091,7 @@ public class HomePageStudent extends javax.swing.JFrame {
             }
         }
     }
-    
+
     private void loadNotifications() {
         DefaultTableModel model = (DefaultTableModel) NotificationTable.getModel();
         model.setRowCount(0);
@@ -1027,7 +1112,7 @@ public class HomePageStudent extends javax.swing.JFrame {
             System.err.println("Database Error: " + ex.getMessage());
         }
     }
-    
+
     private void showNotificationDetailWindow(String title, String message, String date) {
         // 1. Setup the Dialog
         javax.swing.JDialog detailWindow = new javax.swing.JDialog(this, "Notification Detail", true);
@@ -1041,7 +1126,8 @@ public class HomePageStudent extends javax.swing.JFrame {
         mainPanel.setLayout(new java.awt.BorderLayout(10, 10));
 
         // Title and Date Header
-        javax.swing.JLabel titleLabel = new javax.swing.JLabel("<html><body style='width: 300px'><b>Title: </b>" + title + "</body></html>");
+        javax.swing.JLabel titleLabel = new javax.swing.JLabel(
+                "<html><body style='width: 300px'><b>Title: </b>" + title + "</body></html>");
         titleLabel.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 16));
 
         javax.swing.JLabel dateLabel = new javax.swing.JLabel("Sent: " + date);
@@ -1076,7 +1162,8 @@ public class HomePageStudent extends javax.swing.JFrame {
      * regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated
+    // Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         HomePageStudentPanel = new ui.GradientPanel();
@@ -1266,48 +1353,60 @@ public class HomePageStudent extends javax.swing.JFrame {
         javax.swing.GroupLayout SidePanelLayout = new javax.swing.GroupLayout(SidePanel);
         SidePanel.setLayout(SidePanelLayout);
         SidePanelLayout.setHorizontalGroup(
-            SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(SidePanelLayout.createSequentialGroup()
-                .addGroup(SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(SidePanelLayout.createSequentialGroup()
-                        .addGap(30, 30, 30)
-                        .addComponent(DateTime))
-                    .addGroup(SidePanelLayout.createSequentialGroup()
-                        .addGap(17, 17, 17)
-                        .addGroup(SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(EnrollCourse, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(Profile, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(FeeSummary, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(MyAttendance, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(MyResults, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(MyNotifications, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(LogOut, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(EnrolledCourses, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(17, Short.MAX_VALUE))
-        );
+                SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(SidePanelLayout.createSequentialGroup()
+                                .addGroup(SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(SidePanelLayout.createSequentialGroup()
+                                                .addGap(30, 30, 30)
+                                                .addComponent(DateTime))
+                                        .addGroup(SidePanelLayout.createSequentialGroup()
+                                                .addGap(17, 17, 17)
+                                                .addGroup(SidePanelLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(EnrollCourse,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 166,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(Profile, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                166, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(FeeSummary,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 166,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(MyAttendance,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 166,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(MyResults, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                166, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(MyNotifications,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 166,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(LogOut, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                166, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(EnrolledCourses,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 166,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addContainerGap(17, Short.MAX_VALUE)));
         SidePanelLayout.setVerticalGroup(
-            SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(SidePanelLayout.createSequentialGroup()
-                .addGap(20, 20, 20)
-                .addComponent(DateTime)
-                .addGap(33, 33, 33)
-                .addComponent(Profile)
-                .addGap(33, 33, 33)
-                .addComponent(EnrollCourse)
-                .addGap(33, 33, 33)
-                .addComponent(EnrolledCourses)
-                .addGap(33, 33, 33)
-                .addComponent(FeeSummary)
-                .addGap(33, 33, 33)
-                .addComponent(MyAttendance)
-                .addGap(33, 33, 33)
-                .addComponent(MyResults)
-                .addGap(33, 33, 33)
-                .addComponent(MyNotifications)
-                .addGap(33, 33, 33)
-                .addComponent(LogOut)
-                .addGap(20, 20, 20))
-        );
+                SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(SidePanelLayout.createSequentialGroup()
+                                .addGap(20, 20, 20)
+                                .addComponent(DateTime)
+                                .addGap(33, 33, 33)
+                                .addComponent(Profile)
+                                .addGap(33, 33, 33)
+                                .addComponent(EnrollCourse)
+                                .addGap(33, 33, 33)
+                                .addComponent(EnrolledCourses)
+                                .addGap(33, 33, 33)
+                                .addComponent(FeeSummary)
+                                .addGap(33, 33, 33)
+                                .addComponent(MyAttendance)
+                                .addGap(33, 33, 33)
+                                .addComponent(MyResults)
+                                .addGap(33, 33, 33)
+                                .addComponent(MyNotifications)
+                                .addGap(33, 33, 33)
+                                .addComponent(LogOut)
+                                .addGap(20, 20, 20)));
 
         MainPagePanel.setOpaque(false);
         MainPagePanel.setLayout(new java.awt.CardLayout());
@@ -1321,6 +1420,7 @@ public class HomePageStudent extends javax.swing.JFrame {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 ProfileButtonMouseEntered(evt);
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 ProfileButtonMouseExited(evt);
             }
@@ -1377,77 +1477,156 @@ public class HomePageStudent extends javax.swing.JFrame {
         javax.swing.GroupLayout ProfilePanelLayout = new javax.swing.GroupLayout(ProfilePanel);
         ProfilePanel.setLayout(ProfilePanelLayout);
         ProfilePanelLayout.setHorizontalGroup(
-            ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ProfilePanelLayout.createSequentialGroup()
-                .addGap(35, 35, 35)
-                .addGroup(ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(ProfilePanelLayout.createSequentialGroup()
-                        .addComponent(Separator, javax.swing.GroupLayout.PREFERRED_SIZE, 635, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(ProfilePanelLayout.createSequentialGroup()
-                        .addComponent(ProfilePic, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addGroup(ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(ProfilePanelLayout.createSequentialGroup()
-                                .addComponent(Name, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ProfilePanelLayout.createSequentialGroup()
+                                .addGap(35, 35, 35)
+                                .addGroup(ProfilePanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(ProfilePanelLayout.createSequentialGroup()
+                                                .addComponent(Separator, javax.swing.GroupLayout.PREFERRED_SIZE, 635,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(0, 0, Short.MAX_VALUE))
+                                        .addGroup(ProfilePanelLayout.createSequentialGroup()
+                                                .addComponent(ProfilePic, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(18, 18, 18)
+                                                .addGroup(ProfilePanelLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(ProfilePanelLayout.createSequentialGroup()
+                                                                .addComponent(Name,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 100,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(NameField,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 180,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                                                        190, Short.MAX_VALUE)
+                                                                .addComponent(ProfileButton,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 42,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                        .addGroup(ProfilePanelLayout.createSequentialGroup()
+                                                                .addGroup(ProfilePanelLayout.createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                                        .addComponent(PhoneNo)
+                                                                        .addGroup(ProfilePanelLayout
+                                                                                .createSequentialGroup()
+                                                                                .addComponent(CNIC,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                        100,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                                .addPreferredGap(
+                                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                                .addComponent(CNICField,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                        180,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                        .addGroup(ProfilePanelLayout
+                                                                                .createSequentialGroup()
+                                                                                .addComponent(DOB,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                        100,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                                .addPreferredGap(
+                                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                                .addComponent(DOBField,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                        180,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                                .addGap(0, 232, Short.MAX_VALUE))))))
+                        .addGroup(ProfilePanelLayout.createSequentialGroup()
+                                .addGap(187, 187, 187)
+                                .addComponent(Program, javax.swing.GroupLayout.PREFERRED_SIZE, 100,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(NameField, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 190, Short.MAX_VALUE)
-                                .addComponent(ProfileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(ProfilePanelLayout.createSequentialGroup()
-                                .addGroup(ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(PhoneNo)
-                                    .addGroup(ProfilePanelLayout.createSequentialGroup()
-                                        .addComponent(CNIC, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(CNICField, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(ProfilePanelLayout.createSequentialGroup()
-                                        .addComponent(DOB, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(DOBField, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(0, 232, Short.MAX_VALUE))))))
-            .addGroup(ProfilePanelLayout.createSequentialGroup()
-                .addGap(187, 187, 187)
-                .addComponent(Program, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(PhoneNoField, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(ProgramField, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+                                .addGroup(ProfilePanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(PhoneNoField, javax.swing.GroupLayout.PREFERRED_SIZE, 180,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(ProgramField, javax.swing.GroupLayout.PREFERRED_SIZE, 180,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
         ProfilePanelLayout.setVerticalGroup(
-            ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ProfilePanelLayout.createSequentialGroup()
-                .addGroup(ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(ProfileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(ProfilePanelLayout.createSequentialGroup()
-                        .addGap(25, 25, 25)
-                        .addGroup(ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(ProfilePanelLayout.createSequentialGroup()
-                                .addGroup(ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(Name, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(NameField, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(Program, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(ProgramField, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(PhoneNo)
-                                    .addComponent(PhoneNoField, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(CNIC, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(CNICField, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(DOB, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(DOBField, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addComponent(ProfilePic, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(65, 65, 65)
-                .addComponent(Separator, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(316, Short.MAX_VALUE))
-        );
+                ProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ProfilePanelLayout.createSequentialGroup()
+                                .addGroup(ProfilePanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(ProfileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(ProfilePanelLayout.createSequentialGroup()
+                                                .addGap(25, 25, 25)
+                                                .addGroup(ProfilePanelLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING,
+                                                                false)
+                                                        .addGroup(ProfilePanelLayout.createSequentialGroup()
+                                                                .addGroup(ProfilePanelLayout.createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.BASELINE)
+                                                                        .addComponent(Name,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                25,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addComponent(NameField,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                25,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                                .addGroup(ProfilePanelLayout.createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.BASELINE)
+                                                                        .addComponent(Program,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                25,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addComponent(ProgramField,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                25,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                                .addGroup(ProfilePanelLayout.createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                                        .addComponent(PhoneNo)
+                                                                        .addComponent(PhoneNoField,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                25,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                        Short.MAX_VALUE)
+                                                                .addGroup(ProfilePanelLayout.createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.BASELINE)
+                                                                        .addComponent(CNIC,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                25,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addComponent(CNICField,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                25,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                                .addGroup(ProfilePanelLayout.createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.BASELINE)
+                                                                        .addComponent(DOB,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                25,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addComponent(DOBField,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                25,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                        .addComponent(ProfilePic,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addGap(65, 65, 65)
+                                .addComponent(Separator, javax.swing.GroupLayout.PREFERRED_SIZE, 10,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(316, Short.MAX_VALUE)));
 
         MainPagePanel.add(ProfilePanel, "Card1");
 
@@ -1460,35 +1639,36 @@ public class HomePageStudent extends javax.swing.JFrame {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 ProfileButton1MouseEntered(evt);
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 ProfileButton1MouseExited(evt);
             }
         });
 
         EnrollTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null}
-            },
-            new String [] {
-                "Course Code", "Course Name", "Credit Hours", "Instructor", "Enroll"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
+                new Object[][] {
+                        { null, null, null, null, null },
+                        { null, null, null, null, null },
+                        { null, null, null, null, null },
+                        { null, null, null, null, null }
+                },
+                new String[] {
+                        "Course Code", "Course Name", "Credit Hours", "Instructor", "Enroll"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class,
+                    java.lang.Object.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+            boolean[] canEdit = new boolean[] {
+                    false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         EnrollTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -1507,23 +1687,25 @@ public class HomePageStudent extends javax.swing.JFrame {
         javax.swing.GroupLayout EnrollPanelLayout = new javax.swing.GroupLayout(EnrollPanel);
         EnrollPanel.setLayout(EnrollPanelLayout);
         EnrollPanelLayout.setHorizontalGroup(
-            EnrollPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(EnrollPanelLayout.createSequentialGroup()
-                .addGap(40, 40, 40)
-                .addComponent(EnrollScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(40, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, EnrollPanelLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(ProfileButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
+                EnrollPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(EnrollPanelLayout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addComponent(EnrollScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(40, Short.MAX_VALUE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, EnrollPanelLayout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(ProfileButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 42,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)));
         EnrollPanelLayout.setVerticalGroup(
-            EnrollPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(EnrollPanelLayout.createSequentialGroup()
-                .addComponent(ProfileButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(12, 12, 12)
-                .addComponent(EnrollScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+                EnrollPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(EnrollPanelLayout.createSequentialGroup()
+                                .addComponent(ProfileButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(12, 12, 12)
+                                .addComponent(EnrollScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 530,
+                                        Short.MAX_VALUE)
+                                .addContainerGap()));
 
         MainPagePanel.add(EnrollPanel, "Card2");
 
@@ -1536,35 +1718,36 @@ public class HomePageStudent extends javax.swing.JFrame {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 ProfileButton2MouseEntered(evt);
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 ProfileButton2MouseExited(evt);
             }
         });
 
         EnrolledTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null}
-            },
-            new String [] {
-                "Course Code", "Course Name", "Credit Hours", "Enrollment Date", "Drop Course"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
+                new Object[][] {
+                        { null, null, null, null, null },
+                        { null, null, null, null, null },
+                        { null, null, null, null, null },
+                        { null, null, null, null, null }
+                },
+                new String[] {
+                        "Course Code", "Course Name", "Credit Hours", "Enrollment Date", "Drop Course"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class,
+                    java.lang.Object.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+            boolean[] canEdit = new boolean[] {
+                    false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         EnrolledTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -1583,23 +1766,26 @@ public class HomePageStudent extends javax.swing.JFrame {
         javax.swing.GroupLayout EnrolledPanelLayout = new javax.swing.GroupLayout(EnrolledPanel);
         EnrolledPanel.setLayout(EnrolledPanelLayout);
         EnrolledPanelLayout.setHorizontalGroup(
-            EnrolledPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(EnrolledPanelLayout.createSequentialGroup()
-                .addGap(40, 40, 40)
-                .addComponent(EnrolledScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(40, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, EnrolledPanelLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(ProfileButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
+                EnrolledPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(EnrolledPanelLayout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addComponent(EnrolledScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(40, Short.MAX_VALUE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+                                EnrolledPanelLayout.createSequentialGroup()
+                                        .addGap(0, 0, Short.MAX_VALUE)
+                                        .addComponent(ProfileButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 42,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)));
         EnrolledPanelLayout.setVerticalGroup(
-            EnrolledPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(EnrolledPanelLayout.createSequentialGroup()
-                .addComponent(ProfileButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(12, 12, 12)
-                .addComponent(EnrolledScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+                EnrolledPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(EnrolledPanelLayout.createSequentialGroup()
+                                .addComponent(ProfileButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(12, 12, 12)
+                                .addComponent(EnrolledScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 530,
+                                        Short.MAX_VALUE)
+                                .addContainerGap()));
 
         MainPagePanel.add(EnrolledPanel, "Card3");
 
@@ -1612,35 +1798,35 @@ public class HomePageStudent extends javax.swing.JFrame {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 ProfileButton3MouseEntered(evt);
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 ProfileButton3MouseExited(evt);
             }
         });
 
         FeeTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Year", "Session", "Total Fee", "Status"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                new Object[][] {
+                        { null, null, null, null },
+                        { null, null, null, null },
+                        { null, null, null, null },
+                        { null, null, null, null }
+                },
+                new String[] {
+                        "Year", "Session", "Total Fee", "Status"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false
+            boolean[] canEdit = new boolean[] {
+                    false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         FeeTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -1659,23 +1845,24 @@ public class HomePageStudent extends javax.swing.JFrame {
         javax.swing.GroupLayout FeePanelLayout = new javax.swing.GroupLayout(FeePanel);
         FeePanel.setLayout(FeePanelLayout);
         FeePanelLayout.setHorizontalGroup(
-            FeePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, FeePanelLayout.createSequentialGroup()
-                .addGap(0, 663, Short.MAX_VALUE)
-                .addComponent(ProfileButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(FeePanelLayout.createSequentialGroup()
-                .addGap(40, 40, 40)
-                .addComponent(FeeScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+                FeePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, FeePanelLayout.createSequentialGroup()
+                                .addGap(0, 663, Short.MAX_VALUE)
+                                .addComponent(ProfileButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 42,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(FeePanelLayout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addComponent(FeeScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
         FeePanelLayout.setVerticalGroup(
-            FeePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(FeePanelLayout.createSequentialGroup()
-                .addComponent(ProfileButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(FeeScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 536, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+                FeePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(FeePanelLayout.createSequentialGroup()
+                                .addComponent(ProfileButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(FeeScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 536, Short.MAX_VALUE)
+                                .addContainerGap()));
 
         MainPagePanel.add(FeePanel, "Card4");
 
@@ -1688,35 +1875,35 @@ public class HomePageStudent extends javax.swing.JFrame {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 ProfileButton4MouseEntered(evt);
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 ProfileButton4MouseExited(evt);
             }
         });
 
         AttendanceTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Course Name", "Present", "Absent", "Percentage"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                new Object[][] {
+                        { null, null, null, null },
+                        { null, null, null, null },
+                        { null, null, null, null },
+                        { null, null, null, null }
+                },
+                new String[] {
+                        "Course Name", "Present", "Absent", "Percentage"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false
+            boolean[] canEdit = new boolean[] {
+                    false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         AttendanceTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -1735,23 +1922,27 @@ public class HomePageStudent extends javax.swing.JFrame {
         javax.swing.GroupLayout AttendancePanelLayout = new javax.swing.GroupLayout(AttendancePanel);
         AttendancePanel.setLayout(AttendancePanelLayout);
         AttendancePanelLayout.setHorizontalGroup(
-            AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AttendancePanelLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(ProfileButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AttendancePanelLayout.createSequentialGroup()
-                .addContainerGap(40, Short.MAX_VALUE)
-                .addComponent(AttendanceScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(40, 40, 40))
-        );
+                AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+                                AttendancePanelLayout.createSequentialGroup()
+                                        .addGap(0, 0, Short.MAX_VALUE)
+                                        .addComponent(ProfileButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 42,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+                                AttendancePanelLayout.createSequentialGroup()
+                                        .addContainerGap(40, Short.MAX_VALUE)
+                                        .addComponent(AttendanceScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(40, 40, 40)));
         AttendancePanelLayout.setVerticalGroup(
-            AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AttendancePanelLayout.createSequentialGroup()
-                .addComponent(ProfileButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(AttendanceScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 536, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+                AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(AttendancePanelLayout.createSequentialGroup()
+                                .addComponent(ProfileButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(AttendanceScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 536,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 
         MainPagePanel.add(AttendancePanel, "Card5");
 
@@ -1764,35 +1955,35 @@ public class HomePageStudent extends javax.swing.JFrame {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 ProfileButton5MouseEntered(evt);
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 ProfileButton5MouseExited(evt);
             }
         });
 
         ResultTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Year", "Session", "GPA", "CGPA"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                new Object[][] {
+                        { null, null, null, null },
+                        { null, null, null, null },
+                        { null, null, null, null },
+                        { null, null, null, null }
+                },
+                new String[] {
+                        "Year", "Session", "GPA", "CGPA"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false
+            boolean[] canEdit = new boolean[] {
+                    false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         ResultTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -1811,23 +2002,25 @@ public class HomePageStudent extends javax.swing.JFrame {
         javax.swing.GroupLayout ResultPanelLayout = new javax.swing.GroupLayout(ResultPanel);
         ResultPanel.setLayout(ResultPanelLayout);
         ResultPanelLayout.setHorizontalGroup(
-            ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ResultPanelLayout.createSequentialGroup()
-                .addGap(0, 663, Short.MAX_VALUE)
-                .addComponent(ProfileButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ResultPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(ResultScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(40, 40, 40))
-        );
+                ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ResultPanelLayout.createSequentialGroup()
+                                .addGap(0, 663, Short.MAX_VALUE)
+                                .addComponent(ProfileButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 42,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ResultPanelLayout.createSequentialGroup()
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(ResultScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(40, 40, 40)));
         ResultPanelLayout.setVerticalGroup(
-            ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ResultPanelLayout.createSequentialGroup()
-                .addComponent(ProfileButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(ResultScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 536, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+                ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ResultPanelLayout.createSequentialGroup()
+                                .addComponent(ProfileButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(ResultScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 536,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 
         MainPagePanel.add(ResultPanel, "Card6");
 
@@ -1840,35 +2033,35 @@ public class HomePageStudent extends javax.swing.JFrame {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 ProfileButton6MouseEntered(evt);
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 ProfileButton6MouseExited(evt);
             }
         });
 
         NotificationTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null}
-            },
-            new String [] {
-                "Title", "Message", "Date"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class
+                new Object[][] {
+                        { null, null, null },
+                        { null, null, null },
+                        { null, null, null },
+                        { null, null, null }
+                },
+                new String[] {
+                        "Title", "Message", "Date"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, false
+            boolean[] canEdit = new boolean[] {
+                    false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         NotificationTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -1887,169 +2080,178 @@ public class HomePageStudent extends javax.swing.JFrame {
         javax.swing.GroupLayout NotificationPanelLayout = new javax.swing.GroupLayout(NotificationPanel);
         NotificationPanel.setLayout(NotificationPanelLayout);
         NotificationPanelLayout.setHorizontalGroup(
-            NotificationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, NotificationPanelLayout.createSequentialGroup()
-                .addGap(0, 663, Short.MAX_VALUE)
-                .addComponent(ProfileButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(NotificationPanelLayout.createSequentialGroup()
-                .addGap(40, 40, 40)
-                .addComponent(NotificationScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+                NotificationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+                                NotificationPanelLayout.createSequentialGroup()
+                                        .addGap(0, 663, Short.MAX_VALUE)
+                                        .addComponent(ProfileButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 42,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(NotificationPanelLayout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addComponent(NotificationScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
         NotificationPanelLayout.setVerticalGroup(
-            NotificationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(NotificationPanelLayout.createSequentialGroup()
-                .addComponent(ProfileButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(NotificationScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 536, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
+                NotificationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(NotificationPanelLayout.createSequentialGroup()
+                                .addComponent(ProfileButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(NotificationScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 536,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap()));
 
         MainPagePanel.add(NotificationPanel, "Card7");
 
         javax.swing.GroupLayout HomePageStudentPanelLayout = new javax.swing.GroupLayout(HomePageStudentPanel);
         HomePageStudentPanel.setLayout(HomePageStudentPanelLayout);
         HomePageStudentPanelLayout.setHorizontalGroup(
-            HomePageStudentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(HomePageStudentPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(SidePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(MainPagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 705, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
+                HomePageStudentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(HomePageStudentPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(SidePanel, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(MainPagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 705,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap()));
         HomePageStudentPanelLayout.setVerticalGroup(
-            HomePageStudentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(HomePageStudentPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(HomePageStudentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(HomePageStudentPanelLayout.createSequentialGroup()
-                        .addComponent(SidePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 588, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(MainPagePanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
-        );
+                HomePageStudentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(HomePageStudentPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(HomePageStudentPanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(HomePageStudentPanelLayout.createSequentialGroup()
+                                                .addComponent(SidePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 588,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(0, 0, Short.MAX_VALUE))
+                                        .addComponent(MainPagePanel, javax.swing.GroupLayout.Alignment.TRAILING,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap()));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(HomePageStudentPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(HomePageStudentPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE));
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(HomePageStudentPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(HomePageStudentPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE));
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void ProfileMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileMouseClicked
+    private void ProfileMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card1");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card1");
         setActiveTab(Profile);
-    }//GEN-LAST:event_ProfileMouseClicked
+    }// GEN-LAST:event_ProfileMouseClicked
 
-    private void ProfileKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ProfileKeyPressed
+    private void ProfileKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_ProfileKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             ProfileMouseClicked(null);
         }
-    }//GEN-LAST:event_ProfileKeyPressed
+    }// GEN-LAST:event_ProfileKeyPressed
 
-    private void EnrollCourseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EnrollCourseMouseClicked
+    private void EnrollCourseMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_EnrollCourseMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card2");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card2");
         setActiveTab(EnrollCourse);
         show_Table("course", EnrollTable);
-    }//GEN-LAST:event_EnrollCourseMouseClicked
+    }// GEN-LAST:event_EnrollCourseMouseClicked
 
-    private void EnrollCourseKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_EnrollCourseKeyPressed
+    private void EnrollCourseKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_EnrollCourseKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             EnrollCourseMouseClicked(null);
         }
-    }//GEN-LAST:event_EnrollCourseKeyPressed
+    }// GEN-LAST:event_EnrollCourseKeyPressed
 
-    private void EnrolledCoursesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EnrolledCoursesMouseClicked
+    private void EnrolledCoursesMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_EnrolledCoursesMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card3");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card3");
         setActiveTab(EnrolledCourses);
         show_Table("enrollment", EnrolledTable);
-    }//GEN-LAST:event_EnrolledCoursesMouseClicked
+    }// GEN-LAST:event_EnrolledCoursesMouseClicked
 
-    private void EnrolledCoursesKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_EnrolledCoursesKeyPressed
+    private void EnrolledCoursesKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_EnrolledCoursesKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             EnrolledCoursesMouseClicked(null);
         }
-    }//GEN-LAST:event_EnrolledCoursesKeyPressed
+    }// GEN-LAST:event_EnrolledCoursesKeyPressed
 
-    private void FeeSummaryMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_FeeSummaryMouseClicked
+    private void FeeSummaryMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_FeeSummaryMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card4");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card4");
         setActiveTab(FeeSummary);
         showFee();
-    }//GEN-LAST:event_FeeSummaryMouseClicked
+    }// GEN-LAST:event_FeeSummaryMouseClicked
 
-    private void FeeSummaryKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_FeeSummaryKeyPressed
+    private void FeeSummaryKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_FeeSummaryKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             FeeSummaryMouseClicked(null);
         }
-    }//GEN-LAST:event_FeeSummaryKeyPressed
+    }// GEN-LAST:event_FeeSummaryKeyPressed
 
-    private void MyAttendanceMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_MyAttendanceMouseClicked
+    private void MyAttendanceMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_MyAttendanceMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card5");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card5");
         setActiveTab(MyAttendance);
         showAttendance();
-    }//GEN-LAST:event_MyAttendanceMouseClicked
+    }// GEN-LAST:event_MyAttendanceMouseClicked
 
-    private void MyAttendanceKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_MyAttendanceKeyPressed
+    private void MyAttendanceKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_MyAttendanceKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             MyAttendanceMouseClicked(null);
         }
-    }//GEN-LAST:event_MyAttendanceKeyPressed
+    }// GEN-LAST:event_MyAttendanceKeyPressed
 
-    private void MyResultsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_MyResultsMouseClicked
+    private void MyResultsMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_MyResultsMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card6");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card6");
         setActiveTab(MyResults);
         showResults();
-    }//GEN-LAST:event_MyResultsMouseClicked
+    }// GEN-LAST:event_MyResultsMouseClicked
 
-    private void MyResultsKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_MyResultsKeyPressed
+    private void MyResultsKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_MyResultsKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             MyResultsMouseClicked(null);
         }
-    }//GEN-LAST:event_MyResultsKeyPressed
+    }// GEN-LAST:event_MyResultsKeyPressed
 
-    private void MyNotificationsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_MyNotificationsMouseClicked
+    private void MyNotificationsMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_MyNotificationsMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card7");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card7");
         setActiveTab(MyNotifications);
         loadNotifications();
-    }//GEN-LAST:event_MyNotificationsMouseClicked
+    }// GEN-LAST:event_MyNotificationsMouseClicked
 
-    private void MyNotificationsKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_MyNotificationsKeyPressed
+    private void MyNotificationsKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_MyNotificationsKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             MyNotificationsMouseClicked(null);
         }
-    }//GEN-LAST:event_MyNotificationsKeyPressed
+    }// GEN-LAST:event_MyNotificationsKeyPressed
 
-    private void LogOutMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_LogOutMouseClicked
+    private void LogOutMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_LogOutMouseClicked
         // TODO add your handling code here:
         new Timer().schedule(new TimerTask() {
             public void run() {
@@ -2057,35 +2259,35 @@ public class HomePageStudent extends javax.swing.JFrame {
             }
         }, 1000);
         this.dispose();
-    }//GEN-LAST:event_LogOutMouseClicked
+    }// GEN-LAST:event_LogOutMouseClicked
 
-    private void LogOutKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_LogOutKeyPressed
+    private void LogOutKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_LogOutKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             LogOutMouseClicked(null);
         }
-    }//GEN-LAST:event_LogOutKeyPressed
+    }// GEN-LAST:event_LogOutKeyPressed
 
-    private void ProfileButtonMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButtonMouseEntered
+    private void ProfileButtonMouseEntered(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButtonMouseEntered
         // TODO add your handling code here:
         showProfilePopup(ProfileButton, evt);
-    }//GEN-LAST:event_ProfileButtonMouseEntered
+    }// GEN-LAST:event_ProfileButtonMouseEntered
 
-    private void ProfileButtonMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButtonMouseExited
+    private void ProfileButtonMouseExited(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButtonMouseExited
         // TODO add your handling code here:
         if (infoPopup != null) {
             infoPopup.setVisible(false);
         }
-    }//GEN-LAST:event_ProfileButtonMouseExited
+    }// GEN-LAST:event_ProfileButtonMouseExited
 
-    private void ProfilePicMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfilePicMouseClicked
+    private void ProfilePicMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfilePicMouseClicked
         // TODO add your handling code here:
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Select Profile Picture");
         fileChooser.setFileFilter(new FileNameExtensionFilter("Image Files", "jpg", "jpeg", "png"));
-        
+
         int result = fileChooser.showOpenDialog(this);
-        
+
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             try {
@@ -2097,11 +2299,11 @@ public class HomePageStudent extends javax.swing.JFrame {
                     bos.write(buf, 0, readNum);
                 }
                 byte[] imageBytes = bos.toByteArray();
-                
+
                 saveImageToDatabase(imageBytes);
-                
+
                 displayImageFromBytes(imageBytes);
-                
+
                 DataUpdated dataupdated = new DataUpdated();
                 dataupdated.setVisible(true);
                 new Timer().schedule(new TimerTask() {
@@ -2110,79 +2312,79 @@ public class HomePageStudent extends javax.swing.JFrame {
                         dataupdated.dispose();
                     }
                 }, 1000);
-                
+
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this, "Error processing image file: " + ex.getMessage());
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this, "Database Error during image upload: " + ex.getMessage());
             }
         }
-    }//GEN-LAST:event_ProfilePicMouseClicked
+    }// GEN-LAST:event_ProfilePicMouseClicked
 
-    private void ProfilePicKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ProfilePicKeyPressed
+    private void ProfilePicKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_ProfilePicKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER){
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             ProfilePicMouseClicked(null);
         }
-    }//GEN-LAST:event_ProfilePicKeyPressed
+    }// GEN-LAST:event_ProfilePicKeyPressed
 
-    private void ProfileButton1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton1MouseEntered
+    private void ProfileButton1MouseEntered(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton1MouseEntered
         // TODO add your handling code here:
         showProfilePopup(ProfileButton1, evt);
-    }//GEN-LAST:event_ProfileButton1MouseEntered
+    }// GEN-LAST:event_ProfileButton1MouseEntered
 
-    private void ProfileButton1MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton1MouseExited
+    private void ProfileButton1MouseExited(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton1MouseExited
         // TODO add your handling code here:
         if (infoPopup != null) {
             infoPopup.setVisible(false);
         }
-    }//GEN-LAST:event_ProfileButton1MouseExited
+    }// GEN-LAST:event_ProfileButton1MouseExited
 
-    private void EnrollTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EnrollTableMouseClicked
+    private void EnrollTableMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_EnrollTableMouseClicked
         // TODO add your handling code here:
         int row = EnrollTable.rowAtPoint(evt.getPoint());
         int col = EnrollTable.columnAtPoint(evt.getPoint());
-        if(row >= 0 && col == 4){
-            String courseCode = (String)EnrollTable.getModel().getValueAt(row, 0);
+        if (row >= 0 && col == 4) {
+            String courseCode = (String) EnrollTable.getModel().getValueAt(row, 0);
             enrollCourse(courseCode);
         }
-    }//GEN-LAST:event_EnrollTableMouseClicked
+    }// GEN-LAST:event_EnrollTableMouseClicked
 
-    private void ProfileButton2MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton2MouseEntered
+    private void ProfileButton2MouseEntered(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton2MouseEntered
         // TODO add your handling code here:
         showProfilePopup(ProfileButton2, evt);
-    }//GEN-LAST:event_ProfileButton2MouseEntered
+    }// GEN-LAST:event_ProfileButton2MouseEntered
 
-    private void ProfileButton2MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton2MouseExited
+    private void ProfileButton2MouseExited(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton2MouseExited
         // TODO add your handling code here:
         if (infoPopup != null) {
             infoPopup.setVisible(false);
         }
-    }//GEN-LAST:event_ProfileButton2MouseExited
+    }// GEN-LAST:event_ProfileButton2MouseExited
 
-    private void EnrolledTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_EnrolledTableMouseClicked
+    private void EnrolledTableMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_EnrolledTableMouseClicked
         // TODO add your handling code here:
         int row = EnrollTable.rowAtPoint(evt.getPoint());
         int col = EnrollTable.columnAtPoint(evt.getPoint());
-        if(row >= 0 && col == 4){
-            String courseCode = (String)EnrolledTable.getModel().getValueAt(row, 0);
+        if (row >= 0 && col == 4) {
+            String courseCode = (String) EnrolledTable.getModel().getValueAt(row, 0);
             deleteEnrollment(courseCode);
         }
-    }//GEN-LAST:event_EnrolledTableMouseClicked
+    }// GEN-LAST:event_EnrolledTableMouseClicked
 
-    private void ProfileButton3MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton3MouseEntered
+    private void ProfileButton3MouseEntered(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton3MouseEntered
         // TODO add your handling code here:
         showProfilePopup(ProfileButton3, evt);
-    }//GEN-LAST:event_ProfileButton3MouseEntered
+    }// GEN-LAST:event_ProfileButton3MouseEntered
 
-    private void ProfileButton3MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton3MouseExited
+    private void ProfileButton3MouseExited(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton3MouseExited
         // TODO add your handling code here:
         if (infoPopup != null) {
             infoPopup.setVisible(false);
         }
-    }//GEN-LAST:event_ProfileButton3MouseExited
+    }// GEN-LAST:event_ProfileButton3MouseExited
 
-    private void FeeTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_FeeTableMouseClicked
+    private void FeeTableMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_FeeTableMouseClicked
         // TODO add your handling code here:
         int row = FeeTable.getSelectedRow();
         if (row != -1) {
@@ -2190,7 +2392,7 @@ public class HomePageStudent extends javax.swing.JFrame {
             String session = FeeTable.getValueAt(row, 1).toString();
             String amount = FeeTable.getValueAt(row, 2).toString();
             String status = FeeTable.getValueAt(row, 3).toString();
-            
+
             boolean confirmed = false;
             String message = "Download Fee Voucher for " + session + " " + year + "?";
             CustomConfirmDialog customDialog = new CustomConfirmDialog(this, "Download Transcript", message);
@@ -2200,50 +2402,52 @@ public class HomePageStudent extends javax.swing.JFrame {
                 downloadFeeVoucherPDF(year, session, amount, status);
             }
         }
-    }//GEN-LAST:event_FeeTableMouseClicked
+    }// GEN-LAST:event_FeeTableMouseClicked
 
-    private void ProfileButton4MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton4MouseEntered
+    private void ProfileButton4MouseEntered(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton4MouseEntered
         // TODO add your handling code here:
         showProfilePopup(ProfileButton4, evt);
-    }//GEN-LAST:event_ProfileButton4MouseEntered
+    }// GEN-LAST:event_ProfileButton4MouseEntered
 
-    private void ProfileButton4MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton4MouseExited
+    private void ProfileButton4MouseExited(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton4MouseExited
         // TODO add your handling code here:
         if (infoPopup != null) {
             infoPopup.setVisible(false);
         }
-    }//GEN-LAST:event_ProfileButton4MouseExited
+    }// GEN-LAST:event_ProfileButton4MouseExited
 
-    private void AttendanceTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_AttendanceTableMouseClicked
+    private void AttendanceTableMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_AttendanceTableMouseClicked
         // TODO add your handling code here:
         int row = AttendanceTable.getSelectedRow();
         if (row != -1) {
             String courseName = AttendanceTable.getValueAt(row, 0).toString();
-            
+
             try {
                 PreparedStatement ps = connect.prepareStatement("SELECT coursecode FROM course WHERE coursename = ?");
                 ps.setString(1, courseName);
                 ResultSet rs = ps.executeQuery();
-                if(rs.next()) {
+                if (rs.next()) {
                     showDetailedAttendance(rs.getString("coursecode"));
                 }
-            } catch (SQLException e) { e.printStackTrace(); }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-    }//GEN-LAST:event_AttendanceTableMouseClicked
+    }// GEN-LAST:event_AttendanceTableMouseClicked
 
-    private void ProfileButton5MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton5MouseEntered
+    private void ProfileButton5MouseEntered(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton5MouseEntered
         // TODO add your handling code here:
         showProfilePopup(ProfileButton5, evt);
-    }//GEN-LAST:event_ProfileButton5MouseEntered
+    }// GEN-LAST:event_ProfileButton5MouseEntered
 
-    private void ProfileButton5MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton5MouseExited
+    private void ProfileButton5MouseExited(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton5MouseExited
         // TODO add your handling code here:
         if (infoPopup != null) {
             infoPopup.setVisible(false);
         }
-    }//GEN-LAST:event_ProfileButton5MouseExited
+    }// GEN-LAST:event_ProfileButton5MouseExited
 
-    private void ResultTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ResultTableMouseClicked
+    private void ResultTableMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ResultTableMouseClicked
         // TODO add your handling code here:
         int row = ResultTable.getSelectedRow();
         if (row != -1) {
@@ -2260,21 +2464,21 @@ public class HomePageStudent extends javax.swing.JFrame {
                 showDetailedResults(year, session);
             }
         }
-    }//GEN-LAST:event_ResultTableMouseClicked
+    }// GEN-LAST:event_ResultTableMouseClicked
 
-    private void ProfileButton6MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton6MouseEntered
+    private void ProfileButton6MouseEntered(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton6MouseEntered
         // TODO add your handling code here:
         showProfilePopup(ProfileButton6, evt);
-    }//GEN-LAST:event_ProfileButton6MouseEntered
+    }// GEN-LAST:event_ProfileButton6MouseEntered
 
-    private void ProfileButton6MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton6MouseExited
+    private void ProfileButton6MouseExited(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton6MouseExited
         // TODO add your handling code here:
         if (infoPopup != null) {
             infoPopup.setVisible(false);
         }
-    }//GEN-LAST:event_ProfileButton6MouseExited
+    }// GEN-LAST:event_ProfileButton6MouseExited
 
-    private void NotificationTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_NotificationTableMouseClicked
+    private void NotificationTableMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_NotificationTableMouseClicked
         // TODO add your handling code here:
         int row = NotificationTable.getSelectedRow();
         if (row != -1) {
@@ -2286,16 +2490,20 @@ public class HomePageStudent extends javax.swing.JFrame {
             // Create a separate window (Dialog) to show the details
             showNotificationDetailWindow(title, message, date);
         }
-    }//GEN-LAST:event_NotificationTableMouseClicked
+    }// GEN-LAST:event_NotificationTableMouseClicked
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+        // <editor-fold defaultstate="collapsed" desc=" Look and feel setting code
+        // (optional) ">
+        /*
+         * If Nimbus (introduced in Java SE 6) is not available, stay with the default
+         * look and feel.
+         * For details see
+         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -2305,16 +2513,20 @@ public class HomePageStudent extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(HomePageStudent.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(HomePageStudent.class.getName()).log(java.util.logging.Level.SEVERE,
+                    null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(HomePageStudent.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(HomePageStudent.class.getName()).log(java.util.logging.Level.SEVERE,
+                    null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(HomePageStudent.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(HomePageStudent.class.getName()).log(java.util.logging.Level.SEVERE,
+                    null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(HomePageStudent.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(HomePageStudent.class.getName()).log(java.util.logging.Level.SEVERE,
+                    null, ex);
         }
-        //</editor-fold>
-        //</editor-fold>
+        // </editor-fold>
+        // </editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {

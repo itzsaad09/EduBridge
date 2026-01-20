@@ -81,6 +81,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         UdateTextField2.setForeground(new Color(153, 153, 153));
         // Active Manage Student Button
         setActiveTab(ManageStudent);
+        setupDateValidation();
         // Show Table
         show_Table("student", ViewStudentsTable);
     }
@@ -110,6 +111,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         UdateTextField.setForeground(new Color(153, 153, 153));
         // Active Manage Student Button
         setActiveTab(ManageStudent);
+        setupDateValidation();
         // Show Table
         show_Table("student", ViewStudentsTable);
     }
@@ -368,6 +370,21 @@ public class HomePageAdmin extends javax.swing.JFrame {
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Error fetching results: " + ex.getMessage());
         }
+    }
+
+    private void setupDateValidation() {
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        calendar.add(java.util.Calendar.YEAR, -18);
+        java.util.Date maxDate = calendar.getTime();
+
+        if (ADateOfBirthField != null)
+            ADateOfBirthField.setMaxSelectableDate(maxDate);
+        if (UDateOfBirthField != null)
+            UDateOfBirthField.setMaxSelectableDate(maxDate);
+        if (ADateOfBirthField2 != null)
+            ADateOfBirthField2.setMaxSelectableDate(maxDate);
+        if (UDateOfBirthField2 != null)
+            UDateOfBirthField2.setMaxSelectableDate(maxDate);
     }
 
     /**
@@ -4084,7 +4101,6 @@ public class HomePageAdmin extends javax.swing.JFrame {
             Object cellValue = ViewStudentsTable.getModel().getValueAt(row, 0);
             if (col == 4) {
                 String studentID = ViewStudentsTable.getValueAt(row, 0).toString();
-                // Open the new Detail Window
                 new StudentFullProfile(studentID).setVisible(true);
             } else if (col == 5) {
                 String message = "Are you sure want to delete?";
@@ -4098,7 +4114,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
                         for (String table : relatedTables) {
                             String deleteQuery = "DELETE FROM `" + table + "` WHERE `student_id`=?";
                             pst = connect.prepareStatement(deleteQuery);
-                            pst.setString(1, (String) cellValue); // cellValue is ID (student_id)
+                            pst.setString(1, (String) cellValue);
                             pst.executeUpdate();
                             if (pst != null)
                                 pst.close();
