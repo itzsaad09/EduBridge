@@ -33,9 +33,10 @@ public class HomePageInstructor extends javax.swing.JFrame {
     Connection connect = null;
     ResultSet result = null;
     PreparedStatement pst = null;
-    
+
     String id;
     private HoverPopup infoPopup;
+
     public HomePageInstructor() {
         initComponents();
         // Set Title
@@ -56,7 +57,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
         startDateTimeUpdater();
         showInstructorTimetable();
     }
-    
+
     public HomePageInstructor(String id) {
         initComponents();
         // Set Title
@@ -76,17 +77,17 @@ public class HomePageInstructor extends javax.swing.JFrame {
         try {
             pst = connect.prepareStatement(query);
             pst.setString(1, id);
-            
+
             result = pst.executeQuery();
-            if(result.next()){
+            if (result.next()) {
                 String password = result.getString("password");
-                if(password.equals("Employee123")){
+                if (password.equals("Employee123")) {
                     new ChangePassword(id, "instructor").setVisible(true);
                 }
             }
-                
+
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null,ex);
+            JOptionPane.showMessageDialog(null, ex);
         }
         // Active View Courses Button
         setActiveTab(ViewCourses);
@@ -94,7 +95,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
         startDateTimeUpdater();
         showInstructorTimetable();
     }
-    
+
     // Active Tab Styling
     private void setActiveTab(javax.swing.JButton selectedBtn) {
         Color activeColor = new Color(100, 80, 200);
@@ -103,31 +104,31 @@ public class HomePageInstructor extends javax.swing.JFrame {
         Color defaultTextColor = new Color(60, 60, 60);
 
         javax.swing.JButton[] sideButtons = {
-            ViewCourses, MarkAttendance, UploadResult, LogOut
+                ViewCourses, MarkAttendance, UploadResult, LogOut
         };
 
         for (javax.swing.JButton btn : sideButtons) {
             if (btn == selectedBtn) {
                 btn.setBackground(activeColor);
                 btn.setForeground(activeTextColor);
-                btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 19)); 
+                btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 19));
             } else {
                 btn.setBackground(defaultColor);
                 btn.setForeground(defaultTextColor);
                 btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 18));
             }
-            
+
             btn.revalidate();
             btn.repaint();
         }
     }
-    
+
     private void updateDateTime() {
         SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss a, MMM dd, yyyy");
         Date date = new Date();
         DateTime.setText(formatter.format(date));
     }
-    
+
     private void startDateTimeUpdater() {
         Timer timer = new Timer(true);
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -142,13 +143,13 @@ public class HomePageInstructor extends javax.swing.JFrame {
         String instructorName = "";
         String instructorEmail = "";
         String instructorDepartment = "";
-        
+
         String query = "SELECT `fName`, `lName`, `email`, `department` FROM `instructor` WHERE `ID` = ?";
         try {
             pst = connect.prepareStatement(query);
             pst.setString(1, this.id);
             result = pst.executeQuery();
-            
+
             if (result.next()) {
                 instructorName = result.getString("fName") + " " + result.getString("lName");
                 instructorEmail = result.getString("email");
@@ -162,63 +163,65 @@ public class HomePageInstructor extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Database Error fetching profile data: " + ex.getMessage());
             instructorName = "Database Error";
         }
-        
-        String message = "<html><b>Full Name:</b> " + instructorName + 
-                         "<br><b>Email:</b> " + instructorEmail + 
-                         "<br><b>Department:</b> " + instructorDepartment + 
-                         "</html>";
-        
-        
+
+        String message = "<html><b>Full Name:</b> " + instructorName +
+                "<br><b>Email:</b> " + instructorEmail +
+                "<br><b>Department:</b> " + instructorDepartment +
+                "</html>";
+
         if (infoPopup == null) {
             infoPopup = new HoverPopup(HomePageInstructor.this, message);
         } else {
-            infoPopup.updateMessage(message); 
+            infoPopup.updateMessage(message);
         }
 
         Point buttonLocation = sourceButton.getLocationOnScreen();
-        
+
         int popupX = buttonLocation.x + sourceButton.getWidth() - infoPopup.getWidth();
-        
+
         int popupY = buttonLocation.y + sourceButton.getHeight();
-        
+
         infoPopup.showAtLocation(popupX, popupY);
     }
-    
+
     private void showInstructorTimetable() {
         String instructorFullName = null;
         try {
-            pst = connect.prepareStatement("SELECT CONCAT(`fName`, ' ', `lName`) AS `fullName` FROM `instructor` WHERE `ID` = ?");
+            pst = connect.prepareStatement(
+                    "SELECT CONCAT(`fName`, ' ', `lName`) AS `fullName` FROM `instructor` WHERE `ID` = ?");
             pst.setString(1, this.id);
             result = pst.executeQuery();
             if (result.next()) {
                 instructorFullName = result.getString("fullName");
             } else {
-                JOptionPane.showMessageDialog(this, "Instructor ID not found in the database.", "Data Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Instructor ID not found in the database.", "Data Error",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Database Error fetching instructor name: " + ex.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Database Error fetching instructor name: " + ex.getMessage(),
+                    "SQL Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        DefaultTableModel DTM = (DefaultTableModel)ViewCoursesTable.getModel();
+        DefaultTableModel DTM = (DefaultTableModel) ViewCoursesTable.getModel();
         DTM.setRowCount(0);
 
-        String[] daysOfWeek = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+        String[] daysOfWeek = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday" };
         String timetableQuery = "SELECT `day`, `sTime`, `eTime`, `cName`, `roomNo` FROM `timetable` WHERE `instructorName` = ? AND `day` = ? ORDER BY `sTime`";
 
         try {
-            boolean dayHeaderAdded = false; 
+            boolean dayHeaderAdded = false;
 
             for (String currentDay : daysOfWeek) {
                 pst = connect.prepareStatement(timetableQuery);
                 pst.setString(1, instructorFullName);
-                pst.setString(2, currentDay); 
+                pst.setString(2, currentDay);
                 result = pst.executeQuery();
 
                 dayHeaderAdded = false;
 
-                if (result.isBeforeFirst()) { 
+                if (result.isBeforeFirst()) {
                     while (result.next()) {
                         String startTime = result.getString("sTime");
                         String endTime = result.getString("eTime");
@@ -226,28 +229,29 @@ public class HomePageInstructor extends javax.swing.JFrame {
 
                         String dayToDisplay = dayHeaderAdded ? "" : currentDay;
 
-                        DTM.addRow(new Object[]{
-                            dayToDisplay, 
-                            result.getString("cName"),
-                            timeSlot, 
-                            result.getString("roomNo")
+                        DTM.addRow(new Object[] {
+                                dayToDisplay,
+                                result.getString("cName"),
+                                timeSlot,
+                                result.getString("roomNo")
                         });
 
-                        dayHeaderAdded = true; 
+                        dayHeaderAdded = true;
                     }
                 }
 
                 if (!dayHeaderAdded) {
-                    DTM.addRow(new Object[]{
-                        currentDay, 
-                        "Free", 
-                        "N/A",
-                        "N/A"
+                    DTM.addRow(new Object[] {
+                            currentDay,
+                            "Free",
+                            "N/A",
+                            "N/A"
                     });
                 }
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Database Error fetching timetable: " + ex.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Database Error fetching timetable: " + ex.getMessage(), "SQL Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -261,40 +265,41 @@ public class HomePageInstructor extends javax.swing.JFrame {
         }
 
         DefaultTableModel model = (DefaultTableModel) AttendanceTable.getModel();
-        String[] options = {"Select Attendance", "Present", "Absent"};
+        String[] options = { "Select Attendance", "Present", "Absent" };
         javax.swing.JComboBox<String> editorCombo = new RoundedComboBox<>(options);
 
         AttendanceTable.getColumnModel().getColumn(2).setCellEditor(new javax.swing.DefaultCellEditor(editorCombo));
-        
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String dateKey = sdf.format(selectedDate);
-        
+
         try {
             String codeLookup = "SELECT coursecode FROM course WHERE coursename = ?";
             pst = connect.prepareStatement(codeLookup);
             pst.setString(1, selectedCourse);
             result = pst.executeQuery();
-            
-            if (!result.next()) return;
+
+            if (!result.next())
+                return;
             String targetCode = result.getString("coursecode");
 
             String query = "SELECT s.fName, s.lName, aj.log " +
-                        "FROM student s " +
-                        "JOIN enrollment e ON s.ID = e.student_id " +
-                        "LEFT JOIN attendance_json aj ON s.ID = aj.student_id AND aj.coursecode = ? " +
-                        "WHERE e.coursecode LIKE ?";
-                
+                    "FROM student s " +
+                    "JOIN enrollment e ON s.ID = e.student_id " +
+                    "LEFT JOIN attendance_json aj ON s.ID = aj.student_id AND aj.coursecode = ? " +
+                    "WHERE e.coursecode LIKE ?";
+
             pst = connect.prepareStatement(query);
             pst.setString(1, targetCode);
             pst.setString(2, "%" + targetCode + "%");
             result = pst.executeQuery();
-            
+
             model.setRowCount(0);
             while (result.next()) {
                 String fullName = result.getString("fName") + " " + result.getString("lName");
                 String jsonLog = result.getString("log");
-                
-                String status = "Select Attendance"; 
+
+                String status = "Select Attendance";
                 if (jsonLog != null && !jsonLog.isEmpty()) {
                     if (jsonLog.contains("\"" + dateKey + "\": \"Present\"")) {
                         status = "Present";
@@ -302,11 +307,11 @@ public class HomePageInstructor extends javax.swing.JFrame {
                         status = "Absent";
                     }
                 }
-                
-                model.addRow(new Object[]{
-                    fullName, 
-                    calculateTotalAbsences(jsonLog), 
-                    status
+
+                model.addRow(new Object[] {
+                        fullName,
+                        calculateTotalAbsences(jsonLog),
+                        status
                 });
             }
         } catch (SQLException ex) {
@@ -315,11 +320,12 @@ public class HomePageInstructor extends javax.swing.JFrame {
     }
 
     private int calculateTotalAbsences(String jsonLog) {
-        if (jsonLog == null || jsonLog.isEmpty()) return 0;
+        if (jsonLog == null || jsonLog.isEmpty())
+            return 0;
         return (jsonLog.length() - jsonLog.replace("Absent", "").length()) / "Absent".length();
     }
-    
-    private void restrictDateAndMultipleDays(String session, java.util.List<Integer> allowedDays) {
+
+    private void restrictDateAndMultipleDays(String session, int year, java.util.List<Integer> allowedDays) {
         com.toedter.calendar.JDayChooser dayChooser = SelectDate.getJCalendar().getDayChooser();
 
         try {
@@ -336,19 +342,18 @@ public class HomePageInstructor extends javax.swing.JFrame {
 
         Calendar cal = Calendar.getInstance();
         Date today = cal.getTime();
-        int currentYear = cal.get(Calendar.YEAR);
         Date minDate, maxDate;
 
         if (session.equalsIgnoreCase("Fall")) {
-            cal.set(currentYear, Calendar.OCTOBER, 1);
+            cal.set(year, Calendar.OCTOBER, 1);
             minDate = cal.getTime();
-            cal.set(currentYear + 1, Calendar.JANUARY, 31);
+            cal.set(year + 1, Calendar.JANUARY, 31);
             Date semesterEnd = cal.getTime();
             maxDate = today.before(semesterEnd) ? today : semesterEnd;
         } else {
-            cal.set(currentYear, Calendar.MARCH, 1);
+            cal.set(year, Calendar.MARCH, 1);
             minDate = cal.getTime();
-            cal.set(currentYear, Calendar.JUNE, 30);
+            cal.set(year, Calendar.JUNE, 30);
             Date semesterEnd = cal.getTime();
             maxDate = today.before(semesterEnd) ? today : semesterEnd;
         }
@@ -359,20 +364,29 @@ public class HomePageInstructor extends javax.swing.JFrame {
 
         dayChooser.addDateEvaluator(new IDateEvaluator() {
             @Override
-            public boolean isSpecial(Date date) { return false; }
+            public boolean isSpecial(Date date) {
+                return false;
+            }
 
             @Override
-            public Color getSpecialForegroundColor() { return null; }
+            public Color getSpecialForegroundColor() {
+                return null;
+            }
 
             @Override
-            public Color getSpecialBackroundColor() { return null; }
+            public Color getSpecialBackroundColor() {
+                return null;
+            }
 
             @Override
-            public String getInvalidTooltip() { return "No lecture on this day"; }
+            public String getInvalidTooltip() {
+                return "No lecture on this day";
+            }
 
             @Override
             public boolean isInvalid(Date date) {
-                if (date == null) return true;
+                if (date == null)
+                    return true;
                 Calendar c = Calendar.getInstance();
                 c.setTime(date);
                 int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
@@ -399,23 +413,32 @@ public class HomePageInstructor extends javax.swing.JFrame {
     }
 
     private int getDayInteger(String day) {
-        if (day == null) return -1;
-        
+        if (day == null)
+            return -1;
+
         switch (day.trim().toLowerCase()) {
-            case "sunday":    return java.util.Calendar.SUNDAY;    // 1
-            case "monday":    return java.util.Calendar.MONDAY;    // 2
-            case "tuesday":   return java.util.Calendar.TUESDAY;   // 3
-            case "wednesday": return java.util.Calendar.WEDNESDAY; // 4
-            case "thursday":  return java.util.Calendar.THURSDAY;  // 5
-            case "friday":    return java.util.Calendar.FRIDAY;    // 6
-            case "saturday":  return java.util.Calendar.SATURDAY;  // 7
-            default: 
+            case "sunday":
+                return java.util.Calendar.SUNDAY; // 1
+            case "monday":
+                return java.util.Calendar.MONDAY; // 2
+            case "tuesday":
+                return java.util.Calendar.TUESDAY; // 3
+            case "wednesday":
+                return java.util.Calendar.WEDNESDAY; // 4
+            case "thursday":
+                return java.util.Calendar.THURSDAY; // 5
+            case "friday":
+                return java.util.Calendar.FRIDAY; // 6
+            case "saturday":
+                return java.util.Calendar.SATURDAY; // 7
+            default:
                 System.out.println("Warning: Could not map day string: '" + day + "'");
                 return -1;
         }
     }
-    
-    private void updateStudentAttendance(String studentId, String courseCode, String dateKey, String status) throws SQLException {
+
+    private void updateStudentAttendance(String studentId, String courseCode, String dateKey, String status)
+            throws SQLException {
         String selectQuery = "SELECT log FROM attendance_json WHERE student_id = ? AND coursecode = ?";
         pst = connect.prepareStatement(selectQuery);
         pst.setString(1, studentId);
@@ -427,7 +450,8 @@ public class HomePageInstructor extends javax.swing.JFrame {
 
         if (result.next()) {
             currentLog = result.getString("log");
-            if (currentLog == null) currentLog = "";
+            if (currentLog == null)
+                currentLog = "";
             exists = true;
         }
 
@@ -458,12 +482,12 @@ public class HomePageInstructor extends javax.swing.JFrame {
             pst.executeUpdate();
         }
     }
-    
+
     public class RoundedTextFieldEditor extends DefaultCellEditor {
         private RoundedTextField textField;
 
         public RoundedTextFieldEditor() {
-            super(new RoundedTextField(20)); 
+            super(new RoundedTextField(20));
             textField = (RoundedTextField) getComponent();
         }
 
@@ -474,7 +498,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
             return textField;
         }
     }
-    
+
     public class RoundedTextFieldRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
@@ -492,31 +516,32 @@ public class HomePageInstructor extends javax.swing.JFrame {
             return rtf;
         }
     }
-    
+
     private void fillResultsTable(String courseName) {
         DefaultTableModel model = (DefaultTableModel) ResultTable.getModel();
         model.setRowCount(0);
-        
+
         // Set custom renderers for editing marks
         for (int i = 2; i <= 3; i++) {
             ResultTable.getColumnModel().getColumn(i).setCellRenderer(new RoundedTextFieldRenderer());
             ResultTable.getColumnModel().getColumn(i).setCellEditor(new RoundedTextFieldEditor());
         }
-        
+
         try {
             // Step 1: Get the specific Course Code
             pst = connect.prepareStatement("SELECT coursecode FROM course WHERE coursename = ?");
             pst.setString(1, courseName);
             result = pst.executeQuery();
-            if (!result.next()) return;
+            if (!result.next())
+                return;
             String targetCode = result.getString("coursecode");
 
             // Step 2: Fetch students enrolled in this code and their current results
             String query = "SELECT s.ID, CONCAT(s.fName, ' ', s.lName) AS name, r.sessional, r.final " +
-                        "FROM student s " +
-                        "JOIN enrollment e ON s.ID = e.student_id " +
-                        "LEFT JOIN results r ON s.ID = r.student_id AND r.course_code = ? " +
-                        "WHERE e.coursecode LIKE ?";
+                    "FROM student s " +
+                    "JOIN enrollment e ON s.ID = e.student_id " +
+                    "LEFT JOIN results r ON s.ID = r.student_id AND r.course_code = ? " +
+                    "WHERE e.coursecode LIKE ?";
 
             pst = connect.prepareStatement(query);
             pst.setString(1, targetCode);
@@ -524,11 +549,11 @@ public class HomePageInstructor extends javax.swing.JFrame {
             result = pst.executeQuery();
 
             while (result.next()) {
-                model.addRow(new Object[]{
-                    result.getString("ID"),
-                    result.getString("name"),
-                    result.getObject("sessional") == null ? 0.0 : result.getDouble("sessional"),
-                    result.getObject("final") == null ? 0.0 : result.getDouble("final")
+                model.addRow(new Object[] {
+                        result.getString("ID"),
+                        result.getString("name"),
+                        result.getObject("sessional") == null ? 0.0 : result.getDouble("sessional"),
+                        result.getObject("final") == null ? 0.0 : result.getDouble("final")
                 });
             }
         } catch (SQLException ex) {
@@ -542,7 +567,8 @@ public class HomePageInstructor extends javax.swing.JFrame {
      * regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated
+    // Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         HomePageInstuctorPanel = new ui.GradientPanel();
@@ -649,32 +675,35 @@ public class HomePageInstructor extends javax.swing.JFrame {
         javax.swing.GroupLayout SidePanelLayout = new javax.swing.GroupLayout(SidePanel);
         SidePanel.setLayout(SidePanelLayout);
         SidePanelLayout.setHorizontalGroup(
-            SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(SidePanelLayout.createSequentialGroup()
-                .addGap(30, 30, 30)
-                .addGroup(SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(DateTime)
-                    .addComponent(ViewCourses, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(UploadResult, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(MarkAttendance, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(LogOut, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(30, Short.MAX_VALUE))
-        );
+                SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(SidePanelLayout.createSequentialGroup()
+                                .addGap(30, 30, 30)
+                                .addGroup(SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(DateTime)
+                                        .addComponent(ViewCourses, javax.swing.GroupLayout.PREFERRED_SIZE, 140,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(UploadResult, javax.swing.GroupLayout.PREFERRED_SIZE, 140,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(MarkAttendance, javax.swing.GroupLayout.PREFERRED_SIZE, 140,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(LogOut, javax.swing.GroupLayout.PREFERRED_SIZE, 140,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap(30, Short.MAX_VALUE)));
         SidePanelLayout.setVerticalGroup(
-            SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(SidePanelLayout.createSequentialGroup()
-                .addGap(20, 20, 20)
-                .addComponent(DateTime)
-                .addGap(50, 50, 50)
-                .addComponent(ViewCourses)
-                .addGap(50, 50, 50)
-                .addComponent(MarkAttendance)
-                .addGap(50, 50, 50)
-                .addComponent(UploadResult)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 263, Short.MAX_VALUE)
-                .addComponent(LogOut)
-                .addGap(20, 20, 20))
-        );
+                SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(SidePanelLayout.createSequentialGroup()
+                                .addGap(20, 20, 20)
+                                .addComponent(DateTime)
+                                .addGap(50, 50, 50)
+                                .addComponent(ViewCourses)
+                                .addGap(50, 50, 50)
+                                .addComponent(MarkAttendance)
+                                .addGap(50, 50, 50)
+                                .addComponent(UploadResult)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 263,
+                                        Short.MAX_VALUE)
+                                .addComponent(LogOut)
+                                .addGap(20, 20, 20)));
 
         MainPagePanel.setOpaque(false);
         MainPagePanel.setPreferredSize(new java.awt.Dimension(100, 600));
@@ -690,35 +719,35 @@ public class HomePageInstructor extends javax.swing.JFrame {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 ProfileButtonMouseEntered(evt);
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 ProfileButtonMouseExited(evt);
             }
         });
 
         ViewCoursesTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Day", "Course", "Time", "Room No"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                new Object[][] {
+                        { null, null, null, null },
+                        { null, null, null, null },
+                        { null, null, null, null },
+                        { null, null, null, null }
+                },
+                new String[] {
+                        "Day", "Course", "Time", "Room No"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false
+            boolean[] canEdit = new boolean[] {
+                    false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         ViewCoursesTable.setRowHeight(50);
@@ -731,23 +760,26 @@ public class HomePageInstructor extends javax.swing.JFrame {
         javax.swing.GroupLayout ViewCoursesPanelLayout = new javax.swing.GroupLayout(ViewCoursesPanel);
         ViewCoursesPanel.setLayout(ViewCoursesPanelLayout);
         ViewCoursesPanelLayout.setHorizontalGroup(
-            ViewCoursesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ViewCoursesPanelLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(ProfileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(ViewCoursesPanelLayout.createSequentialGroup()
-                .addGap(40, 40, 40)
-                .addComponent(ViewCoursesScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(40, Short.MAX_VALUE))
-        );
+                ViewCoursesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+                                ViewCoursesPanelLayout.createSequentialGroup()
+                                        .addGap(0, 0, Short.MAX_VALUE)
+                                        .addComponent(ProfileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 42,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(ViewCoursesPanelLayout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addComponent(ViewCoursesScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(40, Short.MAX_VALUE)));
         ViewCoursesPanelLayout.setVerticalGroup(
-            ViewCoursesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ViewCoursesPanelLayout.createSequentialGroup()
-                .addComponent(ProfileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(ViewCoursesScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 534, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+                ViewCoursesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ViewCoursesPanelLayout.createSequentialGroup()
+                                .addComponent(ProfileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(ViewCoursesScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 534,
+                                        Short.MAX_VALUE)
+                                .addContainerGap()));
 
         MainPagePanel.add(ViewCoursesPanel, "Card1");
 
@@ -761,6 +793,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 ProfileButton1MouseEntered(evt);
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 ProfileButton1MouseExited(evt);
             }
@@ -786,29 +819,28 @@ public class HomePageInstructor extends javax.swing.JFrame {
         });
 
         AttendanceTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null}
-            },
-            new String [] {
-                "Name", "Absence Count", "Status"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class
+                new Object[][] {
+                        { null, null, null },
+                        { null, null, null },
+                        { null, null, null },
+                        { null, null, null }
+                },
+                new String[] {
+                        "Name", "Absence Count", "Status"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, true
+            boolean[] canEdit = new boolean[] {
+                    false, false, true
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         AttendanceTable.setRowHeight(50);
@@ -836,51 +868,65 @@ public class HomePageInstructor extends javax.swing.JFrame {
         javax.swing.GroupLayout AttendancePanelLayout = new javax.swing.GroupLayout(AttendancePanel);
         AttendancePanel.setLayout(AttendancePanelLayout);
         AttendancePanelLayout.setHorizontalGroup(
-            AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AttendancePanelLayout.createSequentialGroup()
-                .addGap(0, 663, Short.MAX_VALUE)
-                .addComponent(ProfileButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(AttendancePanelLayout.createSequentialGroup()
-                .addGap(159, 159, 159)
-                .addGroup(AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(CourseCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(Course))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(Date)
-                    .addComponent(SelectDate, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(159, 159, 159))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AttendancePanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(SaveBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(314, 314, 314))
-            .addGroup(AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(AttendancePanelLayout.createSequentialGroup()
-                    .addGap(43, 43, 43)
-                    .addComponent(AttendanceTableScrollPane)
-                    .addGap(44, 44, 44)))
-        );
+                AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+                                AttendancePanelLayout.createSequentialGroup()
+                                        .addGap(0, 663, Short.MAX_VALUE)
+                                        .addComponent(ProfileButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 42,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(AttendancePanelLayout.createSequentialGroup()
+                                .addGap(159, 159, 159)
+                                .addGroup(AttendancePanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(CourseCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(Course))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(AttendancePanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(Date)
+                                        .addComponent(SelectDate, javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(159, 159, 159))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+                                AttendancePanelLayout.createSequentialGroup()
+                                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(SaveBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 100,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(314, 314, 314))
+                        .addGroup(AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(AttendancePanelLayout.createSequentialGroup()
+                                        .addGap(43, 43, 43)
+                                        .addComponent(AttendanceTableScrollPane)
+                                        .addGap(44, 44, 44))));
         AttendancePanelLayout.setVerticalGroup(
-            AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AttendancePanelLayout.createSequentialGroup()
-                .addComponent(ProfileButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(Course)
-                    .addComponent(Date))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(CourseCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SelectDate, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(424, 424, 424)
-                .addComponent(SaveBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(26, 26, 26))
-            .addGroup(AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(AttendancePanelLayout.createSequentialGroup()
-                    .addGap(124, 124, 124)
-                    .addComponent(AttendanceTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 393, Short.MAX_VALUE)
-                    .addGap(78, 78, 78)))
-        );
+                AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(AttendancePanelLayout.createSequentialGroup()
+                                .addComponent(ProfileButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(AttendancePanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(Course)
+                                        .addComponent(Date))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(AttendancePanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(CourseCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(SelectDate, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(424, 424, 424)
+                                .addComponent(SaveBtn, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(26, 26, 26))
+                        .addGroup(AttendancePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(AttendancePanelLayout.createSequentialGroup()
+                                        .addGap(124, 124, 124)
+                                        .addComponent(AttendanceTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                393, Short.MAX_VALUE)
+                                        .addGap(78, 78, 78))));
 
         MainPagePanel.add(AttendancePanel, "Card2");
 
@@ -894,6 +940,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 ProfileButton2MouseEntered(evt);
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 ProfileButton2MouseExited(evt);
             }
@@ -910,29 +957,28 @@ public class HomePageInstructor extends javax.swing.JFrame {
         });
 
         ResultTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Name", "Name", "Sessional", "Final"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                new Object[][] {
+                        { null, null, null, null },
+                        { null, null, null, null },
+                        { null, null, null, null },
+                        { null, null, null, null }
+                },
+                new String[] {
+                        "Name", "Name", "Sessional", "Final"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, true, true
+            boolean[] canEdit = new boolean[] {
+                    false, false, true, true
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         ResultTable.setRowHeight(50);
@@ -960,99 +1006,110 @@ public class HomePageInstructor extends javax.swing.JFrame {
         javax.swing.GroupLayout ResultsPanelLayout = new javax.swing.GroupLayout(ResultsPanel);
         ResultsPanel.setLayout(ResultsPanelLayout);
         ResultsPanelLayout.setHorizontalGroup(
-            ResultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ResultsPanelLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(ProfileButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(ResultsPanelLayout.createSequentialGroup()
-                .addGroup(ResultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(ResultsPanelLayout.createSequentialGroup()
-                        .addGap(40, 40, 40)
-                        .addGroup(ResultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(CourseCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(Course1)
-                            .addComponent(ResultTableScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(ResultsPanelLayout.createSequentialGroup()
-                        .addGap(302, 302, 302)
-                        .addComponent(SaveBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(40, Short.MAX_VALUE))
-        );
+                ResultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ResultsPanelLayout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(ProfileButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 42,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(ResultsPanelLayout.createSequentialGroup()
+                                .addGroup(ResultsPanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(ResultsPanelLayout.createSequentialGroup()
+                                                .addGap(40, 40, 40)
+                                                .addGroup(ResultsPanelLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(CourseCombo1,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(Course1)
+                                                        .addComponent(ResultTableScrollPane,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 625,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addGroup(ResultsPanelLayout.createSequentialGroup()
+                                                .addGap(302, 302, 302)
+                                                .addComponent(SaveBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 100,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addContainerGap(40, Short.MAX_VALUE)));
         ResultsPanelLayout.setVerticalGroup(
-            ResultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ResultsPanelLayout.createSequentialGroup()
-                .addComponent(ProfileButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(Course1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(CourseCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(ResultTableScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 393, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(SaveBtn1)
-                .addContainerGap(18, Short.MAX_VALUE))
-        );
+                ResultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ResultsPanelLayout.createSequentialGroup()
+                                .addComponent(ProfileButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(Course1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(CourseCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(ResultTableScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 393,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(SaveBtn1)
+                                .addContainerGap(18, Short.MAX_VALUE)));
 
         MainPagePanel.add(ResultsPanel, "Card3");
 
         javax.swing.GroupLayout HomePageInstuctorPanelLayout = new javax.swing.GroupLayout(HomePageInstuctorPanel);
         HomePageInstuctorPanel.setLayout(HomePageInstuctorPanelLayout);
         HomePageInstuctorPanelLayout.setHorizontalGroup(
-            HomePageInstuctorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(HomePageInstuctorPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(SidePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(MainPagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 705, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+                HomePageInstuctorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(HomePageInstuctorPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(SidePanel, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(MainPagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 705, Short.MAX_VALUE)
+                                .addContainerGap()));
         HomePageInstuctorPanelLayout.setVerticalGroup(
-            HomePageInstuctorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(HomePageInstuctorPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(HomePageInstuctorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(MainPagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 592, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SidePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 588, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+                HomePageInstuctorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(HomePageInstuctorPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(HomePageInstuctorPanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(MainPagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 592,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(SidePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 588,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(HomePageInstuctorPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(HomePageInstuctorPanel, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE)));
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(HomePageInstuctorPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(HomePageInstuctorPanel, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE)));
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void ViewCoursesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ViewCoursesMouseClicked
+    private void ViewCoursesMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ViewCoursesMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card1");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card1");
         setActiveTab(ViewCourses);
         showInstructorTimetable();
-    }//GEN-LAST:event_ViewCoursesMouseClicked
+    }// GEN-LAST:event_ViewCoursesMouseClicked
 
-    private void ViewCoursesKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ViewCoursesKeyPressed
+    private void ViewCoursesKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_ViewCoursesKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             ViewCoursesMouseClicked(null);
         }
-    }//GEN-LAST:event_ViewCoursesKeyPressed
+    }// GEN-LAST:event_ViewCoursesKeyPressed
 
-    private void MarkAttendanceMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_MarkAttendanceMouseClicked
+    private void MarkAttendanceMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_MarkAttendanceMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card2");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card2");
         setActiveTab(MarkAttendance);
         CourseCombo.removeAllItems();
         CourseCombo.addItem("Select Course");
@@ -1080,28 +1137,31 @@ public class HomePageInstructor extends javax.swing.JFrame {
             }
 
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error loading courses: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error loading courses: " + ex.getMessage(), "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
         } finally {
             try {
-                if (result != null) result.close();
-                if (pst != null) pst.close();
+                if (result != null)
+                    result.close();
+                if (pst != null)
+                    pst.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
-    }//GEN-LAST:event_MarkAttendanceMouseClicked
+    }// GEN-LAST:event_MarkAttendanceMouseClicked
 
-    private void MarkAttendanceKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_MarkAttendanceKeyPressed
+    private void MarkAttendanceKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_MarkAttendanceKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             MarkAttendanceMouseClicked(null);
         }
-    }//GEN-LAST:event_MarkAttendanceKeyPressed
+    }// GEN-LAST:event_MarkAttendanceKeyPressed
 
-    private void UploadResultMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UploadResultMouseClicked
+    private void UploadResultMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_UploadResultMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card3");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card3");
         setActiveTab(UploadResult);
         CourseCombo1.removeAllItems();
         CourseCombo1.addItem("Select Course");
@@ -1129,25 +1189,28 @@ public class HomePageInstructor extends javax.swing.JFrame {
             }
 
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error loading courses: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error loading courses: " + ex.getMessage(), "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
         } finally {
             try {
-                if (result != null) result.close();
-                if (pst != null) pst.close();
+                if (result != null)
+                    result.close();
+                if (pst != null)
+                    pst.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
-    }//GEN-LAST:event_UploadResultMouseClicked
+    }// GEN-LAST:event_UploadResultMouseClicked
 
-    private void UploadResultKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_UploadResultKeyPressed
+    private void UploadResultKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_UploadResultKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             UploadResultMouseClicked(null);
         }
-    }//GEN-LAST:event_UploadResultKeyPressed
+    }// GEN-LAST:event_UploadResultKeyPressed
 
-    private void LogOutMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_LogOutMouseClicked
+    private void LogOutMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_LogOutMouseClicked
         // TODO add your handling code here:
         new Timer().schedule(new TimerTask() {
             public void run() {
@@ -1155,52 +1218,52 @@ public class HomePageInstructor extends javax.swing.JFrame {
             }
         }, 1000);
         this.dispose();
-    }//GEN-LAST:event_LogOutMouseClicked
+    }// GEN-LAST:event_LogOutMouseClicked
 
-    private void LogOutKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_LogOutKeyPressed
+    private void LogOutKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_LogOutKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             LogOutMouseClicked(null);
         }
-    }//GEN-LAST:event_LogOutKeyPressed
+    }// GEN-LAST:event_LogOutKeyPressed
 
-    private void ProfileButtonMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButtonMouseEntered
+    private void ProfileButtonMouseEntered(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButtonMouseEntered
         // TODO add your handling code here:
         showProfilePopup(ProfileButton, evt);
-    }//GEN-LAST:event_ProfileButtonMouseEntered
+    }// GEN-LAST:event_ProfileButtonMouseEntered
 
-    private void ProfileButtonMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButtonMouseExited
+    private void ProfileButtonMouseExited(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButtonMouseExited
         // TODO add your handling code here:
         if (infoPopup != null) {
             infoPopup.setVisible(false);
         }
-    }//GEN-LAST:event_ProfileButtonMouseExited
+    }// GEN-LAST:event_ProfileButtonMouseExited
 
-    private void ProfileButton1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton1MouseEntered
+    private void ProfileButton1MouseEntered(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton1MouseEntered
         // TODO add your handling code here:
         showProfilePopup(ProfileButton1, evt);
-    }//GEN-LAST:event_ProfileButton1MouseEntered
+    }// GEN-LAST:event_ProfileButton1MouseEntered
 
-    private void ProfileButton1MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton1MouseExited
+    private void ProfileButton1MouseExited(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton1MouseExited
         // TODO add your handling code here:
         if (infoPopup != null) {
             infoPopup.setVisible(false);
         }
-    }//GEN-LAST:event_ProfileButton1MouseExited
+    }// GEN-LAST:event_ProfileButton1MouseExited
 
-    private void ProfileButton2MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton2MouseEntered
+    private void ProfileButton2MouseEntered(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton2MouseEntered
         // TODO add your handling code here:
         showProfilePopup(ProfileButton2, evt);
-    }//GEN-LAST:event_ProfileButton2MouseEntered
+    }// GEN-LAST:event_ProfileButton2MouseEntered
 
-    private void ProfileButton2MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProfileButton2MouseExited
+    private void ProfileButton2MouseExited(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ProfileButton2MouseExited
         // TODO add your handling code here:
         if (infoPopup != null) {
             infoPopup.setVisible(false);
         }
-    }//GEN-LAST:event_ProfileButton2MouseExited
+    }// GEN-LAST:event_ProfileButton2MouseExited
 
-    private void CourseComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CourseComboActionPerformed
+    private void CourseComboActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_CourseComboActionPerformed
         // TODO add your handling code here:
         String selectedCourse = (String) CourseCombo.getSelectedItem();
         if (selectedCourse == null || selectedCourse.equals("Select Course")) {
@@ -1209,7 +1272,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
         }
 
         try {
-            String courseQuery = "SELECT `coursecode`, `session` FROM `course` WHERE `coursename` = ?";
+            String courseQuery = "SELECT `coursecode`, `session`, `academicyear` FROM `course` WHERE `coursename` = ?";
             pst = connect.prepareStatement(courseQuery);
             pst.setString(1, selectedCourse);
             result = pst.executeQuery();
@@ -1217,6 +1280,7 @@ public class HomePageInstructor extends javax.swing.JFrame {
             if (result.next()) {
                 String code = result.getString("coursecode");
                 String session = result.getString("session");
+                int year = result.getInt("academicyear");
 
                 java.util.List<Integer> scheduledDays = new java.util.ArrayList<>();
                 String dayQuery = "SELECT `day` FROM `timetable` WHERE `courseCode` = ?";
@@ -1227,9 +1291,9 @@ public class HomePageInstructor extends javax.swing.JFrame {
                 while (result.next()) {
                     scheduledDays.add(getDayInteger(result.getString("day")));
                 }
-                
-                restrictDateAndMultipleDays(session, scheduledDays);
-                if (SelectDate.getDate() != null){
+
+                restrictDateAndMultipleDays(session, year, scheduledDays);
+                if (SelectDate.getDate() != null) {
                     loadAttendanceForSelectedDate();
                 } else {
                     ((DefaultTableModel) AttendanceTable.getModel()).setRowCount(0);
@@ -1238,25 +1302,26 @@ public class HomePageInstructor extends javax.swing.JFrame {
         } catch (SQLException ex) {
             System.err.println("Database Error: " + ex.getMessage());
         }
-    }//GEN-LAST:event_CourseComboActionPerformed
+    }// GEN-LAST:event_CourseComboActionPerformed
 
-    private void SelectDatePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_SelectDatePropertyChange
+    private void SelectDatePropertyChange(java.beans.PropertyChangeEvent evt) {// GEN-FIRST:event_SelectDatePropertyChange
         // TODO add your handling code here:
-            if ("date".equals(evt.getPropertyName())) {
-                String selectedCourse = (String) CourseCombo.getSelectedItem();
-                if(selectedCourse != null && !selectedCourse.equals("Select Course") && SelectDate.getDate() != null){
-                    loadAttendanceForSelectedDate();
-                }
+        if ("date".equals(evt.getPropertyName())) {
+            String selectedCourse = (String) CourseCombo.getSelectedItem();
+            if (selectedCourse != null && !selectedCourse.equals("Select Course") && SelectDate.getDate() != null) {
+                loadAttendanceForSelectedDate();
             }
-    }//GEN-LAST:event_SelectDatePropertyChange
+        }
+    }// GEN-LAST:event_SelectDatePropertyChange
 
-    private void SaveBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SaveBtnMouseClicked
+    private void SaveBtnMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_SaveBtnMouseClicked
         // TODO add your handling code here:
         String selectedCourse = (String) CourseCombo.getSelectedItem();
         java.util.Date selectedDate = SelectDate.getDate();
 
         if (selectedCourse == null || selectedCourse.equals("Select Course") || selectedDate == null) {
-            JOptionPane.showMessageDialog(this, "Please select both a course and a date.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please select both a course and a date.", "Input Error",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -1272,16 +1337,19 @@ public class HomePageInstructor extends javax.swing.JFrame {
             result = pst.executeQuery();
             String courseCode = result.next() ? result.getString("coursecode") : null;
 
-            if (courseCode == null) return;
+            if (courseCode == null)
+                return;
 
             // 2. Iterate through table rows to update each student
             for (int i = 0; i < model.getRowCount(); i++) {
                 String studentName = (String) model.getValueAt(i, 0);
                 String status = (String) model.getValueAt(i, 2);
 
-                if (status.equals("Select Attendance")) continue;
+                if (status.equals("Select Attendance"))
+                    continue;
 
-                // Get Student ID from Name (assuming unique names or you'd need ID in the table)
+                // Get Student ID from Name (assuming unique names or you'd need ID in the
+                // table)
                 String studentIdQuery = "SELECT ID FROM student WHERE CONCAT(fName, ' ', lName) = ?";
                 PreparedStatement pstId = connect.prepareStatement(studentIdQuery);
                 pstId.setString(1, studentName);
@@ -1292,22 +1360,23 @@ public class HomePageInstructor extends javax.swing.JFrame {
                     updateStudentAttendance(studentId, courseCode, dateKey, status);
                 }
             }
-            new CustomMessageDialog(this, "Success", "Attendance saved successfully!", CustomMessageDialog.SUCCESS).setVisible(true);
+            new CustomMessageDialog(this, "Success", "Attendance saved successfully!", CustomMessageDialog.SUCCESS)
+                    .setVisible(true);
             loadAttendanceForSelectedDate();
 
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Error saving attendance: " + ex.getMessage());
         }
-    }//GEN-LAST:event_SaveBtnMouseClicked
+    }// GEN-LAST:event_SaveBtnMouseClicked
 
-    private void SaveBtnKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_SaveBtnKeyPressed
+    private void SaveBtnKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_SaveBtnKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             SaveBtnMouseClicked(null);
         }
-    }//GEN-LAST:event_SaveBtnKeyPressed
+    }// GEN-LAST:event_SaveBtnKeyPressed
 
-    private void CourseCombo1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CourseCombo1ActionPerformed
+    private void CourseCombo1ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_CourseCombo1ActionPerformed
         // TODO add your handling code here:
         String selectedCourse = (String) CourseCombo1.getSelectedItem();
 
@@ -1317,9 +1386,9 @@ public class HomePageInstructor extends javax.swing.JFrame {
         } else {
             ((DefaultTableModel) ResultTable.getModel()).setRowCount(0);
         }
-    }//GEN-LAST:event_CourseCombo1ActionPerformed
+    }// GEN-LAST:event_CourseCombo1ActionPerformed
 
-    private void SaveBtn1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SaveBtn1MouseClicked
+    private void SaveBtn1MouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_SaveBtn1MouseClicked
         // TODO add your handling code here:
         DefaultTableModel model = (DefaultTableModel) ResultTable.getModel();
         String selectedCourse = (String) CourseCombo1.getSelectedItem();
@@ -1332,13 +1401,14 @@ public class HomePageInstructor extends javax.swing.JFrame {
         try {
             pst = connect.prepareStatement("SELECT coursecode FROM course WHERE coursename = ?");
             pst.setString(1, selectedCourse);
-            result= pst.executeQuery();
-            if (!result.next()) return;
+            result = pst.executeQuery();
+            if (!result.next())
+                return;
             String courseCode = result.getString("coursecode");
 
             String query = "INSERT INTO results (student_id, course_code, sessional, final, is_published) " +
-                               "VALUES (?, ?, ?, ?, 0) " +
-                               "ON DUPLICATE KEY UPDATE sessional = VALUES(sessional), final = VALUES(final)";
+                    "VALUES (?, ?, ?, ?, 0) " +
+                    "ON DUPLICATE KEY UPDATE sessional = VALUES(sessional), final = VALUES(final)";
 
             pst = connect.prepareStatement(query);
 
@@ -1351,30 +1421,35 @@ public class HomePageInstructor extends javax.swing.JFrame {
             }
 
             pst.executeBatch();
-            new CustomMessageDialog(this, "Success", "Results saved successfully!", CustomMessageDialog.SUCCESS).setVisible(true);
+            new CustomMessageDialog(this, "Success", "Results saved successfully!", CustomMessageDialog.SUCCESS)
+                    .setVisible(true);
 
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Please enter valid numeric marks.");
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage());
         }
-    }//GEN-LAST:event_SaveBtn1MouseClicked
+    }// GEN-LAST:event_SaveBtn1MouseClicked
 
-    private void SaveBtn1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_SaveBtn1KeyPressed
+    private void SaveBtn1KeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_SaveBtn1KeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             SaveBtn1MouseClicked(null);
         }
-    }//GEN-LAST:event_SaveBtn1KeyPressed
+    }// GEN-LAST:event_SaveBtn1KeyPressed
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+        // <editor-fold defaultstate="collapsed" desc=" Look and feel setting code
+        // (optional) ">
+        /*
+         * If Nimbus (introduced in Java SE 6) is not available, stay with the default
+         * look and feel.
+         * For details see
+         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -1384,15 +1459,19 @@ public class HomePageInstructor extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(HomePageInstructor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(HomePageInstructor.class.getName()).log(java.util.logging.Level.SEVERE,
+                    null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(HomePageInstructor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(HomePageInstructor.class.getName()).log(java.util.logging.Level.SEVERE,
+                    null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(HomePageInstructor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(HomePageInstructor.class.getName()).log(java.util.logging.Level.SEVERE,
+                    null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(HomePageInstructor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(HomePageInstructor.class.getName()).log(java.util.logging.Level.SEVERE,
+                    null, ex);
         }
-        //</editor-fold>
+        // </editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {

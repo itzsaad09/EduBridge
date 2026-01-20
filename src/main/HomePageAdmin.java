@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package main;
+
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.sql.*;
@@ -32,21 +33,22 @@ public class HomePageAdmin extends javax.swing.JFrame {
     PreparedStatement pst = null;
     ResultSetMetaData RSMD;
     DefaultTableModel DTM;
-    
-    boolean temp = false;
-    String checkStatus = "Active",email,cnic;
-    
+
+    boolean temp = true;
+    String checkStatus = "Active", email, cnic;
+
     JTextField AdateTextField, UdateTextField, AdateTextField2, UdateTextField2;
-    
+
     private final ImageIcon VIEW_ICON = new ImageIcon(getClass().getResource("/main/resources/icons8-view-24.png"));
-    private final ImageIcon DELETE_ICON = new ImageIcon(getClass().getResource("/main/resources/icons8-delete-24.png")); 
-    
+    private final ImageIcon DELETE_ICON = new ImageIcon(getClass().getResource("/main/resources/icons8-delete-24.png"));
+
     // Store View Time Table Data
     private String cName, instructorName, day, sTime, eTime, roomNo;
 
     // Top of file with other variables
     HashMap<String, String> courseMap = new HashMap<>();
     HashMap<String, String> instructorMap = new HashMap<>();
+
     public HomePageAdmin() {
         initComponents();
         // Set Title
@@ -64,25 +66,25 @@ public class HomePageAdmin extends javax.swing.JFrame {
         // For Add Student
         this.AdateTextField = (JTextField) ADateOfBirthField.getDateEditor().getUiComponent();
         AdateTextField.setText("DD-MM-YYYY");
-        AdateTextField.setForeground(new Color(153,153,153));
+        AdateTextField.setForeground(new Color(153, 153, 153));
         // For Add Instructor
         this.AdateTextField2 = (JTextField) ADateOfBirthField2.getDateEditor().getUiComponent();
         AdateTextField2.setText("DD-MM-YYYY");
-        AdateTextField2.setForeground(new Color(153,153,153));
+        AdateTextField2.setForeground(new Color(153, 153, 153));
         // For Update Student
         this.UdateTextField = (JTextField) UDateOfBirthField.getDateEditor().getUiComponent();
         UdateTextField.setText("DD-MM-YYYY");
-        UdateTextField.setForeground(new Color(153,153,153));
+        UdateTextField.setForeground(new Color(153, 153, 153));
         // For Update Instructor
         this.UdateTextField2 = (JTextField) UDateOfBirthField2.getDateEditor().getUiComponent();
         UdateTextField2.setText("DD-MM-YYYY");
-        UdateTextField2.setForeground(new Color(153,153,153));
+        UdateTextField2.setForeground(new Color(153, 153, 153));
         // Active Manage Student Button
         setActiveTab(ManageStudent);
         // Show Table
         show_Table("student", ViewStudentsTable);
     }
-    
+
     public HomePageAdmin(String email) {
         initComponents();
         // Set Title
@@ -101,11 +103,11 @@ public class HomePageAdmin extends javax.swing.JFrame {
         // For Add Tab
         this.AdateTextField = (JTextField) ADateOfBirthField.getDateEditor().getUiComponent();
         AdateTextField.setText("DD-MM-YYYY");
-        AdateTextField.setForeground(new Color(153,153,153));
+        AdateTextField.setForeground(new Color(153, 153, 153));
         // For Update Tab
         this.UdateTextField = (JTextField) UDateOfBirthField.getDateEditor().getUiComponent();
         UdateTextField.setText("DD-MM-YYYY");
-        UdateTextField.setForeground(new Color(153,153,153));
+        UdateTextField.setForeground(new Color(153, 153, 153));
         // Active Manage Student Button
         setActiveTab(ManageStudent);
         // Show Table
@@ -120,28 +122,28 @@ public class HomePageAdmin extends javax.swing.JFrame {
         Color defaultTextColor = new Color(60, 60, 60);
 
         javax.swing.JButton[] sideButtons = {
-            ManageStudent, ManageInstructor, ManageCourse, 
-            TimeTable, PublishResult, Notification, LogOut
+                ManageStudent, ManageInstructor, ManageCourse,
+                TimeTable, PublishResult, Notification, LogOut
         };
 
         for (javax.swing.JButton btn : sideButtons) {
             if (btn == selectedBtn) {
                 btn.setBackground(activeColor);
                 btn.setForeground(activeTextColor);
-                btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 19)); 
+                btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 19));
             } else {
                 btn.setBackground(defaultColor);
                 btn.setForeground(defaultTextColor);
                 btn.setFont(new java.awt.Font("Bodoni MT", java.awt.Font.BOLD, 18));
             }
-            
+
             btn.revalidate();
             btn.repaint();
         }
     }
-    
+
     // Check Email Already Exist or Not
-    public boolean checkEmail (String email) {
+    public boolean checkEmail(String email) {
         boolean checkEmail = false;
         String studentQuery = "SELECT * FROM `student` WHERE `email`=?";
         String instructorQuery = "SELECT * FROM `instructor` WHERE `email`=?";
@@ -152,24 +154,26 @@ public class HomePageAdmin extends javax.swing.JFrame {
             if (result.next()) {
                 checkEmail = true;
             } else {
-                if(result != null) result.close();
-                if(pst != null) pst.close();
-                
+                if (result != null)
+                    result.close();
+                if (pst != null)
+                    pst.close();
+
                 pst = connect.prepareStatement(instructorQuery);
                 pst.setString(1, AEmailField2.getText());
                 result = pst.executeQuery();
-                if(result.next()){
+                if (result.next()) {
                     checkEmail = true;
                 }
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null,ex);
+            JOptionPane.showMessageDialog(null, ex);
         }
         return checkEmail;
     }
-    
+
     // Check CNIC Already Exist or Not
-    public boolean checkCNIC (String cnic) {
+    public boolean checkCNIC(String cnic) {
         boolean checkCNIC = false;
         String studentQuery = "SELECT * FROM `student` WHERE `cnic`=?";
         String instructorQuery = "SELECT * FROM `instructor` WHERE `cnic`=?";
@@ -180,24 +184,26 @@ public class HomePageAdmin extends javax.swing.JFrame {
             if (result.next()) {
                 checkCNIC = true;
             } else {
-                if(result != null) result.close();
-                if(pst != null) pst.close();
-                
+                if (result != null)
+                    result.close();
+                if (pst != null)
+                    pst.close();
+
                 pst = connect.prepareStatement(instructorQuery);
                 pst.setString(1, ACNICField2.getText());
                 result = pst.executeQuery();
-                if(result.next()){
+                if (result.next()) {
                     checkCNIC = true;
                 }
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null,ex);
+            JOptionPane.showMessageDialog(null, ex);
         }
         return checkCNIC;
     }
-    
+
     // Check Instructor ID already exists
-    public boolean checkInstructorID(String ID){
+    public boolean checkInstructorID(String ID) {
         boolean checkID = false;
         String query = "SELECT * FROM `instructor` WHERE `ID`=?";
         try {
@@ -207,16 +213,15 @@ public class HomePageAdmin extends javax.swing.JFrame {
             if (result.next()) {
                 checkID = true;
                 generateRandomID();
-            } 
+            }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null,ex);
+            JOptionPane.showMessageDialog(null, ex);
         }
         return checkID;
     }
-        
-    
+
     // Check CourseCode Already Exists
-    public boolean checkCourseCode (String ccode) {
+    public boolean checkCourseCode(String ccode) {
         boolean checkCCODE = false;
         String query = "SELECT * FROM `course` WHERE `coursecode`=?";
         try {
@@ -225,28 +230,28 @@ public class HomePageAdmin extends javax.swing.JFrame {
             result = pst.executeQuery();
             if (result.next()) {
                 checkCCODE = true;
-            } 
+            }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null,ex);
+            JOptionPane.showMessageDialog(null, ex);
         }
         return checkCCODE;
     }
-    
+
     // Show Table
     private void show_Table(String tableName, JTable targetTable) {
         // Icons
-        if(tableName.equals("student")){
+        if (tableName.equals("student")) {
             setIconRenderer(4, VIEW_ICON, tableName);
             setIconRenderer(5, DELETE_ICON, tableName);
-        } else if(tableName.equals("instructor")){
+        } else if (tableName.equals("instructor")) {
             setIconRenderer(5, VIEW_ICON, tableName);
             setIconRenderer(6, DELETE_ICON, tableName);
-        } else if(tableName.equals("course")){
+        } else if (tableName.equals("course")) {
             setIconRenderer(6, DELETE_ICON, tableName);
-        } else if(tableName.equals("notification")){
+        } else if (tableName.equals("notification")) {
             setIconRenderer(2, DELETE_ICON, tableName);
         }
-        String query = "SELECT * FROM `"+ tableName +"` ";
+        String query = "SELECT * FROM `" + tableName + "` ";
         try {
             // Database Connection
             connect = Database.getConnection();
@@ -254,55 +259,56 @@ public class HomePageAdmin extends javax.swing.JFrame {
             result = pst.executeQuery();
             RSMD = result.getMetaData();
             int CC = RSMD.getColumnCount();
-            DTM = (DefaultTableModel)targetTable.getModel();
-            
+            DTM = (DefaultTableModel) targetTable.getModel();
+
             DTM.setRowCount(0);
-            while(result.next()) {
+            while (result.next()) {
                 Vector v2 = new Vector();
-                for(int i=1; i<=CC; i++) {
-                    if(tableName.equals("student")){
+                for (int i = 1; i <= CC; i++) {
+                    if (tableName.equals("student")) {
                         v2.add(result.getString("Id"));
                         v2.add(result.getString("fName"));
                         v2.add(result.getString("lName"));
                         v2.add(result.getString("status"));
-                    } else if(tableName.equals("instructor")){
+                    } else if (tableName.equals("instructor")) {
                         v2.add(result.getString("Id"));
                         v2.add(result.getString("fName"));
                         v2.add(result.getString("lName"));
                         v2.add(result.getString("status"));
                         v2.add(result.getString("department"));
                         v2.add("");
-                    } else if (tableName.equals("course")){
+                    } else if (tableName.equals("course")) {
                         v2.add(result.getString("coursecode"));
                         v2.add(result.getString("coursename"));
                         v2.add(result.getString("credithrs"));
                         v2.add(result.getString("session"));
                         v2.add(result.getString("academicyear"));
                         v2.add(result.getString("seats"));
-                    } else if (tableName.equals("timetable")){
+                    } else if (tableName.equals("timetable")) {
                         v2.add(result.getString("cName"));
                         v2.add(result.getString("instructorName"));
                         v2.add(result.getString("day"));
                         v2.add(result.getString("sTime"));
                         v2.add(result.getString("eTime"));
                         v2.add(result.getString("roomNo"));
-                    } else if (tableName.equals("notification")){
+                    } else if (tableName.equals("notification")) {
                         v2.add(result.getString("title"));
                         v2.add(result.getString("message"));
-                    }   
+                    }
                 }
                 DTM.addRow(v2);
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null,ex);
+            JOptionPane.showMessageDialog(null, ex);
         }
     }
-    
+
     // Set Icon
     private void setIconRenderer(int columnIndex, ImageIcon icon, String tableName) {
         DefaultTableCellRenderer iconRenderer = new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable ViewTable, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            public Component getTableCellRendererComponent(JTable ViewTable, Object value, boolean isSelected,
+                    boolean hasFocus, int row, int column) {
                 JLabel label = new JLabel(icon);
                 label.setHorizontalAlignment(JLabel.CENTER);
                 if (isSelected) {
@@ -312,36 +318,37 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 return label;
             }
         };
-        if(tableName.equals("student")){
+        if (tableName.equals("student")) {
             ViewStudentsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
-        } else if(tableName.equals("instructor")){
+        } else if (tableName.equals("instructor")) {
             ViewInstructorsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
-        } else if(tableName.equals("course")){
+        } else if (tableName.equals("course")) {
             ViewCoursesTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
-        } else if(tableName.equals("notification")){
+        } else if (tableName.equals("notification")) {
             ViewNotificationsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(iconRenderer);
         }
     }
-    
+
     // Generate Random ID For Instructor
-    private String generateRandomID(){
+    private String generateRandomID() {
         Random random = new Random();
         char fixedLetter = 'F';
         int randomNum = random.nextInt(10000);
         String generatedID = String.format("%04d", randomNum);
         return fixedLetter + generatedID;
     }
-    
+
     // Show Results
     private void showResultsToPublish(String courseName) {
         DefaultTableModel model = (DefaultTableModel) ResultTable.getModel();
         model.setRowCount(0);
 
-        String query = "SELECT r.student_id, CONCAT(s.fName, ' ', s.lName) AS name, r.sessional, r.final, r.total, r.is_published " +
-                       "FROM results r " +
-                       "JOIN student s ON r.student_id = s.ID " +
-                       "JOIN course c ON r.course_code = c.coursecode " +
-                       "WHERE c.coursename = ?";
+        String query = "SELECT r.student_id, CONCAT(s.fName, ' ', s.lName) AS name, r.sessional, r.final, r.total, r.is_published "
+                +
+                "FROM results r " +
+                "JOIN student s ON r.student_id = s.ID " +
+                "JOIN course c ON r.course_code = c.coursecode " +
+                "WHERE c.coursename = ?";
         try {
             pst = connect.prepareStatement(query);
             pst.setString(1, courseName);
@@ -349,19 +356,19 @@ public class HomePageAdmin extends javax.swing.JFrame {
 
             while (result.next()) {
                 String status = result.getInt("is_published") == 1 ? "Published" : "Pending";
-                model.addRow(new Object[]{
-                    result.getString("student_id"),
-                    result.getString("name"),
-                    result.getDouble("sessional"),
-                    result.getDouble("final"),
-                    result.getDouble("total"),
-                    status
+                model.addRow(new Object[] {
+                        result.getString("student_id"),
+                        result.getString("name"),
+                        result.getDouble("sessional"),
+                        result.getDouble("final"),
+                        result.getDouble("total"),
+                        status
                 });
             }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Error fetching results: " + ex.getMessage());
         }
-    }  
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -369,7 +376,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
      * regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated
+    // Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         HomePageAdminPanel = new ui.GradientPanel();
@@ -398,8 +406,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         ADateOfBirth = new javax.swing.JLabel();
         ADateOfBirthField = new RoundedDateChooser();
         ADepartment = new javax.swing.JLabel();
-        ADepartmentCombo = new RoundedComboBox<>()
-        ;
+        ADepartmentCombo = new RoundedComboBox<>();
         AProgram = new javax.swing.JLabel();
         AProgramField = new RoundedTextField(20);
         AAddress = new javax.swing.JLabel();
@@ -423,8 +430,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         UDateOfBirth = new javax.swing.JLabel();
         UDateOfBirthField = new RoundedDateChooser();
         UDepartment = new javax.swing.JLabel();
-        UDepartmentCombo = new RoundedComboBox<>()
-        ;
+        UDepartmentCombo = new RoundedComboBox<>();
         UProgram = new javax.swing.JLabel();
         UProgramField = new RoundedTextField(20);
         UAddress = new javax.swing.JLabel();
@@ -456,8 +462,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         ADateOfBirth2 = new javax.swing.JLabel();
         ADateOfBirthField2 = new RoundedDateChooser();
         ADepartment2 = new javax.swing.JLabel();
-        ADepartmentCombo2 = new RoundedComboBox<>()
-        ;
+        ADepartmentCombo2 = new RoundedComboBox<>();
         AAddress2 = new javax.swing.JLabel();
         AAddressField2 = new RoundedTextField(20);
         AEmail2 = new javax.swing.JLabel();
@@ -479,8 +484,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         UDateOfBirth2 = new javax.swing.JLabel();
         UDateOfBirthField2 = new RoundedDateChooser();
         UDepartment2 = new javax.swing.JLabel();
-        UDepartmentCombo2 = new RoundedComboBox<>()
-        ;
+        UDepartmentCombo2 = new RoundedComboBox<>();
         UAddress2 = new javax.swing.JLabel();
         UAddressField2 = new RoundedTextField(20);
         UEmail2 = new javax.swing.JLabel();
@@ -508,8 +512,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         AAcademicYear = new javax.swing.JLabel();
         AAcademicYearField = new RoundedTextField(20);
         ACDepartment = new javax.swing.JLabel();
-        ACDepartmentCombo = new RoundedComboBox<>()
-        ;
+        ACDepartmentCombo = new RoundedComboBox<>();
         ASeats = new javax.swing.JLabel();
         ASeatsField = new RoundedTextField(20);
         ACSubmitBtn = new RoundedButton();
@@ -525,8 +528,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         UAcademicYear = new javax.swing.JLabel();
         UAcademicYearField = new RoundedTextField(20);
         UCDepartment = new javax.swing.JLabel();
-        UCDepartmentCombo = new RoundedComboBox<>()
-        ;
+        UCDepartmentCombo = new RoundedComboBox<>();
         USeats = new javax.swing.JLabel();
         USeatsField = new RoundedTextField(20);
         UCSubmitBtn = new RoundedButton();
@@ -688,38 +690,43 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout SidePanelLayout = new javax.swing.GroupLayout(SidePanel);
         SidePanel.setLayout(SidePanelLayout);
         SidePanelLayout.setHorizontalGroup(
-            SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(SidePanelLayout.createSequentialGroup()
-                .addGap(30, 30, 30)
-                .addGroup(SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(Notification, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(ManageStudent, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(ManageCourse, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(ManageInstructor, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(PublishResult, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(LogOut, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(TimeTable, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(30, Short.MAX_VALUE))
-        );
+                SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(SidePanelLayout.createSequentialGroup()
+                                .addGap(30, 30, 30)
+                                .addGroup(SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(Notification, javax.swing.GroupLayout.PREFERRED_SIZE, 140,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(ManageStudent, javax.swing.GroupLayout.PREFERRED_SIZE, 140,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(ManageCourse, javax.swing.GroupLayout.PREFERRED_SIZE, 140,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(ManageInstructor, javax.swing.GroupLayout.PREFERRED_SIZE, 140,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(PublishResult, javax.swing.GroupLayout.PREFERRED_SIZE, 140,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(LogOut, javax.swing.GroupLayout.PREFERRED_SIZE, 140,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(TimeTable, javax.swing.GroupLayout.PREFERRED_SIZE, 140,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap(30, Short.MAX_VALUE)));
         SidePanelLayout.setVerticalGroup(
-            SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(SidePanelLayout.createSequentialGroup()
-                .addGap(45, 45, 45)
-                .addComponent(ManageStudent)
-                .addGap(45, 45, 45)
-                .addComponent(ManageInstructor)
-                .addGap(45, 45, 45)
-                .addComponent(ManageCourse)
-                .addGap(45, 45, 45)
-                .addComponent(TimeTable)
-                .addGap(45, 45, 45)
-                .addComponent(PublishResult)
-                .addGap(45, 45, 45)
-                .addComponent(Notification)
-                .addGap(45, 45, 45)
-                .addComponent(LogOut)
-                .addGap(22, 22, 22))
-        );
+                SidePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(SidePanelLayout.createSequentialGroup()
+                                .addGap(45, 45, 45)
+                                .addComponent(ManageStudent)
+                                .addGap(45, 45, 45)
+                                .addComponent(ManageInstructor)
+                                .addGap(45, 45, 45)
+                                .addComponent(ManageCourse)
+                                .addGap(45, 45, 45)
+                                .addComponent(TimeTable)
+                                .addGap(45, 45, 45)
+                                .addComponent(PublishResult)
+                                .addGap(45, 45, 45)
+                                .addComponent(Notification)
+                                .addGap(45, 45, 45)
+                                .addComponent(LogOut)
+                                .addGap(22, 22, 22)));
 
         MainPagePanel.setOpaque(false);
         MainPagePanel.setPreferredSize(new java.awt.Dimension(100, 600));
@@ -742,6 +749,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 AFirstNameFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 AFirstNameFieldFocusLost(evt);
             }
@@ -756,6 +764,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 ALastNameFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 ALastNameFieldFocusLost(evt);
             }
@@ -770,6 +779,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 APhoneNoFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 APhoneNoFieldFocusLost(evt);
             }
@@ -778,7 +788,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
         AGender.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         AGender.setText("Gender");
 
-        AGenderCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Gender", "Male", "Female", "Other" }));
+        AGenderCombo.setModel(
+                new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Gender", "Male", "Female", "Other" }));
 
         ACNIC.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         ACNIC.setText("CNIC");
@@ -790,6 +801,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 ACNICFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 ACNICFieldFocusLost(evt);
             }
@@ -803,6 +815,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 ADateOfBirthFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 ADateOfBirthFieldFocusLost(evt);
             }
@@ -811,7 +824,9 @@ public class HomePageAdmin extends javax.swing.JFrame {
         ADepartment.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         ADepartment.setText("Department");
 
-        ADepartmentCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Department", "Department of Computer Science", "Department of English", "Department of Mathematics", "Department of Physics" }));
+        ADepartmentCombo.setModel(new javax.swing.DefaultComboBoxModel<>(
+                new String[] { "Select Department", "Department of Computer Science", "Department of English",
+                        "Department of Mathematics", "Department of Physics" }));
 
         AProgram.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         AProgram.setText("Program");
@@ -822,6 +837,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 AProgramFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 AProgramFieldFocusLost(evt);
             }
@@ -839,6 +855,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 AEmailFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 AEmailFieldFocusLost(evt);
             }
@@ -861,116 +878,196 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout AddStudentLayout = new javax.swing.GroupLayout(AddStudent);
         AddStudent.setLayout(AddStudentLayout);
         AddStudentLayout.setHorizontalGroup(
-            AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AddStudentLayout.createSequentialGroup()
-                .addGap(40, 40, 40)
-                .addGroup(AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(AAddressField)
-                    .addComponent(AEmailField)
-                    .addGroup(AddStudentLayout.createSequentialGroup()
-                        .addComponent(AEmail)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(AddStudentLayout.createSequentialGroup()
-                        .addGroup(AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(ACNIC, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(ACNICField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(AFirstNameField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(AddStudentLayout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addGroup(AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(AAddress)
-                                        .addComponent(ADepartment)
-                                        .addComponent(ADepartmentCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(AddStudentLayout.createSequentialGroup()
-                                        .addComponent(AFirstName)
-                                        .addGap(279, 279, 279))
-                                    .addGroup(AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(AddStudentLayout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addGroup(AddStudentLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(AAddressField)
+                                        .addComponent(AEmailField)
                                         .addGroup(AddStudentLayout.createSequentialGroup()
-                                            .addComponent(ALastName)
-                                            .addGap(71, 71, 71))
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(APhoneNoField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(APhoneNo))
-                                        .addComponent(ALastNameField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                        .addGap(63, 63, 63)
-                        .addGroup(AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddStudentLayout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addGroup(AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddStudentLayout.createSequentialGroup()
-                                        .addComponent(AProgram)
-                                        .addGap(147, 147, 147))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddStudentLayout.createSequentialGroup()
-                                        .addComponent(ADateOfBirth)
-                                        .addGap(114, 114, 114))))
-                            .addGroup(AddStudentLayout.createSequentialGroup()
-                                .addGroup(AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(AGenderCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(AGender)
-                                    .addComponent(ADateOfBirthField, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(AProgramField, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(0, 0, Short.MAX_VALUE)))))
-                .addGap(40, 40, 40))
-            .addGroup(AddStudentLayout.createSequentialGroup()
-                .addGap(289, 289, 289)
-                .addComponent(ASubmitBtn)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
+                                                .addComponent(AEmail)
+                                                .addGap(0, 0, Short.MAX_VALUE))
+                                        .addGroup(AddStudentLayout.createSequentialGroup()
+                                                .addGroup(AddStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                                        .addComponent(ACNIC, javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(ACNICField,
+                                                                javax.swing.GroupLayout.Alignment.LEADING,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(AFirstNameField,
+                                                                javax.swing.GroupLayout.Alignment.LEADING,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addGroup(AddStudentLayout.createSequentialGroup()
+                                                                .addGap(0, 0, Short.MAX_VALUE)
+                                                                .addGroup(AddStudentLayout.createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.TRAILING)
+                                                                        .addGroup(AddStudentLayout.createParallelGroup(
+                                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                .addComponent(AAddress)
+                                                                                .addComponent(ADepartment)
+                                                                                .addComponent(ADepartmentCombo,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                        361,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                        .addGroup(
+                                                                                AddStudentLayout.createSequentialGroup()
+                                                                                        .addComponent(AFirstName)
+                                                                                        .addGap(279, 279, 279))
+                                                                        .addGroup(AddStudentLayout.createParallelGroup(
+                                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                .addGroup(AddStudentLayout
+                                                                                        .createSequentialGroup()
+                                                                                        .addComponent(ALastName)
+                                                                                        .addGap(71, 71, 71))
+                                                                                .addGroup(
+                                                                                        javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                                        AddStudentLayout
+                                                                                                .createParallelGroup(
+                                                                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                                .addComponent(
+                                                                                                        APhoneNoField,
+                                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                                        150,
+                                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                                                .addComponent(APhoneNo))
+                                                                                .addComponent(ALastNameField,
+                                                                                        javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                        150,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                                .addGap(63, 63, 63)
+                                                .addGroup(AddStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                AddStudentLayout.createSequentialGroup()
+                                                                        .addGap(0, 0, Short.MAX_VALUE)
+                                                                        .addGroup(AddStudentLayout.createParallelGroup(
+                                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                .addGroup(
+                                                                                        javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                                        AddStudentLayout
+                                                                                                .createSequentialGroup()
+                                                                                                .addComponent(AProgram)
+                                                                                                .addGap(147, 147, 147))
+                                                                                .addGroup(
+                                                                                        javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                                        AddStudentLayout
+                                                                                                .createSequentialGroup()
+                                                                                                .addComponent(
+                                                                                                        ADateOfBirth)
+                                                                                                .addGap(114, 114,
+                                                                                                        114))))
+                                                        .addGroup(AddStudentLayout.createSequentialGroup()
+                                                                .addGroup(AddStudentLayout.createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                                        .addComponent(AGenderCombo,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                213,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addComponent(AGender)
+                                                                        .addComponent(ADateOfBirthField,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                213,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addComponent(AProgramField,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                213,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                .addGap(0, 0, Short.MAX_VALUE)))))
+                                .addGap(40, 40, 40))
+                        .addGroup(AddStudentLayout.createSequentialGroup()
+                                .addGap(289, 289, 289)
+                                .addComponent(ASubmitBtn)
+                                .addGap(0, 0, Short.MAX_VALUE)));
         AddStudentLayout.setVerticalGroup(
-            AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AddStudentLayout.createSequentialGroup()
-                .addGap(50, 50, 50)
-                .addGroup(AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(AddStudentLayout.createSequentialGroup()
-                        .addGroup(AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addGroup(AddStudentLayout.createSequentialGroup()
-                                .addComponent(AFirstName)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(AFirstNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                AddStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(AddStudentLayout.createSequentialGroup()
+                                .addGap(50, 50, 50)
+                                .addGroup(AddStudentLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addGroup(AddStudentLayout.createSequentialGroup()
+                                                .addGroup(AddStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                false)
+                                                        .addGroup(AddStudentLayout.createSequentialGroup()
+                                                                .addComponent(AFirstName)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(AFirstNameField,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                                .addComponent(ACNIC)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(ACNICField,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                                .addComponent(ADepartment)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING,
+                                                                AddStudentLayout.createSequentialGroup()
+                                                                        .addComponent(ALastName)
+                                                                        .addPreferredGap(
+                                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                        .addComponent(ALastNameField,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                40,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addPreferredGap(
+                                                                                javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                                        .addComponent(APhoneNo)
+                                                                        .addPreferredGap(
+                                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                        .addComponent(APhoneNoField,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                40,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addPreferredGap(
+                                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                Short.MAX_VALUE)))
+                                                .addComponent(ADepartmentCombo, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                        40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(AddStudentLayout.createSequentialGroup()
+                                                .addComponent(ADateOfBirth)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(ADateOfBirthField, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                        40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(AGender)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(AGenderCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(AProgram)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(AProgramField, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(ACNIC)
+                                .addComponent(AAddress)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(ACNICField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(AAddressField, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(ADepartment)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, AddStudentLayout.createSequentialGroup()
-                                .addComponent(ALastName)
+                                .addComponent(AEmail)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(ALastNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(APhoneNo)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(APhoneNoField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                        .addComponent(ADepartmentCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(AddStudentLayout.createSequentialGroup()
-                        .addComponent(ADateOfBirth)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(ADateOfBirthField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(AGender)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(AGenderCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(AProgram)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(AProgramField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(AAddress)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(AAddressField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(AEmail)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(AEmailField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(50, 50, 50)
-                .addComponent(ASubmitBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(22, Short.MAX_VALUE))
-        );
+                                .addComponent(AEmailField, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(50, 50, 50)
+                                .addComponent(ASubmitBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(22, Short.MAX_VALUE)));
 
-        StudentTabs.addTab("Add Student", new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-add-16.png")), AddStudent); // NOI18N
+        StudentTabs.addTab("Add Student",
+                new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-add-16.png")), AddStudent); // NOI18N
 
         UpdateStudent.setOpaque(false);
 
@@ -983,6 +1080,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 UIdFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 UIdFieldFocusLost(evt);
             }
@@ -1000,6 +1098,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 UFirstNameFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 UFirstNameFieldFocusLost(evt);
             }
@@ -1012,6 +1111,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 ULastNameFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 ULastNameFieldFocusLost(evt);
             }
@@ -1024,6 +1124,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 UPhoneNoFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 UPhoneNoFieldFocusLost(evt);
             }
@@ -1032,7 +1133,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
         UGender.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         UGender.setText("Gender");
 
-        UGenderCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Gender", "Male", "Female", "Other" }));
+        UGenderCombo.setModel(
+                new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Gender", "Male", "Female", "Other" }));
 
         UCNIC.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         UCNIC.setText("CNIC");
@@ -1041,6 +1143,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 UCNICFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 UCNICFieldFocusLost(evt);
             }
@@ -1054,6 +1157,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 UDateOfBirthFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 UDateOfBirthFieldFocusLost(evt);
             }
@@ -1062,7 +1166,9 @@ public class HomePageAdmin extends javax.swing.JFrame {
         UDepartment.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         UDepartment.setText("Department");
 
-        UDepartmentCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Department", "Department of Computer Science", "Department of English", "Department of Mathematics", "Department of Physics" }));
+        UDepartmentCombo.setModel(new javax.swing.DefaultComboBoxModel<>(
+                new String[] { "Select Department", "Department of Computer Science", "Department of English",
+                        "Department of Mathematics", "Department of Physics" }));
 
         UProgram.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         UProgram.setText("Program");
@@ -1071,6 +1177,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 UProgramFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 UProgramFieldFocusLost(evt);
             }
@@ -1086,6 +1193,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 UEmailFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 UEmailFieldFocusLost(evt);
             }
@@ -1140,152 +1248,208 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout UpdateStudentLayout = new javax.swing.GroupLayout(UpdateStudent);
         UpdateStudent.setLayout(UpdateStudentLayout);
         UpdateStudentLayout.setHorizontalGroup(
-            UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(UpdateStudentLayout.createSequentialGroup()
-                .addGap(40, 40, 40)
-                .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(UAddressField)
-                    .addComponent(UEmailField)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, UpdateStudentLayout.createSequentialGroup()
-                        .addComponent(UStatus)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(UActive)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(UInactive)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(USubmitBtn))
-                    .addComponent(UPasswordField)
-                    .addGroup(UpdateStudentLayout.createSequentialGroup()
-                        .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(UIdField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(UId))
-                        .addGap(12, 12, 12)
-                        .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(UFirstNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(UFirstName))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
-                        .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(UpdateStudentLayout.createSequentialGroup()
-                                .addComponent(ULastName)
-                                .addGap(83, 83, 83)
-                                .addComponent(UDateOfBirth))
-                            .addGroup(UpdateStudentLayout.createSequentialGroup()
-                                .addComponent(ULastNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(UDateOfBirthField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(UpdateStudentLayout.createSequentialGroup()
-                        .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(UDepartment)
-                            .addComponent(UEmail)
-                            .addComponent(UPassword)
-                            .addComponent(UAddress))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(UpdateStudentLayout.createSequentialGroup()
-                        .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(UCNIC)
-                            .addComponent(UCNICField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(UPhoneNoField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(UPhoneNo))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(UGender)
-                            .addComponent(UGenderCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(UProgram)
-                            .addComponent(UProgramField)))
-                    .addComponent(UDepartmentCombo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(40, 40, 40))
-        );
+                UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(UpdateStudentLayout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addGroup(UpdateStudentLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(UAddressField)
+                                        .addComponent(UEmailField)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, UpdateStudentLayout
+                                                .createSequentialGroup()
+                                                .addComponent(UStatus)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(UActive)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(UInactive)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(USubmitBtn))
+                                        .addComponent(UPasswordField)
+                                        .addGroup(UpdateStudentLayout.createSequentialGroup()
+                                                .addGroup(UpdateStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(UIdField, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(UId))
+                                                .addGap(12, 12, 12)
+                                                .addGroup(UpdateStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(UFirstNameField,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(UFirstName))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13,
+                                                        Short.MAX_VALUE)
+                                                .addGroup(UpdateStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(UpdateStudentLayout.createSequentialGroup()
+                                                                .addComponent(ULastName)
+                                                                .addGap(83, 83, 83)
+                                                                .addComponent(UDateOfBirth))
+                                                        .addGroup(UpdateStudentLayout.createSequentialGroup()
+                                                                .addComponent(ULastNameField,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                                .addComponent(UDateOfBirthField,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                        .addGroup(UpdateStudentLayout.createSequentialGroup()
+                                                .addGroup(UpdateStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(UDepartment)
+                                                        .addComponent(UEmail)
+                                                        .addComponent(UPassword)
+                                                        .addComponent(UAddress))
+                                                .addGap(0, 0, Short.MAX_VALUE))
+                                        .addGroup(UpdateStudentLayout.createSequentialGroup()
+                                                .addGroup(UpdateStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING,
+                                                                false)
+                                                        .addComponent(UCNIC)
+                                                        .addComponent(UCNICField,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addGroup(UpdateStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(UPhoneNoField,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(UPhoneNo))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addGroup(UpdateStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(UGender)
+                                                        .addComponent(UGenderCombo,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addGroup(UpdateStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(UProgram)
+                                                        .addComponent(UProgramField)))
+                                        .addComponent(UDepartmentCombo, 0, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                Short.MAX_VALUE))
+                                .addGap(40, 40, 40)));
         UpdateStudentLayout.setVerticalGroup(
-            UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(UpdateStudentLayout.createSequentialGroup()
-                .addGap(17, 17, 17)
-                .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(UpdateStudentLayout.createSequentialGroup()
-                        .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(UFirstName)
-                            .addComponent(ULastName)
-                            .addComponent(UDateOfBirth)
-                            .addComponent(UId))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(UDateOfBirthField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(UIdField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(UFirstNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(ULastNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(UPhoneNo)
-                            .addComponent(UGender)
-                            .addComponent(UCNIC))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(UPhoneNoField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(UGenderCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(UCNICField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(UpdateStudentLayout.createSequentialGroup()
-                        .addComponent(UProgram)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(UProgramField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(UDepartment)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(UDepartmentCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(UAddress)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(UAddressField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(UEmail)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(UEmailField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(UPassword)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(UPasswordField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(USubmitBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(UStatus)
-                    .addComponent(UActive)
-                    .addComponent(UInactive))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+                UpdateStudentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(UpdateStudentLayout.createSequentialGroup()
+                                .addGap(17, 17, 17)
+                                .addGroup(UpdateStudentLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addGroup(UpdateStudentLayout.createSequentialGroup()
+                                                .addGroup(UpdateStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(UFirstName)
+                                                        .addComponent(ULastName)
+                                                        .addComponent(UDateOfBirth)
+                                                        .addComponent(UId))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(UpdateStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(UDateOfBirthField,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addGroup(UpdateStudentLayout
+                                                                .createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.BASELINE)
+                                                                .addComponent(UIdField,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addComponent(UFirstNameField,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addComponent(ULastNameField,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addGroup(UpdateStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(UPhoneNo)
+                                                        .addComponent(UGender)
+                                                        .addComponent(UCNIC))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(UpdateStudentLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(UPhoneNoField,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(UGenderCombo,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(UCNICField,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addGroup(UpdateStudentLayout.createSequentialGroup()
+                                                .addComponent(UProgram)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(UProgramField, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(UDepartment)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(UDepartmentCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(UAddress)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(UAddressField, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(UEmail)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(UEmailField, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(UPassword)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(UPasswordField, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addGroup(UpdateStudentLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(USubmitBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(UStatus)
+                                        .addComponent(UActive)
+                                        .addComponent(UInactive))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 
-        StudentTabs.addTab("Update Student", new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-update-16.png")), UpdateStudent); // NOI18N
+        StudentTabs.addTab("Update Student",
+                new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-update-16.png")),
+                UpdateStudent); // NOI18N
 
         ViewStudents.setOpaque(false);
 
         ViewStudentsTable.setFont(new java.awt.Font("Bodoni MT", 0, 14)); // NOI18N
         ViewStudentsTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
-            },
-            new String [] {
-                "ID", "First Name", "Last Name", "Status", "View", "Delete"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class
+                new Object[][] {
+                        { null, null, null, null, null, null },
+                        { null, null, null, null, null, null },
+                        { null, null, null, null, null, null },
+                        { null, null, null, null, null, null },
+                        { null, null, null, null, null, null }
+                },
+                new String[] {
+                        "ID", "First Name", "Last Name", "Status", "View", "Delete"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class,
+                    java.lang.Object.class, java.lang.Object.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+            boolean[] canEdit = new boolean[] {
+                    false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         ViewStudentsTable.setRowHeight(50);
@@ -1305,32 +1469,31 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout ViewStudentsLayout = new javax.swing.GroupLayout(ViewStudents);
         ViewStudents.setLayout(ViewStudentsLayout);
         ViewStudentsLayout.setHorizontalGroup(
-            ViewStudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ViewStudentsLayout.createSequentialGroup()
-                .addGap(50, 50, 50)
-                .addComponent(ViewStudentsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 617, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(50, Short.MAX_VALUE))
-        );
+                ViewStudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ViewStudentsLayout.createSequentialGroup()
+                                .addGap(50, 50, 50)
+                                .addComponent(ViewStudentsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 617,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(50, Short.MAX_VALUE)));
         ViewStudentsLayout.setVerticalGroup(
-            ViewStudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ViewStudentsLayout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addComponent(ViewStudentsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 515, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(15, Short.MAX_VALUE))
-        );
+                ViewStudentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ViewStudentsLayout.createSequentialGroup()
+                                .addGap(25, 25, 25)
+                                .addComponent(ViewStudentsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 515,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(15, Short.MAX_VALUE)));
 
-        StudentTabs.addTab("View Students", new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-view-16.png")), ViewStudents); // NOI18N
+        StudentTabs.addTab("View Students",
+                new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-view-16.png")), ViewStudents); // NOI18N
 
         javax.swing.GroupLayout StudentPanelLayout = new javax.swing.GroupLayout(StudentPanel);
         StudentPanel.setLayout(StudentPanelLayout);
         StudentPanelLayout.setHorizontalGroup(
-            StudentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(StudentTabs)
-        );
+                StudentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(StudentTabs));
         StudentPanelLayout.setVerticalGroup(
-            StudentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(StudentTabs)
-        );
+                StudentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(StudentTabs));
 
         MainPagePanel.add(StudentPanel, "Card1");
 
@@ -1351,6 +1514,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 AFirstNameField2FocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 AFirstNameField2FocusLost(evt);
             }
@@ -1365,6 +1529,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 ALastNameField2FocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 ALastNameField2FocusLost(evt);
             }
@@ -1379,6 +1544,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 APhoneNoField2FocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 APhoneNoField2FocusLost(evt);
             }
@@ -1387,7 +1553,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
         AGender2.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         AGender2.setText("Gender");
 
-        AGenderCombo2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Gender", "Male", "Female", "Other" }));
+        AGenderCombo2.setModel(
+                new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Gender", "Male", "Female", "Other" }));
 
         ACNIC2.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         ACNIC2.setText("CNIC");
@@ -1399,6 +1566,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 ACNICField2FocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 ACNICField2FocusLost(evt);
             }
@@ -1412,6 +1580,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 ADateOfBirthField2FocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 ADateOfBirthField2FocusLost(evt);
             }
@@ -1420,7 +1589,9 @@ public class HomePageAdmin extends javax.swing.JFrame {
         ADepartment2.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         ADepartment2.setText("Department");
 
-        ADepartmentCombo2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Department", "Department of Computer Science", "Department of English", "Department of Mathematics", "Department of Physics" }));
+        ADepartmentCombo2.setModel(new javax.swing.DefaultComboBoxModel<>(
+                new String[] { "Select Department", "Department of Computer Science", "Department of English",
+                        "Department of Mathematics", "Department of Physics" }));
 
         AAddress2.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         AAddress2.setText("Address");
@@ -1434,6 +1605,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 AEmailField2FocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 AEmailField2FocusLost(evt);
             }
@@ -1456,111 +1628,197 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout AddInstructorLayout = new javax.swing.GroupLayout(AddInstructor);
         AddInstructor.setLayout(AddInstructorLayout);
         AddInstructorLayout.setHorizontalGroup(
-            AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AddInstructorLayout.createSequentialGroup()
-                .addGap(289, 289, 289)
-                .addComponent(ASubmitBtn2)
-                .addGap(0, 0, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddInstructorLayout.createSequentialGroup()
-                .addGroup(AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(AddInstructorLayout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(ADepartmentCombo2, javax.swing.GroupLayout.PREFERRED_SIZE, 637, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, AddInstructorLayout.createSequentialGroup()
-                        .addGap(40, 40, 40)
-                        .addGroup(AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(AAddressField2)
-                            .addComponent(AEmailField2)
-                            .addGroup(AddInstructorLayout.createSequentialGroup()
-                                .addComponent(AEmail2)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(AddInstructorLayout.createSequentialGroup()
-                                .addGroup(AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(ACNIC2, javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(ACNICField2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(AFirstNameField2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(AddInstructorLayout.createSequentialGroup()
-                                        .addGap(0, 0, Short.MAX_VALUE)
-                                        .addGroup(AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                            .addGroup(AddInstructorLayout.createSequentialGroup()
-                                                .addGroup(AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                    .addComponent(AAddress2)
-                                                    .addComponent(ADepartment2))
-                                                .addGap(272, 272, 272))
-                                            .addGroup(AddInstructorLayout.createSequentialGroup()
-                                                .addComponent(AFirstName2)
-                                                .addGap(279, 279, 279))
-                                            .addGroup(AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addGroup(AddInstructorLayout.createSequentialGroup()
-                                                    .addComponent(ALastName2)
-                                                    .addGap(71, 71, 71))
-                                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                    .addComponent(APhoneNoField2, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                    .addComponent(APhoneNo2))
-                                                .addComponent(ALastNameField2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                                .addGap(63, 63, 63)
-                                .addGroup(AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddInstructorLayout.createSequentialGroup()
-                                        .addGap(0, 0, Short.MAX_VALUE)
-                                        .addComponent(ADateOfBirth2)
-                                        .addGap(114, 114, 114))
-                                    .addGroup(AddInstructorLayout.createSequentialGroup()
-                                        .addGroup(AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(AGenderCombo2, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(AGender2)
-                                            .addComponent(ADateOfBirthField2, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGap(0, 0, Short.MAX_VALUE)))))))
-                .addGap(40, 40, 40))
-        );
-        AddInstructorLayout.setVerticalGroup(
-            AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AddInstructorLayout.createSequentialGroup()
-                .addGap(50, 50, 50)
-                .addGroup(AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(AddInstructorLayout.createSequentialGroup()
-                            .addComponent(AFirstName2)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(AFirstNameField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(ACNIC2)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(ACNICField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(ADepartment2))
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, AddInstructorLayout.createSequentialGroup()
-                            .addComponent(ALastName2)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(ALastNameField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(APhoneNo2)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(APhoneNoField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddInstructorLayout.createSequentialGroup()
-                        .addComponent(ADateOfBirth2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(ADateOfBirthField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(AGender2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(AGenderCombo2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(41, 41, 41)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(ADepartmentCombo2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(AAddress2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(AAddressField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(AEmail2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(AEmailField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(50, 50, 50)
-                .addComponent(ASubmitBtn2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(16, Short.MAX_VALUE))
-        );
+                                .addGap(289, 289, 289)
+                                .addComponent(ASubmitBtn2)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddInstructorLayout
+                                .createSequentialGroup()
+                                .addGroup(AddInstructorLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addGroup(AddInstructorLayout.createSequentialGroup()
+                                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(ADepartmentCombo2, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                        637, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, AddInstructorLayout
+                                                .createSequentialGroup()
+                                                .addGap(40, 40, 40)
+                                                .addGroup(AddInstructorLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(AAddressField2)
+                                                        .addComponent(AEmailField2)
+                                                        .addGroup(AddInstructorLayout.createSequentialGroup()
+                                                                .addComponent(AEmail2)
+                                                                .addGap(0, 0, Short.MAX_VALUE))
+                                                        .addGroup(AddInstructorLayout.createSequentialGroup()
+                                                                .addGroup(AddInstructorLayout.createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.TRAILING)
+                                                                        .addComponent(ACNIC2,
+                                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                                        .addComponent(ACNICField2,
+                                                                                javax.swing.GroupLayout.Alignment.LEADING,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                150,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addComponent(AFirstNameField2,
+                                                                                javax.swing.GroupLayout.Alignment.LEADING,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                150,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addGroup(AddInstructorLayout
+                                                                                .createSequentialGroup()
+                                                                                .addGap(0, 0, Short.MAX_VALUE)
+                                                                                .addGroup(AddInstructorLayout
+                                                                                        .createParallelGroup(
+                                                                                                javax.swing.GroupLayout.Alignment.TRAILING)
+                                                                                        .addGroup(AddInstructorLayout
+                                                                                                .createSequentialGroup()
+                                                                                                .addGroup(
+                                                                                                        AddInstructorLayout
+                                                                                                                .createParallelGroup(
+                                                                                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                                                .addComponent(
+                                                                                                                        AAddress2)
+                                                                                                                .addComponent(
+                                                                                                                        ADepartment2))
+                                                                                                .addGap(272, 272, 272))
+                                                                                        .addGroup(AddInstructorLayout
+                                                                                                .createSequentialGroup()
+                                                                                                .addComponent(
+                                                                                                        AFirstName2)
+                                                                                                .addGap(279, 279, 279))
+                                                                                        .addGroup(AddInstructorLayout
+                                                                                                .createParallelGroup(
+                                                                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                                .addGroup(
+                                                                                                        AddInstructorLayout
+                                                                                                                .createSequentialGroup()
+                                                                                                                .addComponent(
+                                                                                                                        ALastName2)
+                                                                                                                .addGap(71,
+                                                                                                                        71,
+                                                                                                                        71))
+                                                                                                .addGroup(
+                                                                                                        javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                                                        AddInstructorLayout
+                                                                                                                .createParallelGroup(
+                                                                                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                                                .addComponent(
+                                                                                                                        APhoneNoField2,
+                                                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                                                        150,
+                                                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                                                                .addComponent(
+                                                                                                                        APhoneNo2))
+                                                                                                .addComponent(
+                                                                                                        ALastNameField2,
+                                                                                                        javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                                        150,
+                                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                                                .addGap(63, 63, 63)
+                                                                .addGroup(AddInstructorLayout.createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                                        .addGroup(
+                                                                                javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                                AddInstructorLayout
+                                                                                        .createSequentialGroup()
+                                                                                        .addGap(0, 0, Short.MAX_VALUE)
+                                                                                        .addComponent(ADateOfBirth2)
+                                                                                        .addGap(114, 114, 114))
+                                                                        .addGroup(AddInstructorLayout
+                                                                                .createSequentialGroup()
+                                                                                .addGroup(AddInstructorLayout
+                                                                                        .createParallelGroup(
+                                                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                        .addComponent(AGenderCombo2,
+                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                                213,
+                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                                        .addComponent(AGender2)
+                                                                                        .addComponent(
+                                                                                                ADateOfBirthField2,
+                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                                213,
+                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                                .addGap(0, 0, Short.MAX_VALUE)))))))
+                                .addGap(40, 40, 40)));
+        AddInstructorLayout.setVerticalGroup(
+                AddInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(AddInstructorLayout.createSequentialGroup()
+                                .addGap(50, 50, 50)
+                                .addGroup(AddInstructorLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddInstructorLayout
+                                                .createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                .addGroup(AddInstructorLayout.createSequentialGroup()
+                                                        .addComponent(AFirstName2)
+                                                        .addPreferredGap(
+                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(AFirstNameField2,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addPreferredGap(
+                                                                javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                        .addComponent(ACNIC2)
+                                                        .addPreferredGap(
+                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(ACNICField2,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addPreferredGap(
+                                                                javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                        .addComponent(ADepartment2))
+                                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, AddInstructorLayout
+                                                        .createSequentialGroup()
+                                                        .addComponent(ALastName2)
+                                                        .addPreferredGap(
+                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(ALastNameField2,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addPreferredGap(
+                                                                javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                        .addComponent(APhoneNo2)
+                                                        .addPreferredGap(
+                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(APhoneNoField2,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddInstructorLayout
+                                                .createSequentialGroup()
+                                                .addComponent(ADateOfBirth2)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(ADateOfBirthField2,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(AGender2)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(AGenderCombo2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(41, 41, 41)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(ADepartmentCombo2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(AAddress2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(AAddressField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(AEmail2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(AEmailField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(50, 50, 50)
+                                .addComponent(ASubmitBtn2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(16, Short.MAX_VALUE)));
 
-        InstructorTabs.addTab("Add Instructor", new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-add-16.png")), AddInstructor); // NOI18N
+        InstructorTabs.addTab("Add Instructor",
+                new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-add-16.png")), AddInstructor); // NOI18N
 
         UpdateInstructor.setOpaque(false);
 
@@ -1573,6 +1831,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 UIdField2FocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 UIdField2FocusLost(evt);
             }
@@ -1590,6 +1849,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 UFirstNameField2FocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 UFirstNameField2FocusLost(evt);
             }
@@ -1602,6 +1862,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 ULastNameField2FocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 ULastNameField2FocusLost(evt);
             }
@@ -1614,6 +1875,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 UPhoneNoField2FocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 UPhoneNoField2FocusLost(evt);
             }
@@ -1622,7 +1884,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
         UGender2.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         UGender2.setText("Gender");
 
-        UGenderCombo2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Gender", "Male", "Female", "Other" }));
+        UGenderCombo2.setModel(
+                new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Gender", "Male", "Female", "Other" }));
 
         UCNIC2.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         UCNIC2.setText("CNIC");
@@ -1631,6 +1894,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 UCNICField2FocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 UCNICField2FocusLost(evt);
             }
@@ -1644,6 +1908,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 UDateOfBirthField2FocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 UDateOfBirthField2FocusLost(evt);
             }
@@ -1652,7 +1917,9 @@ public class HomePageAdmin extends javax.swing.JFrame {
         UDepartment2.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         UDepartment2.setText("Department");
 
-        UDepartmentCombo2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Department", "Department of Computer Science", "Department of English", "Department of Mathematics", "Department of Physics" }));
+        UDepartmentCombo2.setModel(new javax.swing.DefaultComboBoxModel<>(
+                new String[] { "Select Department", "Department of Computer Science", "Department of English",
+                        "Department of Mathematics", "Department of Physics" }));
 
         UAddress2.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         UAddress2.setText("Address");
@@ -1664,6 +1931,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 UEmailField2FocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 UEmailField2FocusLost(evt);
             }
@@ -1718,142 +1986,188 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout UpdateInstructorLayout = new javax.swing.GroupLayout(UpdateInstructor);
         UpdateInstructor.setLayout(UpdateInstructorLayout);
         UpdateInstructorLayout.setHorizontalGroup(
-            UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(UpdateInstructorLayout.createSequentialGroup()
-                .addGap(40, 40, 40)
-                .addGroup(UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(UAddressField2)
-                    .addComponent(UEmailField2)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, UpdateInstructorLayout.createSequentialGroup()
-                        .addComponent(UStatus2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(UActive2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(UInactive2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(USubmitBtn2))
-                    .addComponent(UPasswordField2)
-                    .addGroup(UpdateInstructorLayout.createSequentialGroup()
-                        .addGroup(UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(UIdField2, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(UId2))
-                        .addGap(12, 12, 12)
-                        .addGroup(UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(UFirstNameField2, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(UFirstName2))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
-                        .addGroup(UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(UpdateInstructorLayout.createSequentialGroup()
-                                .addComponent(ULastName2)
-                                .addGap(83, 83, 83)
-                                .addComponent(UDateOfBirth2))
-                            .addGroup(UpdateInstructorLayout.createSequentialGroup()
-                                .addComponent(ULastNameField2, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(UDateOfBirthField2, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addComponent(UDepartmentCombo2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(UpdateInstructorLayout.createSequentialGroup()
-                        .addGroup(UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(UDepartment2)
-                            .addComponent(UEmail2)
-                            .addComponent(UPassword2)
-                            .addComponent(UAddress2))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(UpdateInstructorLayout.createSequentialGroup()
-                        .addGroup(UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(UCNIC2)
-                            .addComponent(UCNICField2, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(UPhoneNoField2, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(UPhoneNo2))
-                        .addGap(63, 63, 63)
-                        .addGroup(UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(UGender2)
-                            .addComponent(UGenderCombo2, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(40, 40, 40))
-        );
+                UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(UpdateInstructorLayout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addGroup(UpdateInstructorLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(UAddressField2)
+                                        .addComponent(UEmailField2)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, UpdateInstructorLayout
+                                                .createSequentialGroup()
+                                                .addComponent(UStatus2)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(UActive2)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(UInactive2)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(USubmitBtn2))
+                                        .addComponent(UPasswordField2)
+                                        .addGroup(UpdateInstructorLayout.createSequentialGroup()
+                                                .addGroup(UpdateInstructorLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(UIdField2, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(UId2))
+                                                .addGap(12, 12, 12)
+                                                .addGroup(UpdateInstructorLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(UFirstNameField2,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(UFirstName2))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13,
+                                                        Short.MAX_VALUE)
+                                                .addGroup(UpdateInstructorLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(UpdateInstructorLayout.createSequentialGroup()
+                                                                .addComponent(ULastName2)
+                                                                .addGap(83, 83, 83)
+                                                                .addComponent(UDateOfBirth2))
+                                                        .addGroup(UpdateInstructorLayout.createSequentialGroup()
+                                                                .addComponent(ULastNameField2,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                                .addComponent(UDateOfBirthField2,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                        .addComponent(UDepartmentCombo2, 0, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                Short.MAX_VALUE)
+                                        .addGroup(UpdateInstructorLayout.createSequentialGroup()
+                                                .addGroup(UpdateInstructorLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(UDepartment2)
+                                                        .addComponent(UEmail2)
+                                                        .addComponent(UPassword2)
+                                                        .addComponent(UAddress2))
+                                                .addGap(0, 0, Short.MAX_VALUE))
+                                        .addGroup(UpdateInstructorLayout.createSequentialGroup()
+                                                .addGroup(UpdateInstructorLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING,
+                                                                false)
+                                                        .addComponent(UCNIC2)
+                                                        .addComponent(UCNICField2,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 170,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addGroup(UpdateInstructorLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(UPhoneNoField2,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 170,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(UPhoneNo2))
+                                                .addGap(63, 63, 63)
+                                                .addGroup(UpdateInstructorLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(UGender2)
+                                                        .addComponent(UGenderCombo2,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 170,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addGap(40, 40, 40)));
         UpdateInstructorLayout.setVerticalGroup(
-            UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(UpdateInstructorLayout.createSequentialGroup()
-                .addGap(17, 17, 17)
-                .addGroup(UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(UFirstName2)
-                    .addComponent(ULastName2)
-                    .addComponent(UDateOfBirth2)
-                    .addComponent(UId2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(UDateOfBirthField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(UIdField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(UFirstNameField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(ULastNameField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(UPhoneNo2)
-                    .addComponent(UGender2)
-                    .addComponent(UCNIC2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(UPhoneNoField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(UGenderCombo2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(UCNICField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(UDepartment2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(UDepartmentCombo2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(UAddress2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(UAddressField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(UEmail2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(UEmailField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(UPassword2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(UPasswordField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(USubmitBtn2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(UStatus2)
-                    .addComponent(UActive2)
-                    .addComponent(UInactive2))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+                UpdateInstructorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(UpdateInstructorLayout.createSequentialGroup()
+                                .addGap(17, 17, 17)
+                                .addGroup(UpdateInstructorLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(UFirstName2)
+                                        .addComponent(ULastName2)
+                                        .addComponent(UDateOfBirth2)
+                                        .addComponent(UId2))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(UpdateInstructorLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(UDateOfBirthField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(UpdateInstructorLayout
+                                                .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                .addComponent(UIdField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(UFirstNameField2, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                        40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(ULastNameField2, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                        40, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(UpdateInstructorLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(UPhoneNo2)
+                                        .addComponent(UGender2)
+                                        .addComponent(UCNIC2))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(UpdateInstructorLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(UPhoneNoField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(UGenderCombo2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(UCNICField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(UDepartment2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(UDepartmentCombo2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(UAddress2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(UAddressField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(UEmail2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(UEmailField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(UPassword2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(UPasswordField2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addGroup(UpdateInstructorLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(USubmitBtn2, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(UStatus2)
+                                        .addComponent(UActive2)
+                                        .addComponent(UInactive2))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 
-        InstructorTabs.addTab("Update Instructor", new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-update-16.png")), UpdateInstructor); // NOI18N
+        InstructorTabs.addTab("Update Instructor",
+                new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-update-16.png")),
+                UpdateInstructor); // NOI18N
 
         ViewInstructors.setOpaque(false);
 
         ViewInstructorsTable.setFont(new java.awt.Font("Bodoni MT", 0, 14)); // NOI18N
         ViewInstructorsTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
-            },
-            new String [] {
-                "ID", "First Name", "Last Name", "Status", "Department", "View", "Delete"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class
+                new Object[][] {
+                        { null, null, null, null, null, null, null },
+                        { null, null, null, null, null, null, null },
+                        { null, null, null, null, null, null, null },
+                        { null, null, null, null, null, null, null },
+                        { null, null, null, null, null, null, null }
+                },
+                new String[] {
+                        "ID", "First Name", "Last Name", "Status", "Department", "View", "Delete"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class,
+                    java.lang.String.class, java.lang.Object.class, java.lang.Object.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+            boolean[] canEdit = new boolean[] {
+                    false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         ViewInstructorsTable.setRowHeight(50);
@@ -1873,32 +2187,32 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout ViewInstructorsLayout = new javax.swing.GroupLayout(ViewInstructors);
         ViewInstructors.setLayout(ViewInstructorsLayout);
         ViewInstructorsLayout.setHorizontalGroup(
-            ViewInstructorsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ViewInstructorsLayout.createSequentialGroup()
-                .addGap(50, 50, 50)
-                .addComponent(ViewInstructorsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 617, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(50, Short.MAX_VALUE))
-        );
+                ViewInstructorsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ViewInstructorsLayout.createSequentialGroup()
+                                .addGap(50, 50, 50)
+                                .addComponent(ViewInstructorsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 617,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(50, Short.MAX_VALUE)));
         ViewInstructorsLayout.setVerticalGroup(
-            ViewInstructorsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ViewInstructorsLayout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addComponent(ViewInstructorsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 515, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(15, Short.MAX_VALUE))
-        );
+                ViewInstructorsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ViewInstructorsLayout.createSequentialGroup()
+                                .addGap(25, 25, 25)
+                                .addComponent(ViewInstructorsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 515,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(15, Short.MAX_VALUE)));
 
-        InstructorTabs.addTab("View Instructors", new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-view-16.png")), ViewInstructors); // NOI18N
+        InstructorTabs.addTab("View Instructors",
+                new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-view-16.png")),
+                ViewInstructors); // NOI18N
 
         javax.swing.GroupLayout InstructorPanelLayout = new javax.swing.GroupLayout(InstructorPanel);
         InstructorPanel.setLayout(InstructorPanelLayout);
         InstructorPanelLayout.setHorizontalGroup(
-            InstructorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(InstructorTabs)
-        );
+                InstructorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(InstructorTabs));
         InstructorPanelLayout.setVerticalGroup(
-            InstructorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(InstructorTabs)
-        );
+                InstructorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(InstructorTabs));
 
         MainPagePanel.add(InstructorPanel, "Card2");
 
@@ -1922,7 +2236,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
         ASession.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         ASession.setText("Session");
 
-        ASessionCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Session", "Fall", "Spring", "Summer" }));
+        ASessionCombo.setModel(
+                new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Session", "Fall", "Spring", "Summer" }));
 
         AAcademicYear.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         AAcademicYear.setText("Academic Year");
@@ -1930,7 +2245,9 @@ public class HomePageAdmin extends javax.swing.JFrame {
         ACDepartment.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         ACDepartment.setText("Department");
 
-        ACDepartmentCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Department", "Department of Computer Science", "Department of English", "Department of Mathematics", "Department of Physics" }));
+        ACDepartmentCombo.setModel(new javax.swing.DefaultComboBoxModel<>(
+                new String[] { "Select Department", "Department of Computer Science", "Department of English",
+                        "Department of Mathematics", "Department of Physics" }));
 
         ASeats.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         ASeats.setText("Seats");
@@ -1952,88 +2269,129 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout AddCourseLayout = new javax.swing.GroupLayout(AddCourse);
         AddCourse.setLayout(AddCourseLayout);
         AddCourseLayout.setHorizontalGroup(
-            AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AddCourseLayout.createSequentialGroup()
-                .addGap(60, 60, 60)
-                .addGroup(AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(ACDepartment)
-                    .addComponent(ASeats)
-                    .addGroup(AddCourseLayout.createSequentialGroup()
-                        .addGroup(AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(ASession)
-                            .addGroup(AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddCourseLayout.createSequentialGroup()
-                                    .addComponent(ACourseCode)
-                                    .addGap(60, 60, 60))
-                                .addComponent(ACourseCodeField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGroup(AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddCourseLayout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(ACourseName)
-                                    .addComponent(ACourseNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(73, 73, 73)
-                                .addGroup(AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(ACreditHrsField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(ACreditHrs)))
-                            .addGroup(AddCourseLayout.createSequentialGroup()
-                                .addGap(297, 297, 297)
-                                .addComponent(AAcademicYear)
-                                .addGap(0, 0, Short.MAX_VALUE))))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddCourseLayout.createSequentialGroup()
-                        .addComponent(ASessionCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 226, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(AAcademicYearField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(ASeatsField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 597, Short.MAX_VALUE)
-                    .addComponent(ACDepartmentCombo, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddCourseLayout.createSequentialGroup()
-                .addGap(317, 317, 317)
-                .addComponent(ACSubmitBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(317, 317, 317))
-        );
+                AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(AddCourseLayout.createSequentialGroup()
+                                .addGap(60, 60, 60)
+                                .addGroup(AddCourseLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(ACDepartment)
+                                        .addComponent(ASeats)
+                                        .addGroup(AddCourseLayout.createSequentialGroup()
+                                                .addGroup(AddCourseLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(ASession)
+                                                        .addGroup(AddCourseLayout
+                                                                .createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                        AddCourseLayout.createSequentialGroup()
+                                                                                .addComponent(ACourseCode)
+                                                                                .addGap(60, 60, 60))
+                                                                .addComponent(ACourseCodeField,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                .addGroup(AddCourseLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                AddCourseLayout.createSequentialGroup()
+                                                                        .addPreferredGap(
+                                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                Short.MAX_VALUE)
+                                                                        .addGroup(AddCourseLayout.createParallelGroup(
+                                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                .addComponent(ACourseName)
+                                                                                .addComponent(ACourseNameField,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                        150,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                        .addGap(73, 73, 73)
+                                                                        .addGroup(AddCourseLayout.createParallelGroup(
+                                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                .addComponent(ACreditHrsField,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                        150,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                                .addComponent(ACreditHrs)))
+                                                        .addGroup(AddCourseLayout.createSequentialGroup()
+                                                                .addGap(297, 297, 297)
+                                                                .addComponent(AAcademicYear)
+                                                                .addGap(0, 0, Short.MAX_VALUE))))
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddCourseLayout
+                                                .createSequentialGroup()
+                                                .addComponent(ASessionCombo, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                        226, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(AAcademicYearField,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(ASeatsField, javax.swing.GroupLayout.Alignment.TRAILING,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE, 597, Short.MAX_VALUE)
+                                        .addComponent(ACDepartmentCombo, javax.swing.GroupLayout.Alignment.TRAILING, 0,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AddCourseLayout.createSequentialGroup()
+                                .addGap(317, 317, 317)
+                                .addComponent(ACSubmitBtn, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(317, 317, 317)));
         AddCourseLayout.setVerticalGroup(
-            AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(AddCourseLayout.createSequentialGroup()
-                .addGroup(AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(AddCourseLayout.createSequentialGroup()
-                        .addContainerGap(36, Short.MAX_VALUE)
-                        .addGroup(AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(AddCourseLayout.createSequentialGroup()
-                                .addComponent(ACreditHrs)
+                AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(AddCourseLayout.createSequentialGroup()
+                                .addGroup(AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(AddCourseLayout.createSequentialGroup()
+                                                .addContainerGap(36, Short.MAX_VALUE)
+                                                .addGroup(AddCourseLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(AddCourseLayout.createSequentialGroup()
+                                                                .addComponent(ACreditHrs)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(ACreditHrsField,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                        .addGroup(AddCourseLayout.createSequentialGroup()
+                                                                .addComponent(ACourseCode)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(ACourseCodeField,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                        .addGroup(AddCourseLayout.createSequentialGroup()
+                                                .addGap(0, 0, Short.MAX_VALUE)
+                                                .addComponent(ACourseName)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(ACourseNameField, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                        40, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(45, 45, 45)
+                                .addGroup(
+                                        AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                .addComponent(ASession)
+                                                .addComponent(AAcademicYear))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(ACreditHrsField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(AddCourseLayout.createSequentialGroup()
-                                .addComponent(ACourseCode)
+                                .addGroup(AddCourseLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(ASessionCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(AAcademicYearField, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(40, 40, 40)
+                                .addComponent(ACDepartment)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(ACourseCodeField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(AddCourseLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(ACourseName)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(ACourseNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(45, 45, 45)
-                .addGroup(AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(ASession)
-                    .addComponent(AAcademicYear))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(AddCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(ASessionCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(AAcademicYearField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(40, 40, 40)
-                .addComponent(ACDepartment)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(ACDepartmentCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(40, 40, 40)
-                .addComponent(ASeats)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(ASeatsField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(36, 36, 36)
-                .addComponent(ACSubmitBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
-                .addGap(43, 43, 43))
-        );
+                                .addComponent(ACDepartmentCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(40, 40, 40)
+                                .addComponent(ASeats)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(ASeatsField, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(36, 36, 36)
+                                .addComponent(ACSubmitBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
+                                .addGap(43, 43, 43)));
 
-        CourseTabs.addTab("Add Course", new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-add-16.png")), AddCourse); // NOI18N
+        CourseTabs.addTab("Add Course",
+                new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-add-16.png")), AddCourse); // NOI18N
 
         UpdateCourse.setOpaque(false);
 
@@ -2046,6 +2404,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 UCourseCodeFieldFocusGained(evt);
             }
+
             public void focusLost(java.awt.event.FocusEvent evt) {
                 UCourseCodeFieldFocusLost(evt);
             }
@@ -2065,7 +2424,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
         USession.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         USession.setText("Session");
 
-        USessionCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Session", "Fall", "Spring", "Summer" }));
+        USessionCombo.setModel(
+                new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Session", "Fall", "Spring", "Summer" }));
 
         UAcademicYear.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         UAcademicYear.setText("Academic Year");
@@ -2073,7 +2433,9 @@ public class HomePageAdmin extends javax.swing.JFrame {
         UCDepartment.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         UCDepartment.setText("Department");
 
-        UCDepartmentCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Department", "Department of Computer Science", "Department of English", "Department of Mathematics", "Department of Physics" }));
+        UCDepartmentCombo.setModel(new javax.swing.DefaultComboBoxModel<>(
+                new String[] { "Select Department", "Department of Computer Science", "Department of English",
+                        "Department of Mathematics", "Department of Physics" }));
 
         USeats.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         USeats.setText("Seats");
@@ -2095,115 +2457,158 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout UpdateCourseLayout = new javax.swing.GroupLayout(UpdateCourse);
         UpdateCourse.setLayout(UpdateCourseLayout);
         UpdateCourseLayout.setHorizontalGroup(
-            UpdateCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(UpdateCourseLayout.createSequentialGroup()
-                .addGap(60, 60, 60)
-                .addGroup(UpdateCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(UCDepartment)
-                    .addComponent(USeats)
-                    .addComponent(UCDepartmentCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 597, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(USeatsField)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, UpdateCourseLayout.createSequentialGroup()
-                        .addGroup(UpdateCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(UpdateCourseLayout.createSequentialGroup()
-                                .addGroup(UpdateCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(UpdateCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, UpdateCourseLayout.createSequentialGroup()
-                                            .addComponent(UCourseCode)
-                                            .addGap(60, 60, 60))
-                                        .addComponent(UCourseCodeField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(USession))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(UpdateCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(UCourseNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(UCourseName))
-                                .addGap(74, 74, 74))
-                            .addGroup(UpdateCourseLayout.createSequentialGroup()
-                                .addComponent(USessionCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 226, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(221, 221, 221)))
-                        .addGroup(UpdateCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(UAcademicYearField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(UCreditHrsField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(UCreditHrs)
-                            .addComponent(UAcademicYear))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, UpdateCourseLayout.createSequentialGroup()
-                .addGap(317, 317, 317)
-                .addComponent(UCSubmitBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(317, 317, 317))
-        );
+                UpdateCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(UpdateCourseLayout.createSequentialGroup()
+                                .addGap(60, 60, 60)
+                                .addGroup(UpdateCourseLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(UCDepartment)
+                                        .addComponent(USeats)
+                                        .addComponent(UCDepartmentCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 597,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(USeatsField)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, UpdateCourseLayout
+                                                .createSequentialGroup()
+                                                .addGroup(UpdateCourseLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(UpdateCourseLayout.createSequentialGroup()
+                                                                .addGroup(UpdateCourseLayout.createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                                        .addGroup(UpdateCourseLayout
+                                                                                .createParallelGroup(
+                                                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                .addGroup(
+                                                                                        javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                                        UpdateCourseLayout
+                                                                                                .createSequentialGroup()
+                                                                                                .addComponent(
+                                                                                                        UCourseCode)
+                                                                                                .addGap(60, 60, 60))
+                                                                                .addComponent(UCourseCodeField,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                        150,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                        .addComponent(USession))
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                        Short.MAX_VALUE)
+                                                                .addGroup(UpdateCourseLayout.createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                                        .addComponent(UCourseNameField,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                150,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addComponent(UCourseName))
+                                                                .addGap(74, 74, 74))
+                                                        .addGroup(UpdateCourseLayout.createSequentialGroup()
+                                                                .addComponent(USessionCombo,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 226,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addGap(221, 221, 221)))
+                                                .addGroup(UpdateCourseLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(UAcademicYearField,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(UCreditHrsField,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(UCreditHrs)
+                                                        .addComponent(UAcademicYear))))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, UpdateCourseLayout.createSequentialGroup()
+                                .addGap(317, 317, 317)
+                                .addComponent(UCSubmitBtn, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(317, 317, 317)));
         UpdateCourseLayout.setVerticalGroup(
-            UpdateCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(UpdateCourseLayout.createSequentialGroup()
-                .addGroup(UpdateCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(UpdateCourseLayout.createSequentialGroup()
-                        .addGroup(UpdateCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(UpdateCourseLayout.createSequentialGroup()
-                                .addContainerGap(36, Short.MAX_VALUE)
-                                .addComponent(UCourseCode)
+                UpdateCourseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(UpdateCourseLayout.createSequentialGroup()
+                                .addGroup(UpdateCourseLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(UpdateCourseLayout.createSequentialGroup()
+                                                .addGroup(UpdateCourseLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(UpdateCourseLayout.createSequentialGroup()
+                                                                .addContainerGap(36, Short.MAX_VALUE)
+                                                                .addComponent(UCourseCode)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(UCourseCodeField,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                        .addGroup(UpdateCourseLayout.createSequentialGroup()
+                                                                .addGap(0, 0, Short.MAX_VALUE)
+                                                                .addComponent(UCourseName)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(UCourseNameField,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                .addGap(45, 45, 45)
+                                                .addComponent(USession)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(USessionCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(40, 40, 40)
+                                                .addComponent(UCDepartment))
+                                        .addGroup(UpdateCourseLayout.createSequentialGroup()
+                                                .addGap(45, 45, 45)
+                                                .addComponent(UCreditHrs)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(UCreditHrsField, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                        40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(45, 45, 45)
+                                                .addComponent(UAcademicYear)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(UAcademicYearField,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(UCourseCodeField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(UpdateCourseLayout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(UCourseName)
+                                .addComponent(UCDepartmentCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(40, 40, 40)
+                                .addComponent(USeats)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(UCourseNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(45, 45, 45)
-                        .addComponent(USession)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(USessionCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(40, 40, 40)
-                        .addComponent(UCDepartment))
-                    .addGroup(UpdateCourseLayout.createSequentialGroup()
-                        .addGap(45, 45, 45)
-                        .addComponent(UCreditHrs)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(UCreditHrsField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(45, 45, 45)
-                        .addComponent(UAcademicYear)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(UAcademicYearField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(UCDepartmentCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(40, 40, 40)
-                .addComponent(USeats)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(USeatsField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(36, 36, 36)
-                .addComponent(UCSubmitBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
-                .addGap(43, 43, 43))
-        );
+                                .addComponent(USeatsField, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(36, 36, 36)
+                                .addComponent(UCSubmitBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
+                                .addGap(43, 43, 43)));
 
-        CourseTabs.addTab("Update Course", new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-update-16.png")), UpdateCourse); // NOI18N
+        CourseTabs.addTab("Update Course",
+                new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-update-16.png")),
+                UpdateCourse); // NOI18N
 
         ViewCourses.setOpaque(false);
 
         ViewCoursesTable.setFont(new java.awt.Font("Bodoni MT", 0, 14)); // NOI18N
         ViewCoursesTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
-            },
-            new String [] {
-                "Course Code", "Course Name", "Credit Hours", "Session", "Year", "Seats", "Delete"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
+                new Object[][] {
+                        { null, null, null, null, null, null, null },
+                        { null, null, null, null, null, null, null },
+                        { null, null, null, null, null, null, null },
+                        { null, null, null, null, null, null, null },
+                        { null, null, null, null, null, null, null }
+                },
+                new String[] {
+                        "Course Code", "Course Name", "Credit Hours", "Session", "Year", "Seats", "Delete"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class,
+                    java.lang.String.class, java.lang.String.class, java.lang.Object.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+            boolean[] canEdit = new boolean[] {
+                    false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         ViewCoursesTable.setRowHeight(50);
@@ -2223,32 +2628,31 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout ViewCoursesLayout = new javax.swing.GroupLayout(ViewCourses);
         ViewCourses.setLayout(ViewCoursesLayout);
         ViewCoursesLayout.setHorizontalGroup(
-            ViewCoursesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ViewCoursesLayout.createSequentialGroup()
-                .addGap(50, 50, 50)
-                .addComponent(ViewCoursesScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 617, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(50, Short.MAX_VALUE))
-        );
+                ViewCoursesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ViewCoursesLayout.createSequentialGroup()
+                                .addGap(50, 50, 50)
+                                .addComponent(ViewCoursesScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 617,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(50, Short.MAX_VALUE)));
         ViewCoursesLayout.setVerticalGroup(
-            ViewCoursesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ViewCoursesLayout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addComponent(ViewCoursesScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 515, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+                ViewCoursesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ViewCoursesLayout.createSequentialGroup()
+                                .addGap(25, 25, 25)
+                                .addComponent(ViewCoursesScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 515,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 
-        CourseTabs.addTab("View Courses", new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-view-16.png")), ViewCourses); // NOI18N
+        CourseTabs.addTab("View Courses",
+                new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-view-16.png")), ViewCourses); // NOI18N
 
         javax.swing.GroupLayout CoursePanelLayout = new javax.swing.GroupLayout(CoursePanel);
         CoursePanel.setLayout(CoursePanelLayout);
         CoursePanelLayout.setHorizontalGroup(
-            CoursePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(CourseTabs)
-        );
+                CoursePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(CourseTabs));
         CoursePanelLayout.setVerticalGroup(
-            CoursePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(CourseTabs)
-        );
+                CoursePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(CourseTabs));
 
         MainPagePanel.add(CoursePanel, "Card3");
 
@@ -2257,21 +2661,28 @@ public class HomePageAdmin extends javax.swing.JFrame {
         Day.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         Day.setText("Day");
 
-        DayCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Day", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday" }));
+        DayCombo.setModel(new javax.swing.DefaultComboBoxModel<>(
+                new String[] { "Select Day", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday" }));
 
         StartTime.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         StartTime.setText("Start Time");
 
-        HoursCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Hour", "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", " " }));
+        HoursCombo.setModel(new javax.swing.DefaultComboBoxModel<>(
+                new String[] { "Select Hour", "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11",
+                        "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", " " }));
 
-        MinutesCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Minute", "00", "15", "30", "45" }));
+        MinutesCombo.setModel(
+                new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Minute", "00", "15", "30", "45" }));
 
         EndTime.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         EndTime.setText("End Time");
 
-        HoursCombo1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Hour", "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", " " }));
+        HoursCombo1.setModel(new javax.swing.DefaultComboBoxModel<>(
+                new String[] { "Select Hour", "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11",
+                        "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", " " }));
 
-        MinutesCombo1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Minute", "00", "15", "30", "45" }));
+        MinutesCombo1.setModel(
+                new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Minute", "00", "15", "30", "45" }));
 
         Course.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         Course.setText("Course");
@@ -2281,7 +2692,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
         Room.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         Room.setText("Room");
 
-        RoomCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Room", "B301", "B302", "B303", "B304", "B305" }));
+        RoomCombo.setModel(new javax.swing.DefaultComboBoxModel<>(
+                new String[] { "Select Room", "B301", "B302", "B303", "B304", "B305" }));
 
         Instructor.setFont(new java.awt.Font("Bodoni MT", 1, 18)); // NOI18N
         Instructor.setText("Instructor");
@@ -2331,29 +2743,29 @@ public class HomePageAdmin extends javax.swing.JFrame {
         });
 
         ViewTimeTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
-            },
-            new String [] {
-                "Course", "Instructor", "Day", "Start Time", "End Time", "Room"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                new Object[][] {
+                        { null, null, null, null, null, null },
+                        { null, null, null, null, null, null },
+                        { null, null, null, null, null, null },
+                        { null, null, null, null, null, null }
+                },
+                new String[] {
+                        "Course", "Instructor", "Day", "Start Time", "End Time", "Room"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class,
+                    java.lang.String.class, java.lang.String.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+            boolean[] canEdit = new boolean[] {
+                    false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         ViewTimeTable.setShowHorizontalLines(true);
@@ -2370,89 +2782,151 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout TimeTablePanelLayout = new javax.swing.GroupLayout(TimeTablePanel);
         TimeTablePanel.setLayout(TimeTablePanelLayout);
         TimeTablePanelLayout.setHorizontalGroup(
-            TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(TimeTablePanelLayout.createSequentialGroup()
-                .addGap(50, 50, 50)
-                .addGroup(TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(TimeTablePanelLayout.createSequentialGroup()
-                        .addGroup(TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(TimeTablePanelLayout.createSequentialGroup()
-                                .addGroup(TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(Day)
-                                    .addComponent(DayCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(StartTime)
-                                    .addGroup(TimeTablePanelLayout.createSequentialGroup()
-                                        .addComponent(HoursCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addGroup(TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(Room)
-                                            .addComponent(MinutesCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                            .addComponent(EndTime))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(Course)
-                            .addComponent(CourseCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(Instructor)))
-                    .addGroup(TimeTablePanelLayout.createSequentialGroup()
-                        .addGroup(TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(TimeTablePanelLayout.createSequentialGroup()
-                                .addComponent(HoursCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(MinutesCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(RoomCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
-                            .addGroup(TimeTablePanelLayout.createSequentialGroup()
-                                .addComponent(Add, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(Update, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(101, 101, 101)))
-                        .addGroup(TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(InstructorCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(Delete, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(TimeTableScrollPane))
-                .addContainerGap(37, Short.MAX_VALUE))
-        );
+                TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(TimeTablePanelLayout.createSequentialGroup()
+                                .addGap(50, 50, 50)
+                                .addGroup(TimeTablePanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addGroup(TimeTablePanelLayout.createSequentialGroup()
+                                                .addGroup(TimeTablePanelLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(TimeTablePanelLayout.createSequentialGroup()
+                                                                .addGroup(TimeTablePanelLayout.createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                                        .addComponent(Day)
+                                                                        .addComponent(DayCombo,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                150,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addGroup(TimeTablePanelLayout.createParallelGroup(
+                                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                                        .addComponent(StartTime)
+                                                                        .addGroup(TimeTablePanelLayout
+                                                                                .createSequentialGroup()
+                                                                                .addComponent(HoursCombo,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                        150,
+                                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                                .addPreferredGap(
+                                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                                .addGroup(TimeTablePanelLayout
+                                                                                        .createParallelGroup(
+                                                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                        .addComponent(Room)
+                                                                                        .addComponent(MinutesCombo,
+                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                                150,
+                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                                        .addComponent(EndTime))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(TimeTablePanelLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(Course)
+                                                        .addComponent(CourseCombo,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(Instructor)))
+                                        .addGroup(TimeTablePanelLayout.createSequentialGroup()
+                                                .addGroup(TimeTablePanelLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING,
+                                                                false)
+                                                        .addGroup(TimeTablePanelLayout.createSequentialGroup()
+                                                                .addComponent(HoursCombo1,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(MinutesCombo1,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(RoomCombo,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                                                        .addGroup(TimeTablePanelLayout.createSequentialGroup()
+                                                                .addComponent(Add,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 100,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                        Short.MAX_VALUE)
+                                                                .addComponent(Update,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 100,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addGap(101, 101, 101)))
+                                                .addGroup(TimeTablePanelLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                                        .addComponent(InstructorCombo,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(Delete, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                100, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addComponent(TimeTableScrollPane))
+                                .addContainerGap(37, Short.MAX_VALUE)));
         TimeTablePanelLayout.setVerticalGroup(
-            TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(TimeTablePanelLayout.createSequentialGroup()
-                .addGap(20, 20, 20)
-                .addGroup(TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(TimeTablePanelLayout.createSequentialGroup()
-                        .addGroup(TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(StartTime)
-                            .addComponent(Course))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(HoursCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(MinutesCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(CourseCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(TimeTablePanelLayout.createSequentialGroup()
-                        .addComponent(Day)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(DayCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(EndTime)
-                    .addComponent(Room)
-                    .addComponent(Instructor))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(HoursCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(MinutesCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(RoomCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(InstructorCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(Add, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(Update, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(Delete, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(TimeTableScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 340, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+                TimeTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(TimeTablePanelLayout.createSequentialGroup()
+                                .addGap(20, 20, 20)
+                                .addGroup(TimeTablePanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(TimeTablePanelLayout.createSequentialGroup()
+                                                .addGroup(TimeTablePanelLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(StartTime)
+                                                        .addComponent(Course))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(TimeTablePanelLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(HoursCombo,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(MinutesCombo,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(CourseCombo,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addGroup(TimeTablePanelLayout.createSequentialGroup()
+                                                .addComponent(Day)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(DayCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(TimeTablePanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(EndTime)
+                                        .addComponent(Room)
+                                        .addComponent(Instructor))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(TimeTablePanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(HoursCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(MinutesCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(RoomCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(InstructorCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addGroup(TimeTablePanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(Add, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(Update, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(Delete, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(TimeTableScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 340,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 
         MainPagePanel.add(TimeTablePanel, "Card4");
 
@@ -2469,29 +2943,29 @@ public class HomePageAdmin extends javax.swing.JFrame {
         });
 
         ResultTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
-            },
-            new String [] {
-                "Name", "Name", "Sessional", "Final", "Total", "Status"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                new Object[][] {
+                        { null, null, null, null, null, null },
+                        { null, null, null, null, null, null },
+                        { null, null, null, null, null, null },
+                        { null, null, null, null, null, null }
+                },
+                new String[] {
+                        "Name", "Name", "Sessional", "Final", "Total", "Status"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class,
+                    java.lang.String.class, java.lang.String.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, true
+            boolean[] canEdit = new boolean[] {
+                    false, false, false, false, false, true
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         ResultTable.setRowHeight(50);
@@ -2519,36 +2993,40 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout ResultPanelLayout = new javax.swing.GroupLayout(ResultPanel);
         ResultPanel.setLayout(ResultPanelLayout);
         ResultPanelLayout.setHorizontalGroup(
-            ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ResultPanelLayout.createSequentialGroup()
-                .addGap(40, 40, 40)
-                .addGroup(ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(ResultTableScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(Course1)
-                    .addComponent(CourseCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(40, Short.MAX_VALUE))
-            .addGroup(ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(ResultPanelLayout.createSequentialGroup()
-                    .addGap(302, 302, 302)
-                    .addComponent(Publish, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(303, Short.MAX_VALUE)))
-        );
+                ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ResultPanelLayout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addGroup(ResultPanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(ResultTableScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                625, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(Course1)
+                                        .addComponent(CourseCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 150,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap(40, Short.MAX_VALUE))
+                        .addGroup(ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(ResultPanelLayout.createSequentialGroup()
+                                        .addGap(302, 302, 302)
+                                        .addComponent(Publish, javax.swing.GroupLayout.PREFERRED_SIZE, 100,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addContainerGap(303, Short.MAX_VALUE))));
         ResultPanelLayout.setVerticalGroup(
-            ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ResultPanelLayout.createSequentialGroup()
-                .addGap(32, 32, 32)
-                .addComponent(Course1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(CourseCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(ResultTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 393, Short.MAX_VALUE)
-                .addGap(76, 76, 76))
-            .addGroup(ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(ResultPanelLayout.createSequentialGroup()
-                    .addGap(532, 532, 532)
-                    .addComponent(Publish)
-                    .addContainerGap(26, Short.MAX_VALUE)))
-        );
+                ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ResultPanelLayout.createSequentialGroup()
+                                .addGap(32, 32, 32)
+                                .addComponent(Course1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(CourseCombo1, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(ResultTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 393,
+                                        Short.MAX_VALUE)
+                                .addGap(76, 76, 76))
+                        .addGroup(ResultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(ResultPanelLayout.createSequentialGroup()
+                                        .addGap(532, 532, 532)
+                                        .addComponent(Publish)
+                                        .addContainerGap(26, Short.MAX_VALUE))));
 
         MainPagePanel.add(ResultPanel, "Card5");
 
@@ -2590,70 +3068,79 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout AddNotificationLayout = new javax.swing.GroupLayout(AddNotification);
         AddNotification.setLayout(AddNotificationLayout);
         AddNotificationLayout.setHorizontalGroup(
-            AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 693, Short.MAX_VALUE)
-            .addGroup(AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(AddNotificationLayout.createSequentialGroup()
-                    .addGap(44, 44, 44)
-                    .addGroup(AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(AddNotificationLayout.createSequentialGroup()
-                            .addGap(252, 252, 252)
-                            .addComponent(SendBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(TitleField)
-                            .addComponent(Title, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(Message, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(MessageScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 605, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addContainerGap(44, Short.MAX_VALUE)))
-        );
+                AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGap(0, 693, Short.MAX_VALUE)
+                        .addGroup(AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(AddNotificationLayout.createSequentialGroup()
+                                        .addGap(44, 44, 44)
+                                        .addGroup(AddNotificationLayout
+                                                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addGroup(AddNotificationLayout.createSequentialGroup()
+                                                        .addGap(252, 252, 252)
+                                                        .addComponent(SendBtn, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addGroup(AddNotificationLayout
+                                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING,
+                                                                false)
+                                                        .addComponent(TitleField)
+                                                        .addComponent(Title, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(Message, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(MessageScrollPane,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE, 605,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addContainerGap(44, Short.MAX_VALUE))));
         AddNotificationLayout.setVerticalGroup(
-            AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 546, Short.MAX_VALUE)
-            .addGroup(AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(AddNotificationLayout.createSequentialGroup()
-                    .addGap(9, 9, 9)
-                    .addComponent(Title)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(TitleField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(18, 18, 18)
-                    .addComponent(Message)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(MessageScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 363, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(18, 18, 18)
-                    .addComponent(SendBtn)
-                    .addContainerGap(10, Short.MAX_VALUE)))
-        );
+                AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGap(0, 546, Short.MAX_VALUE)
+                        .addGroup(AddNotificationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(AddNotificationLayout.createSequentialGroup()
+                                        .addGap(9, 9, 9)
+                                        .addComponent(Title)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(TitleField, javax.swing.GroupLayout.PREFERRED_SIZE, 40,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(Message)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(MessageScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 363,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(SendBtn)
+                                        .addContainerGap(10, Short.MAX_VALUE))));
 
-        NotificationTabs.addTab("Add Notification", new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-add-16.png")), AddNotification); // NOI18N
+        NotificationTabs.addTab("Add Notification",
+                new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-add-16.png")),
+                AddNotification); // NOI18N
 
         ViewNotifications.setOpaque(false);
 
         ViewNotificationsTable.setFont(new java.awt.Font("Bodoni MT", 0, 14)); // NOI18N
         ViewNotificationsTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null}
-            },
-            new String [] {
-                "Title", "Message", "Delete"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Object.class
+                new Object[][] {
+                        { null, null, null },
+                        { null, null, null },
+                        { null, null, null },
+                        { null, null, null },
+                        { null, null, null }
+                },
+                new String[] {
+                        "Title", "Message", "Delete"
+                }) {
+            Class[] types = new Class[] {
+                    java.lang.String.class, java.lang.String.class, java.lang.Object.class
             };
-            boolean[] canEdit = new boolean [] {
-                false, false, false
+            boolean[] canEdit = new boolean[] {
+                    false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+                return canEdit[columnIndex];
             }
         });
         ViewNotificationsTable.setRowHeight(50);
@@ -2673,38 +3160,38 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout ViewNotificationsLayout = new javax.swing.GroupLayout(ViewNotifications);
         ViewNotifications.setLayout(ViewNotificationsLayout);
         ViewNotificationsLayout.setHorizontalGroup(
-            ViewNotificationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ViewNotificationsLayout.createSequentialGroup()
-                .addGap(50, 50, 50)
-                .addComponent(ViewNotificationsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 617, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(26, Short.MAX_VALUE))
-        );
+                ViewNotificationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ViewNotificationsLayout.createSequentialGroup()
+                                .addGap(50, 50, 50)
+                                .addComponent(ViewNotificationsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 617,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(26, Short.MAX_VALUE)));
         ViewNotificationsLayout.setVerticalGroup(
-            ViewNotificationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(ViewNotificationsLayout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addComponent(ViewNotificationsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 515, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+                ViewNotificationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(ViewNotificationsLayout.createSequentialGroup()
+                                .addGap(25, 25, 25)
+                                .addComponent(ViewNotificationsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 515,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 
-        NotificationTabs.addTab("View Notifications", new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-view-16.png")), ViewNotifications); // NOI18N
+        NotificationTabs.addTab("View Notifications",
+                new javax.swing.ImageIcon(getClass().getResource("/main/resources/icons8-view-16.png")),
+                ViewNotifications); // NOI18N
 
         javax.swing.GroupLayout NotificationPanelLayout = new javax.swing.GroupLayout(NotificationPanel);
         NotificationPanel.setLayout(NotificationPanelLayout);
         NotificationPanelLayout.setHorizontalGroup(
-            NotificationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(NotificationPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(NotificationTabs)
-                .addContainerGap())
-        );
+                NotificationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(NotificationPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(NotificationTabs)
+                                .addContainerGap()));
         NotificationPanelLayout.setVerticalGroup(
-            NotificationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(NotificationPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(NotificationTabs)
-                .addContainerGap())
-        );
+                NotificationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(NotificationPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(NotificationTabs)
+                                .addContainerGap()));
 
         NotificationTabs.getAccessibleContext().setAccessibleName("Add Notification");
 
@@ -2713,93 +3200,97 @@ public class HomePageAdmin extends javax.swing.JFrame {
         javax.swing.GroupLayout HomePageAdminPanelLayout = new javax.swing.GroupLayout(HomePageAdminPanel);
         HomePageAdminPanel.setLayout(HomePageAdminPanelLayout);
         HomePageAdminPanelLayout.setHorizontalGroup(
-            HomePageAdminPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(HomePageAdminPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(SidePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(MainPagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 705, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
+                HomePageAdminPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(HomePageAdminPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(SidePanel, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(MainPagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 705,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap()));
         HomePageAdminPanelLayout.setVerticalGroup(
-            HomePageAdminPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(HomePageAdminPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(HomePageAdminPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(HomePageAdminPanelLayout.createSequentialGroup()
-                        .addComponent(SidePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 588, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(MainPagePanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 588, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
-        );
+                HomePageAdminPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(HomePageAdminPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(HomePageAdminPanelLayout
+                                        .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(HomePageAdminPanelLayout.createSequentialGroup()
+                                                .addComponent(SidePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 588,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(0, 0, Short.MAX_VALUE))
+                                        .addComponent(MainPagePanel, javax.swing.GroupLayout.Alignment.TRAILING,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE, 588,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap()));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(HomePageAdminPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(HomePageAdminPanel, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE));
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(HomePageAdminPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(HomePageAdminPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE));
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void ManageStudentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ManageStudentMouseClicked
+    private void ManageStudentMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ManageStudentMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card1");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card1");
         setActiveTab(ManageStudent);
         show_Table("student", ViewStudentsTable);
-    }//GEN-LAST:event_ManageStudentMouseClicked
+    }// GEN-LAST:event_ManageStudentMouseClicked
 
-    private void ManageStudentKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ManageStudentKeyPressed
+    private void ManageStudentKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_ManageStudentKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             ManageStudentMouseClicked(null);
         }
-    }//GEN-LAST:event_ManageStudentKeyPressed
+    }// GEN-LAST:event_ManageStudentKeyPressed
 
-    private void ManageInstructorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ManageInstructorMouseClicked
+    private void ManageInstructorMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ManageInstructorMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card2");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card2");
         setActiveTab(ManageInstructor);
         show_Table("instructor", ViewInstructorsTable);
-    }//GEN-LAST:event_ManageInstructorMouseClicked
+    }// GEN-LAST:event_ManageInstructorMouseClicked
 
-    private void ManageInstructorKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ManageInstructorKeyPressed
+    private void ManageInstructorKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_ManageInstructorKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             ManageInstructorMouseClicked(null);
         }
-    }//GEN-LAST:event_ManageInstructorKeyPressed
+    }// GEN-LAST:event_ManageInstructorKeyPressed
 
-    private void ManageCourseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ManageCourseMouseClicked
+    private void ManageCourseMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ManageCourseMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card3");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card3");
         setActiveTab(ManageCourse);
         show_Table("course", ViewCoursesTable);
-    }//GEN-LAST:event_ManageCourseMouseClicked
+    }// GEN-LAST:event_ManageCourseMouseClicked
 
-    private void ManageCourseKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ManageCourseKeyPressed
+    private void ManageCourseKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_ManageCourseKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             ManageCourseMouseClicked(null);
         }
-    }//GEN-LAST:event_ManageCourseKeyPressed
+    }// GEN-LAST:event_ManageCourseKeyPressed
 
-    private void TimeTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TimeTableMouseClicked
+    private void TimeTableMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_TimeTableMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card4");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card4");
         setActiveTab(TimeTable);
         show_Table("timetable", ViewTimeTable);
-        
+
         // 1. Populate Course Combo and Map
         CourseCombo.removeAllItems();
         CourseCombo.addItem("Select Course");
@@ -2826,7 +3317,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
         try {
             pst = connect.prepareStatement(query_instructor);
             result = pst.executeQuery();
-            while(result.next()){
+            while (result.next()) {
                 String id = result.getString("ID");
                 String name = result.getString("fullName");
                 instructorMap.put(name, id);
@@ -2835,21 +3326,21 @@ public class HomePageAdmin extends javax.swing.JFrame {
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex);
         }
-    }//GEN-LAST:event_TimeTableMouseClicked
+    }// GEN-LAST:event_TimeTableMouseClicked
 
-    private void TimeTableKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TimeTableKeyPressed
+    private void TimeTableKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_TimeTableKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             TimeTableMouseClicked(null);
         }
-    }//GEN-LAST:event_TimeTableKeyPressed
+    }// GEN-LAST:event_TimeTableKeyPressed
 
-    private void PublishResultMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_PublishResultMouseClicked
+    private void PublishResultMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_PublishResultMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card5");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card5");
         setActiveTab(PublishResult);
-        
+
         CourseCombo1.removeAllItems();
         CourseCombo1.addItem("Select Course");
         courseMap.clear();
@@ -2866,31 +3357,31 @@ public class HomePageAdmin extends javax.swing.JFrame {
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex);
         }
-    }//GEN-LAST:event_PublishResultMouseClicked
+    }// GEN-LAST:event_PublishResultMouseClicked
 
-    private void PublishResultKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_PublishResultKeyPressed
+    private void PublishResultKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_PublishResultKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             PublishResultMouseClicked(null);
         }
-    }//GEN-LAST:event_PublishResultKeyPressed
+    }// GEN-LAST:event_PublishResultKeyPressed
 
-    private void NotificationMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_NotificationMouseClicked
+    private void NotificationMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_NotificationMouseClicked
         // TODO add your handling code here:
-        CardLayout c1 = (CardLayout)(MainPagePanel.getLayout());
-        c1.show(MainPagePanel,"Card6");
+        CardLayout c1 = (CardLayout) (MainPagePanel.getLayout());
+        c1.show(MainPagePanel, "Card6");
         setActiveTab(Notification);
         show_Table("notification", ViewNotificationsTable);
-    }//GEN-LAST:event_NotificationMouseClicked
+    }// GEN-LAST:event_NotificationMouseClicked
 
-    private void NotificationKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_NotificationKeyPressed
+    private void NotificationKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_NotificationKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             NotificationMouseClicked(null);
         }
-    }//GEN-LAST:event_NotificationKeyPressed
+    }// GEN-LAST:event_NotificationKeyPressed
 
-    private void LogOutMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_LogOutMouseClicked
+    private void LogOutMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_LogOutMouseClicked
         // TODO add your handling code here:
         new Timer().schedule(new TimerTask() {
             public void run() {
@@ -2898,28 +3389,28 @@ public class HomePageAdmin extends javax.swing.JFrame {
             }
         }, 1000);
         this.dispose();
-    }//GEN-LAST:event_LogOutMouseClicked
+    }// GEN-LAST:event_LogOutMouseClicked
 
-    private void LogOutKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_LogOutKeyPressed
+    private void LogOutKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_LogOutKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             LogOutMouseClicked(null);
         }
-    }//GEN-LAST:event_LogOutKeyPressed
+    }// GEN-LAST:event_LogOutKeyPressed
 
-    private void AFirstNameFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_AFirstNameFieldFocusGained
+    private void AFirstNameFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_AFirstNameFieldFocusGained
         // TODO add your handling code here:
-        if(AFirstNameField.getText().equals("John")){
+        if (AFirstNameField.getText().equals("John")) {
             AFirstNameField.setText("");
-            AFirstNameField.setForeground(new Color(0,0,0));
+            AFirstNameField.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_AFirstNameFieldFocusGained
+    }// GEN-LAST:event_AFirstNameFieldFocusGained
 
-    private void AFirstNameFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_AFirstNameFieldFocusLost
+    private void AFirstNameFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_AFirstNameFieldFocusLost
         // TODO add your handling code here:
-        if(AFirstNameField.getText().equals("")) {
+        if (AFirstNameField.getText().equals("")) {
             AFirstNameField.setText("John");
-            AFirstNameField.setForeground(new Color(153,153,153));
+            AFirstNameField.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[a-zA-Z]{1,20}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -2931,22 +3422,22 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 AFirstName.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_AFirstNameFieldFocusLost
+    }// GEN-LAST:event_AFirstNameFieldFocusLost
 
-    private void ALastNameFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ALastNameFieldFocusGained
+    private void ALastNameFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ALastNameFieldFocusGained
         // TODO add your handling code here:
-        if(ALastNameField.getText().equals("Doe")){
+        if (ALastNameField.getText().equals("Doe")) {
             ALastNameField.setText("");
-            ALastNameField.setForeground(new Color(0,0,0));
+            ALastNameField.setForeground(new Color(0, 0, 0));
         }
-        
-    }//GEN-LAST:event_ALastNameFieldFocusGained
 
-    private void ALastNameFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ALastNameFieldFocusLost
+    }// GEN-LAST:event_ALastNameFieldFocusGained
+
+    private void ALastNameFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ALastNameFieldFocusLost
         // TODO add your handling code here:
-        if(ALastNameField.getText().equals("")) {
+        if (ALastNameField.getText().equals("")) {
             ALastNameField.setText("Doe");
-            ALastNameField.setForeground(new Color(153,153,153));
+            ALastNameField.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[a-zA-Z]{1,20}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -2958,37 +3449,37 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 ALastName.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_ALastNameFieldFocusLost
+    }// GEN-LAST:event_ALastNameFieldFocusLost
 
-    private void ADateOfBirthFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ADateOfBirthFieldFocusGained
+    private void ADateOfBirthFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ADateOfBirthFieldFocusGained
         // TODO add your handling code here:
-        if(AdateTextField.getText().equals("DD-MM-YYYY")){
+        if (AdateTextField.getText().equals("DD-MM-YYYY")) {
             AdateTextField.setText("");
-            ADateOfBirthField.setForeground(new Color(0,0,0));
+            ADateOfBirthField.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_ADateOfBirthFieldFocusGained
+    }// GEN-LAST:event_ADateOfBirthFieldFocusGained
 
-    private void ADateOfBirthFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ADateOfBirthFieldFocusLost
+    private void ADateOfBirthFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ADateOfBirthFieldFocusLost
         // TODO add your handling code here:
-        if(AdateTextField.getText().equals("")) {
+        if (AdateTextField.getText().equals("")) {
             AdateTextField.setText("DD-MM-YYYY");
-            ADateOfBirthField.setForeground(new Color(153,153,153));
+            ADateOfBirthField.setForeground(new Color(153, 153, 153));
         }
-    }//GEN-LAST:event_ADateOfBirthFieldFocusLost
+    }// GEN-LAST:event_ADateOfBirthFieldFocusLost
 
-    private void ACNICFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ACNICFieldFocusGained
+    private void ACNICFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ACNICFieldFocusGained
         // TODO add your handling code here:
         if (ACNICField.getText().trim().equals("00000-0000000-0")) {
             ACNICField.setText("");
-            ACNICField.setForeground(new Color(0,0,0));
+            ACNICField.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_ACNICFieldFocusGained
+    }// GEN-LAST:event_ACNICFieldFocusGained
 
-    private void ACNICFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ACNICFieldFocusLost
+    private void ACNICFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ACNICFieldFocusLost
         // TODO add your handling code here:
         if (ACNICField.getText().trim().equals("")) {
             ACNICField.setText("00000-0000000-0");
-            ACNICField.setForeground(new Color(153,153,153));
+            ACNICField.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[0-9]{5}[-][0-9]{7}[-][0-9]{1}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -3000,21 +3491,21 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 ACNIC.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_ACNICFieldFocusLost
+    }// GEN-LAST:event_ACNICFieldFocusLost
 
-    private void APhoneNoFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_APhoneNoFieldFocusGained
+    private void APhoneNoFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_APhoneNoFieldFocusGained
         // TODO add your handling code here:
         if (APhoneNoField.getText().trim().equals("0333-1234567")) {
             APhoneNoField.setText("");
-            APhoneNoField.setForeground(new Color(0,0,0));
+            APhoneNoField.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_APhoneNoFieldFocusGained
+    }// GEN-LAST:event_APhoneNoFieldFocusGained
 
-    private void APhoneNoFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_APhoneNoFieldFocusLost
+    private void APhoneNoFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_APhoneNoFieldFocusLost
         // TODO add your handling code here:
         if (APhoneNoField.getText().trim().equals("")) {
             APhoneNoField.setText("0333-1234567");
-            APhoneNoField.setForeground(new Color(153,153,153));
+            APhoneNoField.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[0-9]{4}[-][0-9]{7}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -3026,37 +3517,37 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 APhoneNo.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_APhoneNoFieldFocusLost
+    }// GEN-LAST:event_APhoneNoFieldFocusLost
 
-    private void AProgramFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_AProgramFieldFocusGained
+    private void AProgramFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_AProgramFieldFocusGained
         // TODO add your handling code here:
         if (AProgramField.getText().trim().equals("Program Name")) {
             AProgramField.setText("");
-            AProgramField.setForeground(new Color(0,0,0));
+            AProgramField.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_AProgramFieldFocusGained
+    }// GEN-LAST:event_AProgramFieldFocusGained
 
-    private void AProgramFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_AProgramFieldFocusLost
+    private void AProgramFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_AProgramFieldFocusLost
         // TODO add your handling code here:
         if (AProgramField.getText().trim().equals("")) {
             AProgramField.setText("Program Name");
-            AProgramField.setForeground(new Color(153,153,153));
+            AProgramField.setForeground(new Color(153, 153, 153));
         }
-    }//GEN-LAST:event_AProgramFieldFocusLost
+    }// GEN-LAST:event_AProgramFieldFocusLost
 
-    private void AEmailFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_AEmailFieldFocusGained
+    private void AEmailFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_AEmailFieldFocusGained
         // TODO add your handling code here:
         if (AEmailField.getText().trim().equals("user@domain.com")) {
             AEmailField.setText("");
-            AEmailField.setForeground(new Color(0,0,0));
+            AEmailField.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_AEmailFieldFocusGained
+    }// GEN-LAST:event_AEmailFieldFocusGained
 
-    private void AEmailFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_AEmailFieldFocusLost
+    private void AEmailFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_AEmailFieldFocusLost
         // TODO add your handling code here:
         if (AEmailField.getText().trim().equals("")) {
             AEmailField.setText("user@domain.com");
-            AEmailField.setForeground(new Color(153,153,153));
+            AEmailField.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^(.+)@(.+)$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -3068,82 +3559,82 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 AEmail.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_AEmailFieldFocusLost
+    }// GEN-LAST:event_AEmailFieldFocusLost
 
-    private void ASubmitBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ASubmitBtnMouseClicked
+    private void ASubmitBtnMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ASubmitBtnMouseClicked
         // TODO add your handling code here:
         String fName = AFirstNameField.getText();
         String lName = ALastNameField.getText();
         String dob = AdateTextField.getText();
         cnic = ACNICField.getText();
         String phoneno = APhoneNoField.getText();
-        String gender = (String)AGenderCombo.getSelectedItem();
-        String department = (String)ADepartmentCombo.getSelectedItem();
+        String gender = (String) AGenderCombo.getSelectedItem();
+        String department = (String) ADepartmentCombo.getSelectedItem();
         String program = AProgramField.getText();
         String address = AAddressField.getText();
         email = AEmailField.getText();
 
-        if(fName.equals("John") || fName.isBlank()){
+        if (fName.equals("John") || fName.isBlank()) {
             AFirstName.setForeground(Color.RED);
             temp = false;
         } else {
             AFirstName.setForeground(Color.BLACK);
         }
-        if(lName.equals("Doe") || lName.isBlank()){
+        if (lName.equals("Doe") || lName.isBlank()) {
             ALastName.setForeground(Color.RED);
             temp = false;
         } else {
             ALastName.setForeground(Color.BLACK);
         }
-        if(dob.equals("DD-MM-YYYY") || fName.isBlank()){
+        if (dob.equals("DD-MM-YYYY") || fName.isBlank()) {
             ADateOfBirth.setForeground(Color.RED);
             temp = false;
         } else {
             ADateOfBirth.setForeground(Color.BLACK);
         }
-        if(cnic.equals("00000-0000000-0") || cnic.isBlank()){
+        if (cnic.equals("00000-0000000-0") || cnic.isBlank()) {
             ACNIC.setForeground(Color.RED);
             temp = false;
         } else {
             ACNIC.setForeground(Color.BLACK);
         }
-        if(phoneno.equals("0333-1234567") || phoneno.isBlank()){
+        if (phoneno.equals("0333-1234567") || phoneno.isBlank()) {
             APhoneNo.setForeground(Color.RED);
             temp = false;
         } else {
             APhoneNo.setForeground(Color.BLACK);
         }
-        if(gender.equals("Select Gender")){
+        if (gender.equals("Select Gender")) {
             AGender.setForeground(Color.RED);
             temp = false;
         } else {
             AGender.setForeground(Color.BLACK);
         }
-        if(department.equals("Select Department")){
+        if (department.equals("Select Department")) {
             ADepartment.setForeground(Color.RED);
             temp = false;
         } else {
             ADepartment.setForeground(Color.BLACK);
         }
-        if(program.equals("Program Name") || program.isBlank()){
+        if (program.equals("Program Name") || program.isBlank()) {
             AProgram.setForeground(Color.RED);
             temp = false;
         } else {
             AProgram.setForeground(Color.BLACK);
         }
-        if(address.isBlank()){
+        if (address.isBlank()) {
             AAddress.setForeground(Color.RED);
             temp = false;
         } else {
             AAddress.setForeground(Color.BLACK);
         }
-        if(email.equals("user@domain.com") || email.isBlank()){
+        if (email.equals("user@domain.com") || email.isBlank()) {
             AEmail.setForeground(Color.RED);
             temp = false;
         } else {
             AEmail.setForeground(Color.BLACK);
         }
-        if(checkEmail(email) || checkCNIC(cnic)){
+        if (checkEmail(email) || checkCNIC(cnic)) {
             UserAlreadyExists useralreadyexists = new UserAlreadyExists();
             useralreadyexists.setVisible(true);
             new Timer().schedule(new TimerTask() {
@@ -3153,7 +3644,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 }
             }, 1000);
         } else {
-            if(temp == true){
+            if (temp == true) {
                 String query = "INSERT INTO `student`(`fName`, `lName`, `dob`, `cnic`, `phoneno`, `gender`, `department`, `program`, `address`, `email`) VALUES (?,?,?,?,?,?,?,?,?,?)";
                 try {
                     pst = connect.prepareStatement(query);
@@ -3163,8 +3654,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
                     pst.setString(3, AdateTextField.getText());
                     pst.setString(4, ACNICField.getText());
                     pst.setString(5, APhoneNoField.getText());
-                    pst.setString(6, (String)AGenderCombo.getSelectedItem());
-                    pst.setString(7, (String)ADepartmentCombo.getSelectedItem());
+                    pst.setString(6, (String) AGenderCombo.getSelectedItem());
+                    pst.setString(7, (String) ADepartmentCombo.getSelectedItem());
                     pst.setString(8, AProgramField.getText());
                     pst.setString(9, AAddressField.getText());
                     pst.setString(10, AEmailField.getText());
@@ -3191,38 +3682,38 @@ public class HomePageAdmin extends javax.swing.JFrame {
                     AEmailField.setText("");
 
                 } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(null,ex);
+                    JOptionPane.showMessageDialog(null, ex);
                 }
             } else {
                 Failed failed = new Failed();
-                    failed.setVisible(true);
-                    new Timer().schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            failed.dispose();
-                        }
-                    }, 1000);
+                failed.setVisible(true);
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        failed.dispose();
+                    }
+                }, 1000);
             }
         }
-    }//GEN-LAST:event_ASubmitBtnMouseClicked
+    }// GEN-LAST:event_ASubmitBtnMouseClicked
 
-    private void ASubmitBtnKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ASubmitBtnKeyPressed
+    private void ASubmitBtnKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_ASubmitBtnKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER){
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             ASubmitBtnMouseClicked(null);
         }
-    }//GEN-LAST:event_ASubmitBtnKeyPressed
+    }// GEN-LAST:event_ASubmitBtnKeyPressed
 
-    private void UFirstNameFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UFirstNameFieldFocusGained
+    private void UFirstNameFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UFirstNameFieldFocusGained
         // TODO add your handling code here:
-        UFirstNameField.setForeground(new Color(0,0,0));
-    }//GEN-LAST:event_UFirstNameFieldFocusGained
+        UFirstNameField.setForeground(new Color(0, 0, 0));
+    }// GEN-LAST:event_UFirstNameFieldFocusGained
 
-    private void UFirstNameFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UFirstNameFieldFocusLost
+    private void UFirstNameFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UFirstNameFieldFocusLost
         // TODO add your handling code here:
-        if(UFirstNameField.getText().equals("")) {
+        if (UFirstNameField.getText().equals("")) {
             UFirstNameField.setText("John");
-            UFirstNameField.setForeground(new Color(153,153,153));
+            UFirstNameField.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[a-zA-Z]{1,20}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -3234,18 +3725,18 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 UFirstName.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_UFirstNameFieldFocusLost
+    }// GEN-LAST:event_UFirstNameFieldFocusLost
 
-    private void ULastNameFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ULastNameFieldFocusGained
+    private void ULastNameFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ULastNameFieldFocusGained
         // TODO add your handling code here:
-        ULastNameField.setForeground(new Color(0,0,0));
-    }//GEN-LAST:event_ULastNameFieldFocusGained
+        ULastNameField.setForeground(new Color(0, 0, 0));
+    }// GEN-LAST:event_ULastNameFieldFocusGained
 
-    private void ULastNameFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ULastNameFieldFocusLost
+    private void ULastNameFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ULastNameFieldFocusLost
         // TODO add your handling code here:
-        if(ULastNameField.getText().equals("")) {
+        if (ULastNameField.getText().equals("")) {
             ULastNameField.setText("Doe");
-            ULastNameField.setForeground(new Color(153,153,153));
+            ULastNameField.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[a-zA-Z]{1,20}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -3257,18 +3748,18 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 ULastName.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_ULastNameFieldFocusLost
+    }// GEN-LAST:event_ULastNameFieldFocusLost
 
-    private void UPhoneNoFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UPhoneNoFieldFocusGained
+    private void UPhoneNoFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UPhoneNoFieldFocusGained
         // TODO add your handling code here:
-        UPhoneNoField.setForeground(new Color(0,0,0));
-    }//GEN-LAST:event_UPhoneNoFieldFocusGained
+        UPhoneNoField.setForeground(new Color(0, 0, 0));
+    }// GEN-LAST:event_UPhoneNoFieldFocusGained
 
-    private void UPhoneNoFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UPhoneNoFieldFocusLost
+    private void UPhoneNoFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UPhoneNoFieldFocusLost
         // TODO add your handling code here:
         if (UPhoneNoField.getText().trim().equals("")) {
             UPhoneNoField.setText("0333-1234567");
-            UPhoneNoField.setForeground(new Color(153,153,153));
+            UPhoneNoField.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[0-9]{4}[-][0-9]{7}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -3280,44 +3771,44 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 UPhoneNo.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_UPhoneNoFieldFocusLost
+    }// GEN-LAST:event_UPhoneNoFieldFocusLost
 
-    private void UDateOfBirthFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UDateOfBirthFieldFocusGained
+    private void UDateOfBirthFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UDateOfBirthFieldFocusGained
         // TODO add your handling code here:
-        UDateOfBirthField.setForeground(new Color(0,0,0));
-    }//GEN-LAST:event_UDateOfBirthFieldFocusGained
+        UDateOfBirthField.setForeground(new Color(0, 0, 0));
+    }// GEN-LAST:event_UDateOfBirthFieldFocusGained
 
-    private void UDateOfBirthFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UDateOfBirthFieldFocusLost
+    private void UDateOfBirthFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UDateOfBirthFieldFocusLost
         // TODO add your handling code here:
-        if(UdateTextField.getText().equals("")) {
+        if (UdateTextField.getText().equals("")) {
             UdateTextField.setText("DD-MM-YYYY");
-            UDateOfBirthField.setForeground(new Color(153,153,153));
+            UDateOfBirthField.setForeground(new Color(153, 153, 153));
         }
-    }//GEN-LAST:event_UDateOfBirthFieldFocusLost
+    }// GEN-LAST:event_UDateOfBirthFieldFocusLost
 
-    private void UProgramFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UProgramFieldFocusGained
+    private void UProgramFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UProgramFieldFocusGained
         // TODO add your handling code here:
-        UProgramField.setForeground(new Color(0,0,0));
-    }//GEN-LAST:event_UProgramFieldFocusGained
+        UProgramField.setForeground(new Color(0, 0, 0));
+    }// GEN-LAST:event_UProgramFieldFocusGained
 
-    private void UProgramFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UProgramFieldFocusLost
+    private void UProgramFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UProgramFieldFocusLost
         // TODO add your handling code here:
         if (UProgramField.getText().trim().equals("")) {
             UProgramField.setText("Program Name");
-            UProgramField.setForeground(new Color(153,153,153));
+            UProgramField.setForeground(new Color(153, 153, 153));
         }
-    }//GEN-LAST:event_UProgramFieldFocusLost
+    }// GEN-LAST:event_UProgramFieldFocusLost
 
-    private void UEmailFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UEmailFieldFocusGained
+    private void UEmailFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UEmailFieldFocusGained
         // TODO add your handling code here:
-        UEmailField.setForeground(new Color(0,0,0));
-    }//GEN-LAST:event_UEmailFieldFocusGained
+        UEmailField.setForeground(new Color(0, 0, 0));
+    }// GEN-LAST:event_UEmailFieldFocusGained
 
-    private void UEmailFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UEmailFieldFocusLost
+    private void UEmailFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UEmailFieldFocusLost
         // TODO add your handling code here:
         if (UEmailField.getText().trim().equals("")) {
             UEmailField.setText("user@domain.com");
-            UEmailField.setForeground(new Color(153,153,153));
+            UEmailField.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^(.+)@(.+)$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -3329,27 +3820,27 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 UEmail.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_UEmailFieldFocusLost
+    }// GEN-LAST:event_UEmailFieldFocusLost
 
-    private void UIdFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UIdFieldFocusGained
+    private void UIdFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UIdFieldFocusGained
         // TODO add your handling code here:
         if (UIdField.getText().trim().equals("Enter ID to Search")) {
             UIdField.setText("");
-            UIdField.setForeground(new Color(0,0,0));
+            UIdField.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_UIdFieldFocusGained
+    }// GEN-LAST:event_UIdFieldFocusGained
 
-    private void UIdFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UIdFieldFocusLost
+    private void UIdFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UIdFieldFocusLost
         // TODO add your handling code here:
         if (UIdField.getText().trim().equals("")) {
             UIdField.setText("Enter ID to Search");
-            UIdField.setForeground(new Color(153,153,153));
+            UIdField.setForeground(new Color(153, 153, 153));
         }
-    }//GEN-LAST:event_UIdFieldFocusLost
+    }// GEN-LAST:event_UIdFieldFocusLost
 
-    private void UIdFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_UIdFieldKeyPressed
+    private void UIdFieldKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_UIdFieldKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             String ID = UIdField.getText();
             try {
                 String query = "SELECT * FROM `student` WHERE `ID` = ?";
@@ -3368,10 +3859,10 @@ public class HomePageAdmin extends javax.swing.JFrame {
                     UAddressField.setText(result.getString(10));
                     UEmailField.setText(result.getString(11));
                     UPasswordField.setText(result.getString(12));
-                    if(result.getString(13).equals("Active")) {
+                    if (result.getString(13).equals("Active")) {
                         UActive.setSelected(true);
                         UInactive.setSelected(false);
-                    } else if(result.getString(13).equals("In-Active")) {
+                    } else if (result.getString(13).equals("In-Active")) {
                         UActive.setSelected(false);
                         UInactive.setSelected(true);
                     }
@@ -3383,7 +3874,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
                             idnotfound.dispose();
                         }
                     }, 1000);
-                    
+
                     UIdField.setText("Enter ID to Search");
                     UFirstNameField.setText("");
                     ULastNameField.setText("");
@@ -3400,44 +3891,44 @@ public class HomePageAdmin extends javax.swing.JFrame {
                     UPasswordField.setText("");
                 }
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null,ex);
+                JOptionPane.showMessageDialog(null, ex);
             }
         }
-    }//GEN-LAST:event_UIdFieldKeyPressed
+    }// GEN-LAST:event_UIdFieldKeyPressed
 
-    private void UActiveMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UActiveMouseClicked
+    private void UActiveMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_UActiveMouseClicked
         // TODO add your handling code here:
         checkStatus = "Active";
         UActive.setSelected(true);
         UInactive.setSelected(false);
-    }//GEN-LAST:event_UActiveMouseClicked
+    }// GEN-LAST:event_UActiveMouseClicked
 
-    private void UActiveKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_UActiveKeyPressed
+    private void UActiveKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_UActiveKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER){
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             checkStatus = "Active";
             UActive.setSelected(true);
             UInactive.setSelected(false);
         }
-    }//GEN-LAST:event_UActiveKeyPressed
+    }// GEN-LAST:event_UActiveKeyPressed
 
-    private void UInactiveMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UInactiveMouseClicked
+    private void UInactiveMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_UInactiveMouseClicked
         // TODO add your handling code here:
         checkStatus = "In-Active";
         UActive.setSelected(false);
         UInactive.setSelected(true);
-    }//GEN-LAST:event_UInactiveMouseClicked
+    }// GEN-LAST:event_UInactiveMouseClicked
 
-    private void UInactiveKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_UInactiveKeyPressed
+    private void UInactiveKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_UInactiveKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER){
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             checkStatus = "Active";
             UActive.setSelected(false);
             UInactive.setSelected(true);
         }
-    }//GEN-LAST:event_UInactiveKeyPressed
+    }// GEN-LAST:event_UInactiveKeyPressed
 
-    private void USubmitBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_USubmitBtnMouseClicked
+    private void USubmitBtnMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_USubmitBtnMouseClicked
         // TODO add your handling code here:
         String id = UIdField.getText();
         String fName = UFirstNameField.getText();
@@ -3445,70 +3936,70 @@ public class HomePageAdmin extends javax.swing.JFrame {
         String dob = UdateTextField.getText();
         cnic = UCNICField.getText();
         String phoneno = UPhoneNoField.getText();
-        String gender = (String)UGenderCombo.getSelectedItem();
-        String department = (String)UDepartmentCombo.getSelectedItem();
+        String gender = (String) UGenderCombo.getSelectedItem();
+        String department = (String) UDepartmentCombo.getSelectedItem();
         String program = UProgramField.getText();
         String address = UAddressField.getText();
         email = UEmailField.getText();
         String password = UPasswordField.getText();
         String value13 = checkStatus;
 
-        if(fName.equals("John") || fName.isBlank()){
+        if (fName.equals("John") || fName.isBlank()) {
             UFirstName.setForeground(Color.RED);
         } else {
             UFirstName.setForeground(Color.BLACK);
         }
-        if(lName.equals("Doe") || lName.isBlank()){
+        if (lName.equals("Doe") || lName.isBlank()) {
             ULastName.setForeground(Color.RED);
         } else {
             ULastName.setForeground(Color.BLACK);
         }
-        if(dob.equals("DD-MM-YYYY") || fName.isBlank()){
+        if (dob.equals("DD-MM-YYYY") || fName.isBlank()) {
             UDateOfBirth.setForeground(Color.RED);
         } else {
             UDateOfBirth.setForeground(Color.BLACK);
         }
-        if(cnic.equals("00000-0000000-0") || cnic.isBlank()){
+        if (cnic.equals("00000-0000000-0") || cnic.isBlank()) {
             UCNIC.setForeground(Color.RED);
         } else {
             UCNIC.setForeground(Color.BLACK);
         }
-        if(phoneno.equals("0333-1234567") || phoneno.isBlank()){
+        if (phoneno.equals("0333-1234567") || phoneno.isBlank()) {
             UPhoneNo.setForeground(Color.RED);
         } else {
             UPhoneNo.setForeground(Color.BLACK);
         }
-        if(gender.equals("Select Gender")){
+        if (gender.equals("Select Gender")) {
             UGender.setForeground(Color.RED);
         } else {
             UGender.setForeground(Color.BLACK);
         }
-        if(department.equals("Select Department")){
+        if (department.equals("Select Department")) {
             UDepartment.setForeground(Color.RED);
         } else {
             UDepartment.setForeground(Color.BLACK);
         }
-        if(program.equals("Program Name") || program.isBlank()){
+        if (program.equals("Program Name") || program.isBlank()) {
             UProgram.setForeground(Color.RED);
         } else {
             UProgram.setForeground(Color.BLACK);
         }
-        if(address.isBlank()){
+        if (address.isBlank()) {
             UAddress.setForeground(Color.RED);
         } else {
             UAddress.setForeground(Color.BLACK);
         }
-        if(email.equals("user@domain.com") || email.isBlank()){
+        if (email.equals("user@domain.com") || email.isBlank()) {
             UEmail.setForeground(Color.RED);
         } else {
             UEmail.setForeground(Color.BLACK);
         }
-        if(password.isBlank()){
+        if (password.isBlank()) {
             UPassword.setForeground(Color.RED);
         } else {
             UPassword.setForeground(Color.BLACK);
         }
-        if(checkEmail(email) || checkCNIC(cnic)){
+        if (checkEmail(email) || checkCNIC(cnic)) {
             UserAlreadyExists useralreadyexists = new UserAlreadyExists();
             useralreadyexists.setVisible(true);
             new Timer().schedule(new TimerTask() {
@@ -3518,25 +4009,29 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 }
             }, 1000);
         } else {
-            if(temp == true){
-                String query = "UPDATE `student` SET `ID`='"+id+"',`fName`='"+fName+"',`lName`='"+lName+"',`dob`='"+dob+"',`cnic`='"+cnic+"',`phoneno`='"+phoneno+"',`gender`='"+gender+"',`department`='"+department+"',`program`='"+program+"',`address`='"+address+"',`email`='"+email+"',`password`='"+password+"',`status`='"+value13+"' WHERE `ID`='"+id+"'";
-                    try {
-                        pst = connect.prepareStatement(query);
-                        pst.execute();
+            if (temp == true) {
+                String query = "UPDATE `student` SET `ID`='" + id + "',`fName`='" + fName + "',`lName`='" + lName
+                        + "',`dob`='" + dob + "',`cnic`='" + cnic + "',`phoneno`='" + phoneno + "',`gender`='" + gender
+                        + "',`department`='" + department + "',`program`='" + program + "',`address`='" + address
+                        + "',`email`='" + email + "',`password`='" + password + "',`status`='" + value13
+                        + "' WHERE `ID`='" + id + "'";
+                try {
+                    pst = connect.prepareStatement(query);
+                    pst.execute();
 
-                        DataUpdated dataupdated = new DataUpdated();
-                        dataupdated.setVisible(true);
-                        new Timer().schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                dataupdated.dispose();
-                            }
-                        }, 1000);
-                        show_Table("student", ViewStudentsTable);
+                    DataUpdated dataupdated = new DataUpdated();
+                    dataupdated.setVisible(true);
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            dataupdated.dispose();
+                        }
+                    }, 1000);
+                    show_Table("student", ViewStudentsTable);
 
-                    } catch (SQLException ex) {
-                        JOptionPane.showMessageDialog(null,ex);
-                    }
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(null, ex);
+                }
             } else {
                 Failed failed = new Failed();
                 failed.setVisible(true);
@@ -3548,20 +4043,20 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 }, 1000);
             }
         }
-    }//GEN-LAST:event_USubmitBtnMouseClicked
+    }// GEN-LAST:event_USubmitBtnMouseClicked
 
-    private void USubmitBtnKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_USubmitBtnKeyPressed
+    private void USubmitBtnKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_USubmitBtnKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER){
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             USubmitBtnMouseClicked(null);
         }
-    }//GEN-LAST:event_USubmitBtnKeyPressed
+    }// GEN-LAST:event_USubmitBtnKeyPressed
 
-    private void UCNICFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UCNICFieldFocusLost
+    private void UCNICFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UCNICFieldFocusLost
         // TODO add your handling code here:
         if (UCNICField.getText().trim().equals("")) {
             UCNICField.setText("00000-0000000-0");
-            UCNICField.setForeground(new Color(153,153,153));
+            UCNICField.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[0-9]{5}[-][0-9]{7}[-][0-9]{1}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -3573,35 +4068,47 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 UCNIC.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_UCNICFieldFocusLost
+    }// GEN-LAST:event_UCNICFieldFocusLost
 
-    private void UCNICFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UCNICFieldFocusGained
+    private void UCNICFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UCNICFieldFocusGained
         // TODO add your handling code here:
-        UCNICField.setForeground(new Color(0,0,0));
-    }//GEN-LAST:event_UCNICFieldFocusGained
+        UCNICField.setForeground(new Color(0, 0, 0));
+    }// GEN-LAST:event_UCNICFieldFocusGained
 
-    private void ViewStudentsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ViewStudentsTableMouseClicked
+    private void ViewStudentsTableMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ViewStudentsTableMouseClicked
         // TODO add your handling code here:
         boolean confirmed = false;
         int row = ViewStudentsTable.rowAtPoint(evt.getPoint());
         int col = ViewStudentsTable.columnAtPoint(evt.getPoint());
-        if(row >= 0 && col >= 0){
+        if (row >= 0 && col >= 0) {
             Object cellValue = ViewStudentsTable.getModel().getValueAt(row, 0);
-            if(col == 4){
+            if (col == 4) {
                 String studentID = ViewStudentsTable.getValueAt(row, 0).toString();
                 // Open the new Detail Window
                 new StudentFullProfile(studentID).setVisible(true);
-            } else if(col == 5){
+            } else if (col == 5) {
                 String message = "Are you sure want to delete?";
                 CustomConfirmDialog customDialog = new CustomConfirmDialog(this, "Confirm Student Deletion", message);
                 customDialog.setVisible(true);
                 confirmed = customDialog.isConfirmed();
-                if(confirmed == true){
-                    String query = "DELETE FROM `student` WHERE `ID`=?";
+                if (confirmed == true) {
                     try {
+                        // Cascading Delete for Student
+                        String[] relatedTables = { "attendance_json", "enrollment", "fee", "results" };
+                        for (String table : relatedTables) {
+                            String deleteQuery = "DELETE FROM `" + table + "` WHERE `student_id`=?";
+                            pst = connect.prepareStatement(deleteQuery);
+                            pst.setString(1, (String) cellValue); // cellValue is ID (student_id)
+                            pst.executeUpdate();
+                            if (pst != null)
+                                pst.close();
+                        }
+
+                        String query = "DELETE FROM `student` WHERE `ID`=?";
+
                         pst = connect.prepareStatement(query);
 
-                        pst.setString(1, (String)cellValue);
+                        pst.setString(1, (String) cellValue);
 
                         pst.execute();
                         DataDeleted datadeleted = new DataDeleted();
@@ -3615,26 +4122,26 @@ public class HomePageAdmin extends javax.swing.JFrame {
                         show_Table("student", ViewStudentsTable);
 
                     } catch (SQLException ex) {
-                        JOptionPane.showMessageDialog(null,ex);
+                        JOptionPane.showMessageDialog(null, ex);
                     }
                 }
             }
         }
-    }//GEN-LAST:event_ViewStudentsTableMouseClicked
+    }// GEN-LAST:event_ViewStudentsTableMouseClicked
 
-    private void AFirstNameField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_AFirstNameField2FocusGained
+    private void AFirstNameField2FocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_AFirstNameField2FocusGained
         // TODO add your handling code here:
-        if(AFirstNameField2.getText().equals("John")){
+        if (AFirstNameField2.getText().equals("John")) {
             AFirstNameField2.setText("");
-            AFirstNameField2.setForeground(new Color(0,0,0));
+            AFirstNameField2.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_AFirstNameField2FocusGained
+    }// GEN-LAST:event_AFirstNameField2FocusGained
 
-    private void AFirstNameField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_AFirstNameField2FocusLost
+    private void AFirstNameField2FocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_AFirstNameField2FocusLost
         // TODO add your handling code here:
-        if(AFirstNameField2.getText().equals("")) {
+        if (AFirstNameField2.getText().equals("")) {
             AFirstNameField2.setText("John");
-            AFirstNameField2.setForeground(new Color(153,153,153));
+            AFirstNameField2.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[a-zA-Z]{1,20}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -3646,21 +4153,21 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 AFirstName2.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_AFirstNameField2FocusLost
+    }// GEN-LAST:event_AFirstNameField2FocusLost
 
-    private void ALastNameField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ALastNameField2FocusGained
+    private void ALastNameField2FocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ALastNameField2FocusGained
         // TODO add your handling code here:
-        if(ALastNameField2.getText().equals("Doe")){
+        if (ALastNameField2.getText().equals("Doe")) {
             ALastNameField2.setText("");
-            ALastNameField2.setForeground(new Color(0,0,0));
+            ALastNameField2.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_ALastNameField2FocusGained
+    }// GEN-LAST:event_ALastNameField2FocusGained
 
-    private void ALastNameField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ALastNameField2FocusLost
+    private void ALastNameField2FocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ALastNameField2FocusLost
         // TODO add your handling code here:
-        if(ALastNameField2.getText().equals("")) {
+        if (ALastNameField2.getText().equals("")) {
             ALastNameField2.setText("Doe");
-            ALastNameField2.setForeground(new Color(153,153,153));
+            ALastNameField2.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[a-zA-Z]{1,20}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -3672,21 +4179,21 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 ALastName2.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_ALastNameField2FocusLost
+    }// GEN-LAST:event_ALastNameField2FocusLost
 
-    private void APhoneNoField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_APhoneNoField2FocusGained
+    private void APhoneNoField2FocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_APhoneNoField2FocusGained
         // TODO add your handling code here:
         if (APhoneNoField2.getText().trim().equals("0333-1234567")) {
             APhoneNoField2.setText("");
-            APhoneNoField2.setForeground(new Color(0,0,0));
+            APhoneNoField2.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_APhoneNoField2FocusGained
+    }// GEN-LAST:event_APhoneNoField2FocusGained
 
-    private void APhoneNoField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_APhoneNoField2FocusLost
+    private void APhoneNoField2FocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_APhoneNoField2FocusLost
         // TODO add your handling code here:
         if (APhoneNoField2.getText().trim().equals("")) {
             APhoneNoField2.setText("0333-1234567");
-            APhoneNoField2.setForeground(new Color(153,153,153));
+            APhoneNoField2.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[0-9]{4}[-][0-9]{7}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -3698,21 +4205,21 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 APhoneNo2.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_APhoneNoField2FocusLost
+    }// GEN-LAST:event_APhoneNoField2FocusLost
 
-    private void ACNICField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ACNICField2FocusGained
+    private void ACNICField2FocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ACNICField2FocusGained
         // TODO add your handling code here:
         if (ACNICField2.getText().trim().equals("00000-0000000-0")) {
             ACNICField2.setText("");
-            ACNICField2.setForeground(new Color(0,0,0));
+            ACNICField2.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_ACNICField2FocusGained
+    }// GEN-LAST:event_ACNICField2FocusGained
 
-    private void ACNICField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ACNICField2FocusLost
+    private void ACNICField2FocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ACNICField2FocusLost
         // TODO add your handling code here:
         if (ACNICField2.getText().trim().equals("")) {
             ACNICField2.setText("00000-0000000-0");
-            ACNICField2.setForeground(new Color(153,153,153));
+            ACNICField2.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[0-9]{5}[-][0-9]{7}[-][0-9]{1}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -3724,37 +4231,37 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 ACNIC2.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_ACNICField2FocusLost
+    }// GEN-LAST:event_ACNICField2FocusLost
 
-    private void ADateOfBirthField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ADateOfBirthField2FocusGained
+    private void ADateOfBirthField2FocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ADateOfBirthField2FocusGained
         // TODO add your handling code here:
-        if(AdateTextField2.getText().equals("DD-MM-YYYY")){
+        if (AdateTextField2.getText().equals("DD-MM-YYYY")) {
             AdateTextField2.setText("");
-            ADateOfBirthField2.setForeground(new Color(0,0,0));
+            ADateOfBirthField2.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_ADateOfBirthField2FocusGained
+    }// GEN-LAST:event_ADateOfBirthField2FocusGained
 
-    private void ADateOfBirthField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ADateOfBirthField2FocusLost
+    private void ADateOfBirthField2FocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ADateOfBirthField2FocusLost
         // TODO add your handling code here:
-        if(AdateTextField2.getText().equals("")) {
+        if (AdateTextField2.getText().equals("")) {
             AdateTextField2.setText("DD-MM-YYYY");
-            ADateOfBirthField2.setForeground(new Color(153,153,153));
+            ADateOfBirthField2.setForeground(new Color(153, 153, 153));
         }
-    }//GEN-LAST:event_ADateOfBirthField2FocusLost
+    }// GEN-LAST:event_ADateOfBirthField2FocusLost
 
-    private void AEmailField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_AEmailField2FocusGained
+    private void AEmailField2FocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_AEmailField2FocusGained
         // TODO add your handling code here:
         if (AEmailField2.getText().trim().equals("user@domain.com")) {
             AEmailField2.setText("");
-            AEmailField2.setForeground(new Color(0,0,0));
+            AEmailField2.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_AEmailField2FocusGained
+    }// GEN-LAST:event_AEmailField2FocusGained
 
-    private void AEmailField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_AEmailField2FocusLost
+    private void AEmailField2FocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_AEmailField2FocusLost
         // TODO add your handling code here:
         if (AEmailField2.getText().trim().equals("")) {
             AEmailField2.setText("user@domain.com");
-            AEmailField2.setForeground(new Color(153,153,153));
+            AEmailField2.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^(.+)@(.+)$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -3766,9 +4273,9 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 AEmail2.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_AEmailField2FocusLost
+    }// GEN-LAST:event_AEmailField2FocusLost
 
-    private void ASubmitBtn2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ASubmitBtn2MouseClicked
+    private void ASubmitBtn2MouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ASubmitBtn2MouseClicked
         // TODO add your handling code here:
         String ID = generateRandomID();
         String fName = AFirstNameField2.getText();
@@ -3776,57 +4283,57 @@ public class HomePageAdmin extends javax.swing.JFrame {
         String dob = AdateTextField2.getText();
         cnic = ACNICField2.getText();
         String phoneno = APhoneNoField2.getText();
-        String gender = (String)AGenderCombo2.getSelectedItem();
-        String department = (String)ADepartmentCombo2.getSelectedItem();
+        String gender = (String) AGenderCombo2.getSelectedItem();
+        String department = (String) ADepartmentCombo2.getSelectedItem();
         String address = AAddressField2.getText();
         email = AEmailField2.getText();
 
-        if(fName.equals("John") || fName.isBlank()){
+        if (fName.equals("John") || fName.isBlank()) {
             AFirstName2.setForeground(Color.RED);
         } else {
             AFirstName2.setForeground(Color.BLACK);
         }
-        if(lName.equals("Doe") || lName.isBlank()){
+        if (lName.equals("Doe") || lName.isBlank()) {
             ALastName2.setForeground(Color.RED);
         } else {
             ALastName2.setForeground(Color.BLACK);
         }
-        if(dob.equals("DD-MM-YYYY") || fName.isBlank()){
+        if (dob.equals("DD-MM-YYYY") || fName.isBlank()) {
             ADateOfBirth2.setForeground(Color.RED);
         } else {
             ADateOfBirth2.setForeground(Color.BLACK);
         }
-        if(cnic.equals("00000-0000000-0") || cnic.isBlank()){
+        if (cnic.equals("00000-0000000-0") || cnic.isBlank()) {
             ACNIC2.setForeground(Color.RED);
         } else {
             ACNIC2.setForeground(Color.BLACK);
         }
-        if(phoneno.equals("0333-1234567") || phoneno.isBlank()){
+        if (phoneno.equals("0333-1234567") || phoneno.isBlank()) {
             APhoneNo2.setForeground(Color.RED);
         } else {
             APhoneNo2.setForeground(Color.BLACK);
         }
-        if(gender.equals("Select Gender")){
+        if (gender.equals("Select Gender")) {
             AGender2.setForeground(Color.RED);
         } else {
             AGender2.setForeground(Color.BLACK);
         }
-        if(department.equals("Select Department")){
+        if (department.equals("Select Department")) {
             ADepartment2.setForeground(Color.RED);
         } else {
             ADepartment2.setForeground(Color.BLACK);
         }
-        if(address.isBlank()){
+        if (address.isBlank()) {
             AAddress2.setForeground(Color.RED);
         } else {
             AAddress2.setForeground(Color.BLACK);
         }
-        if(email.equals("user@domain.com") || email.isBlank()){
+        if (email.equals("user@domain.com") || email.isBlank()) {
             AEmail2.setForeground(Color.RED);
         } else {
             AEmail2.setForeground(Color.BLACK);
         }
-        if(checkEmail(email) || checkCNIC(cnic)){
+        if (checkEmail(email) || checkCNIC(cnic)) {
             UserAlreadyExists useralreadyexists = new UserAlreadyExists();
             useralreadyexists.setVisible(true);
             new Timer().schedule(new TimerTask() {
@@ -3835,7 +4342,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
                     useralreadyexists.dispose();
                 }
             }, 1000);
-        } else if(checkInstructorID(ID)){
+        } else if (checkInstructorID(ID)) {
             UserAlreadyExists useralreadyexists = new UserAlreadyExists();
             useralreadyexists.setVisible(true);
             new Timer().schedule(new TimerTask() {
@@ -3844,8 +4351,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
                     useralreadyexists.dispose();
                 }
             }, 1000);
-        }else {
-            if(temp == true){
+        } else {
+            if (temp == true) {
                 String query = "INSERT INTO `instructor`(`ID`, `fName`, `lName`, `dob`, `cnic`, `phoneno`, `gender`, `department`, `address`, `email`) VALUES (?,?,?,?,?,?,?,?,?,?)";
                 try {
                     pst = connect.prepareStatement(query);
@@ -3855,8 +4362,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
                     pst.setString(4, AdateTextField2.getText());
                     pst.setString(5, ACNICField2.getText());
                     pst.setString(6, APhoneNoField2.getText());
-                    pst.setString(7, (String)AGenderCombo2.getSelectedItem());
-                    pst.setString(8, (String)ADepartmentCombo2.getSelectedItem());
+                    pst.setString(7, (String) AGenderCombo2.getSelectedItem());
+                    pst.setString(8, (String) ADepartmentCombo2.getSelectedItem());
                     pst.setString(9, AAddressField2.getText());
                     pst.setString(10, AEmailField2.getText());
 
@@ -3881,38 +4388,38 @@ public class HomePageAdmin extends javax.swing.JFrame {
                     AEmailField2.setText("");
 
                 } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(null,ex);
+                    JOptionPane.showMessageDialog(null, ex);
                 }
             }
         }
-    }//GEN-LAST:event_ASubmitBtn2MouseClicked
+    }// GEN-LAST:event_ASubmitBtn2MouseClicked
 
-    private void ASubmitBtn2KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ASubmitBtn2KeyPressed
+    private void ASubmitBtn2KeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_ASubmitBtn2KeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER){
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             ASubmitBtn2MouseClicked(null);
         }
-    }//GEN-LAST:event_ASubmitBtn2KeyPressed
+    }// GEN-LAST:event_ASubmitBtn2KeyPressed
 
-    private void UIdField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UIdField2FocusGained
+    private void UIdField2FocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UIdField2FocusGained
         // TODO add your handling code here:
         if (UIdField2.getText().trim().equals("Enter ID to Search")) {
             UIdField2.setText("");
-            UIdField2.setForeground(new Color(0,0,0));
+            UIdField2.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_UIdField2FocusGained
+    }// GEN-LAST:event_UIdField2FocusGained
 
-    private void UIdField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UIdField2FocusLost
+    private void UIdField2FocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UIdField2FocusLost
         // TODO add your handling code here:
         if (UIdField2.getText().trim().equals("")) {
             UIdField2.setText("Enter ID to Search");
-            UIdField2.setForeground(new Color(153,153,153));
+            UIdField2.setForeground(new Color(153, 153, 153));
         }
-    }//GEN-LAST:event_UIdField2FocusLost
+    }// GEN-LAST:event_UIdField2FocusLost
 
-    private void UIdField2KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_UIdField2KeyPressed
+    private void UIdField2KeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_UIdField2KeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             String ID = UIdField2.getText();
             try {
                 String query = "SELECT * FROM `instructor` WHERE `ID` = ?";
@@ -3930,10 +4437,10 @@ public class HomePageAdmin extends javax.swing.JFrame {
                     UAddressField2.setText(result.getString(9));
                     UEmailField2.setText(result.getString(10));
                     UPasswordField2.setText(result.getString(11));
-                    if(result.getString(12).equals("Active")) {
+                    if (result.getString(12).equals("Active")) {
                         UActive2.setSelected(true);
                         UInactive2.setSelected(false);
-                    } else if(result.getString(12).equals("In-Active")) {
+                    } else if (result.getString(12).equals("In-Active")) {
                         UActive2.setSelected(false);
                         UInactive2.setSelected(true);
                     }
@@ -3945,7 +4452,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
                             idnotfound.dispose();
                         }
                     }, 1000);
-                    
+
                     UIdField2.setText("Enter ID to Search");
                     UFirstNameField2.setText("");
                     ULastNameField2.setText("");
@@ -3961,21 +4468,21 @@ public class HomePageAdmin extends javax.swing.JFrame {
                     UPasswordField2.setText("");
                 }
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null,ex);
+                JOptionPane.showMessageDialog(null, ex);
             }
         }
-    }//GEN-LAST:event_UIdField2KeyPressed
+    }// GEN-LAST:event_UIdField2KeyPressed
 
-    private void UFirstNameField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UFirstNameField2FocusGained
+    private void UFirstNameField2FocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UFirstNameField2FocusGained
         // TODO add your handling code here:
-        UFirstNameField2.setForeground(new Color(0,0,0));
-    }//GEN-LAST:event_UFirstNameField2FocusGained
+        UFirstNameField2.setForeground(new Color(0, 0, 0));
+    }// GEN-LAST:event_UFirstNameField2FocusGained
 
-    private void UFirstNameField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UFirstNameField2FocusLost
+    private void UFirstNameField2FocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UFirstNameField2FocusLost
         // TODO add your handling code here:
-        if(UFirstNameField2.getText().equals("")) {
+        if (UFirstNameField2.getText().equals("")) {
             UFirstNameField2.setText("John");
-            UFirstNameField2.setForeground(new Color(153,153,153));
+            UFirstNameField2.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[a-zA-Z]{1,20}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -3987,18 +4494,18 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 UFirstName.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_UFirstNameField2FocusLost
+    }// GEN-LAST:event_UFirstNameField2FocusLost
 
-    private void ULastNameField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ULastNameField2FocusGained
+    private void ULastNameField2FocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ULastNameField2FocusGained
         // TODO add your handling code here:
-        ULastNameField2.setForeground(new Color(0,0,0));
-    }//GEN-LAST:event_ULastNameField2FocusGained
+        ULastNameField2.setForeground(new Color(0, 0, 0));
+    }// GEN-LAST:event_ULastNameField2FocusGained
 
-    private void ULastNameField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_ULastNameField2FocusLost
+    private void ULastNameField2FocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_ULastNameField2FocusLost
         // TODO add your handling code here:
         if (ULastNameField2.getText().equals("")) {
             ULastNameField2.setText("Doe");
-            ULastNameField2.setForeground(new Color(153,153,153));
+            ULastNameField2.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[a-zA-Z]{1,20}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -4010,18 +4517,18 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 ULastName.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_ULastNameField2FocusLost
+    }// GEN-LAST:event_ULastNameField2FocusLost
 
-    private void UPhoneNoField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UPhoneNoField2FocusGained
+    private void UPhoneNoField2FocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UPhoneNoField2FocusGained
         // TODO add your handling code here:
-        UPhoneNoField2.setForeground(new Color(0,0,0));
-    }//GEN-LAST:event_UPhoneNoField2FocusGained
+        UPhoneNoField2.setForeground(new Color(0, 0, 0));
+    }// GEN-LAST:event_UPhoneNoField2FocusGained
 
-    private void UPhoneNoField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UPhoneNoField2FocusLost
+    private void UPhoneNoField2FocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UPhoneNoField2FocusLost
         // TODO add your handling code here:
         if (UPhoneNoField2.getText().trim().equals("")) {
             UPhoneNoField2.setText("0333-1234567");
-            UPhoneNoField2.setForeground(new Color(153,153,153));
+            UPhoneNoField2.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[0-9]{4}[-][0-9]{7}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -4033,18 +4540,18 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 UPhoneNo.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_UPhoneNoField2FocusLost
+    }// GEN-LAST:event_UPhoneNoField2FocusLost
 
-    private void UCNICField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UCNICField2FocusGained
+    private void UCNICField2FocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UCNICField2FocusGained
         // TODO add your handling code here:
-        UCNICField2.setForeground(new Color(0,0,0));
-    }//GEN-LAST:event_UCNICField2FocusGained
+        UCNICField2.setForeground(new Color(0, 0, 0));
+    }// GEN-LAST:event_UCNICField2FocusGained
 
-    private void UCNICField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UCNICField2FocusLost
+    private void UCNICField2FocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UCNICField2FocusLost
         // TODO add your handling code here:
         if (UCNICField2.getText().trim().equals("")) {
             UCNICField2.setText("00000-0000000-0");
-            UCNICField2.setForeground(new Color(153,153,153));
+            UCNICField2.setForeground(new Color(153, 153, 153));
         } else {
             String PATTERN = "^[0-9]{5}[-][0-9]{7}[-][0-9]{1}$";
             Pattern pattern = Pattern.compile(PATTERN);
@@ -4056,67 +4563,67 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 UCNIC.setForeground(Color.BLACK);
             }
         }
-    }//GEN-LAST:event_UCNICField2FocusLost
+    }// GEN-LAST:event_UCNICField2FocusLost
 
-    private void UDateOfBirthField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UDateOfBirthField2FocusGained
+    private void UDateOfBirthField2FocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UDateOfBirthField2FocusGained
         // TODO add your handling code here:
-        UDateOfBirthField2.setForeground(new Color(0,0,0));
-    }//GEN-LAST:event_UDateOfBirthField2FocusGained
+        UDateOfBirthField2.setForeground(new Color(0, 0, 0));
+    }// GEN-LAST:event_UDateOfBirthField2FocusGained
 
-    private void UDateOfBirthField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UDateOfBirthField2FocusLost
+    private void UDateOfBirthField2FocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UDateOfBirthField2FocusLost
         // TODO add your handling code here:
-        if(UdateTextField2.getText().equals("")) {
+        if (UdateTextField2.getText().equals("")) {
             UdateTextField2.setText("DD-MM-YYYY");
-            UDateOfBirthField2.setForeground(new Color(153,153,153));
+            UDateOfBirthField2.setForeground(new Color(153, 153, 153));
         }
-    }//GEN-LAST:event_UDateOfBirthField2FocusLost
+    }// GEN-LAST:event_UDateOfBirthField2FocusLost
 
-    private void UEmailField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UEmailField2FocusGained
+    private void UEmailField2FocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UEmailField2FocusGained
         // TODO add your handling code here:
-        UEmailField2.setForeground(new Color(0,0,0));
-    }//GEN-LAST:event_UEmailField2FocusGained
+        UEmailField2.setForeground(new Color(0, 0, 0));
+    }// GEN-LAST:event_UEmailField2FocusGained
 
-    private void UEmailField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UEmailField2FocusLost
+    private void UEmailField2FocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UEmailField2FocusLost
         // TODO add your handling code here:
         if (UEmailField2.getText().trim().equals("")) {
             UEmailField2.setText("user@domain.com");
-            UEmailField2.setForeground(new Color(153,153,153));
+            UEmailField2.setForeground(new Color(153, 153, 153));
         }
-    }//GEN-LAST:event_UEmailField2FocusLost
+    }// GEN-LAST:event_UEmailField2FocusLost
 
-    private void UActive2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UActive2MouseClicked
+    private void UActive2MouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_UActive2MouseClicked
         // TODO add your handling code here:
         checkStatus = "Active";
         UActive2.setSelected(true);
         UInactive2.setSelected(false);
-    }//GEN-LAST:event_UActive2MouseClicked
+    }// GEN-LAST:event_UActive2MouseClicked
 
-    private void UActive2KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_UActive2KeyPressed
+    private void UActive2KeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_UActive2KeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER){
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             checkStatus = "Active";
             UActive2.setSelected(true);
             UInactive2.setSelected(false);
         }
-    }//GEN-LAST:event_UActive2KeyPressed
+    }// GEN-LAST:event_UActive2KeyPressed
 
-    private void UInactive2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UInactive2MouseClicked
+    private void UInactive2MouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_UInactive2MouseClicked
         // TODO add your handling code here:
         checkStatus = "In-Active";
         UActive2.setSelected(false);
         UInactive2.setSelected(true);
-    }//GEN-LAST:event_UInactive2MouseClicked
+    }// GEN-LAST:event_UInactive2MouseClicked
 
-    private void UInactive2KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_UInactive2KeyPressed
+    private void UInactive2KeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_UInactive2KeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER){
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             checkStatus = "In-Active";
             UActive2.setSelected(false);
             UInactive2.setSelected(true);
         }
-    }//GEN-LAST:event_UInactive2KeyPressed
+    }// GEN-LAST:event_UInactive2KeyPressed
 
-    private void USubmitBtn2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_USubmitBtn2MouseClicked
+    private void USubmitBtn2MouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_USubmitBtn2MouseClicked
         // TODO add your handling code here:
         String id = UIdField2.getText();
         String fName = UFirstNameField2.getText();
@@ -4124,64 +4631,64 @@ public class HomePageAdmin extends javax.swing.JFrame {
         String dob = UdateTextField2.getText();
         cnic = UCNICField2.getText();
         String phoneno = UPhoneNoField2.getText();
-        String gender = (String)UGenderCombo2.getSelectedItem();
-        String department = (String)UDepartmentCombo2.getSelectedItem();
+        String gender = (String) UGenderCombo2.getSelectedItem();
+        String department = (String) UDepartmentCombo2.getSelectedItem();
         String address = UAddressField2.getText();
         email = UEmailField2.getText();
         String password = UPasswordField2.getText();
         String value13 = checkStatus;
 
-        if(fName.equals("John") || fName.isBlank()){
+        if (fName.equals("John") || fName.isBlank()) {
             UFirstName.setForeground(Color.RED);
         } else {
             UFirstName.setForeground(Color.BLACK);
         }
-        if(lName.equals("Doe") || lName.isBlank()){
+        if (lName.equals("Doe") || lName.isBlank()) {
             ULastName.setForeground(Color.RED);
         } else {
             ULastName.setForeground(Color.BLACK);
         }
-        if(dob.equals("DD-MM-YYYY") || fName.isBlank()){
+        if (dob.equals("DD-MM-YYYY") || fName.isBlank()) {
             UDateOfBirth.setForeground(Color.RED);
         } else {
             UDateOfBirth.setForeground(Color.BLACK);
         }
-        if(cnic.equals("00000-0000000-0") || cnic.isBlank()){
+        if (cnic.equals("00000-0000000-0") || cnic.isBlank()) {
             UCNIC.setForeground(Color.RED);
         } else {
             UCNIC.setForeground(Color.BLACK);
         }
-        if(phoneno.equals("0333-1234567") || phoneno.isBlank()){
+        if (phoneno.equals("0333-1234567") || phoneno.isBlank()) {
             UPhoneNo.setForeground(Color.RED);
         } else {
             UPhoneNo.setForeground(Color.BLACK);
         }
-        if(gender.equals("Select Gender")){
+        if (gender.equals("Select Gender")) {
             UGender.setForeground(Color.RED);
         } else {
             UGender.setForeground(Color.BLACK);
         }
-        if(department.equals("Select Department")){
+        if (department.equals("Select Department")) {
             UDepartment.setForeground(Color.RED);
         } else {
             UDepartment.setForeground(Color.BLACK);
         }
-        if(address.isBlank()){
+        if (address.isBlank()) {
             UAddress.setForeground(Color.RED);
         } else {
             UAddress.setForeground(Color.BLACK);
         }
-        if(email.equals("user@domain.com") || email.isBlank()){
+        if (email.equals("user@domain.com") || email.isBlank()) {
             UEmail.setForeground(Color.RED);
         } else {
             UEmail.setForeground(Color.BLACK);
         }
-        if(password.isBlank()){
+        if (password.isBlank()) {
             UPassword.setForeground(Color.RED);
         } else {
             UPassword.setForeground(Color.BLACK);
         }
-        if(checkEmail(email) || checkCNIC(cnic)){
+        if (checkEmail(email) || checkCNIC(cnic)) {
             UserAlreadyExists useralreadyexists = new UserAlreadyExists();
             useralreadyexists.setVisible(true);
             new Timer().schedule(new TimerTask() {
@@ -4191,65 +4698,96 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 }
             }, 1000);
         } else {
-            if(temp == true){
-                String query = "UPDATE `instructor` SET `ID`='"+id+"',`fName`='"+fName+"',`lName`='"+lName+"',`dob`='"+dob+"',`cnic`='"+cnic+"',`phoneno`='"+phoneno+"',`gender`='"+gender+"',`department`='"+department+"',`address`='"+address+"',`email`='"+email+"',`password`='"+password+"',`status`='"+value13+"' WHERE `ID`='"+id+"'";
-                    try {
-                        pst = connect.prepareStatement(query);
-                        pst.execute();
+            if (temp == true) {
+                String query = "UPDATE `instructor` SET `ID`='" + id + "',`fName`='" + fName + "',`lName`='" + lName
+                        + "',`dob`='" + dob + "',`cnic`='" + cnic + "',`phoneno`='" + phoneno + "',`gender`='" + gender
+                        + "',`department`='" + department + "',`address`='" + address + "',`email`='" + email
+                        + "',`password`='" + password + "',`status`='" + value13 + "' WHERE `ID`='" + id + "'";
+                try {
+                    pst = connect.prepareStatement(query);
+                    pst.execute();
 
-                        DataUpdated dataupdated = new DataUpdated();
-                        dataupdated.setVisible(true);
-                        new Timer().schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                dataupdated.dispose();
-                            }
-                        }, 1000);
-                        show_Table("instructor", ViewInstructorsTable);
+                    DataUpdated dataupdated = new DataUpdated();
+                    dataupdated.setVisible(true);
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            dataupdated.dispose();
+                        }
+                    }, 1000);
+                    show_Table("instructor", ViewInstructorsTable);
 
-                    } catch (SQLException ex) {
-                        JOptionPane.showMessageDialog(null,ex);
-                    }
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(null, ex);
+                }
             } else {
                 Failed failed = new Failed();
                 failed.setVisible(true);
                 new Timer().schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                failed.dispose();
-                            }
-                        }, 1000);
+                    @Override
+                    public void run() {
+                        failed.dispose();
+                    }
+                }, 1000);
             }
         }
-    }//GEN-LAST:event_USubmitBtn2MouseClicked
+    }// GEN-LAST:event_USubmitBtn2MouseClicked
 
-    private void USubmitBtn2KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_USubmitBtn2KeyPressed
+    private void USubmitBtn2KeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_USubmitBtn2KeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER){
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             USubmitBtn2MouseClicked(null);
         }
-    }//GEN-LAST:event_USubmitBtn2KeyPressed
+    }// GEN-LAST:event_USubmitBtn2KeyPressed
 
-    private void ViewInstructorsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ViewInstructorsTableMouseClicked
+    private void ViewInstructorsTableMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ViewInstructorsTableMouseClicked
         // TODO add your handling code here:
         boolean confirmed = false;
         int row = ViewInstructorsTable.rowAtPoint(evt.getPoint());
         int col = ViewInstructorsTable.columnAtPoint(evt.getPoint());
-        if(row >= 0 && col >= 0){
+        if (row >= 0 && col >= 0) {
             Object cellValue = ViewInstructorsTable.getModel().getValueAt(row, 0);
-            if(col == 5){
-                
-            } else if(col == 6){
+            if (col == 5) {
+                new InstructorFullProfile((String) cellValue).setVisible(true);
+            } else if (col == 6) {
                 String message = "Are you sure want to delete?";
-                CustomConfirmDialog customDialog = new CustomConfirmDialog(this, "Confirm Instructor Deletion", message);
+                CustomConfirmDialog customDialog = new CustomConfirmDialog(this, "Confirm Instructor Deletion",
+                        message);
                 customDialog.setVisible(true);
                 confirmed = customDialog.isConfirmed();
-                if(confirmed == true){
-                    String query = "DELETE FROM `instructor` WHERE `ID`=?";
+                if (confirmed == true) {
                     try {
+                        // Fetch Instructor Name to delete from timetable
+                        String fName = "", lName = "";
+                        String nameQuery = "SELECT `fName`, `lName` FROM `instructor` WHERE `ID`=?";
+                        pst = connect.prepareStatement(nameQuery);
+                        pst.setString(1, (String) cellValue); // cellValue is ID
+                        result = pst.executeQuery();
+                        if (result.next()) {
+                            fName = result.getString("fName");
+                            lName = result.getString("lName");
+                        }
+                        if (result != null)
+                            result.close();
+                        if (pst != null)
+                            pst.close();
+
+                        if (!fName.isEmpty() && !lName.isEmpty()) {
+                            String instructorName = fName + " " + lName;
+                            // Delete from timetable
+                            String deleteTimetableQuery = "DELETE FROM `timetable` WHERE `instructorName`=?";
+                            pst = connect.prepareStatement(deleteTimetableQuery);
+                            pst.setString(1, instructorName);
+                            pst.executeUpdate();
+                            if (pst != null)
+                                pst.close();
+                        }
+
+                        String query = "DELETE FROM `instructor` WHERE `ID`=?";
+
                         pst = connect.prepareStatement(query);
 
-                        pst.setString(1, (String)cellValue);
+                        pst.setString(1, (String) cellValue);
 
                         pst.execute();
                         DataDeleted datadeleted = new DataDeleted();
@@ -4263,59 +4801,59 @@ public class HomePageAdmin extends javax.swing.JFrame {
                         show_Table("instructor", ViewInstructorsTable);
 
                     } catch (SQLException ex) {
-                        JOptionPane.showMessageDialog(null,ex);
+                        JOptionPane.showMessageDialog(null, ex);
                     }
                 }
             }
         }
-    }//GEN-LAST:event_ViewInstructorsTableMouseClicked
+    }// GEN-LAST:event_ViewInstructorsTableMouseClicked
 
-    private void ACSubmitBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ACSubmitBtnMouseClicked
+    private void ACSubmitBtnMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ACSubmitBtnMouseClicked
         // TODO add your handling code here:
         String cCode = ACourseCodeField.getText();
         String courseName = ACourseNameField.getText();
         String cCreditHr = ACreditHrsField.getText();
-        String cSession = (String)ASessionCombo.getSelectedItem();
+        String cSession = (String) ASessionCombo.getSelectedItem();
         String cAcademicYear = AAcademicYearField.getText();
-        String cDepartment = (String)ACDepartmentCombo.getSelectedItem();
+        String cDepartment = (String) ACDepartmentCombo.getSelectedItem();
         String cSeats = ASeatsField.getText();
 
-        if(cCode.isBlank()){
+        if (cCode.isBlank()) {
             ACourseCode.setForeground(Color.RED);
         } else {
             ACourseCode.setForeground(Color.BLACK);
         }
-        if(courseName.isBlank()){
+        if (courseName.isBlank()) {
             ACourseName.setForeground(Color.RED);
         } else {
             ACourseName.setForeground(Color.BLACK);
         }
-        if(cCreditHr.isBlank()){
+        if (cCreditHr.isBlank()) {
             ACreditHrs.setForeground(Color.RED);
         } else {
             ACreditHrs.setForeground(Color.BLACK);
         }
-        if(cSession.equals("Select Session")){
+        if (cSession.equals("Select Session")) {
             ASession.setForeground(Color.RED);
         } else {
             ASession.setForeground(Color.BLACK);
         }
-        if(cAcademicYear.isBlank()){
+        if (cAcademicYear.isBlank()) {
             AAcademicYear.setForeground(Color.RED);
         } else {
             AAcademicYear.setForeground(Color.BLACK);
         }
-        if(cDepartment.equals("Select Department")){
+        if (cDepartment.equals("Select Department")) {
             ACDepartment.setForeground(Color.RED);
         } else {
             ACDepartment.setForeground(Color.BLACK);
         }
-        if(cSeats.isBlank()){
+        if (cSeats.isBlank()) {
             ASeats.setForeground(Color.RED);
         } else {
             ASeats.setForeground(Color.BLACK);
         }
-        if(checkCourseCode(cCode)){
+        if (checkCourseCode(cCode)) {
             UserAlreadyExists useralreadyexists = new UserAlreadyExists();
             useralreadyexists.setVisible(true);
             new Timer().schedule(new TimerTask() {
@@ -4325,7 +4863,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 }
             }, 1000);
         } else {
-            if(temp == true){
+            if (temp == true) {
                 String query = "INSERT INTO `course`(`coursecode`, `coursename`, `credithrs`, `session`, `academicyear`, `department`, `seats`) VALUES (?,?,?,?,?,?,?)";
                 try {
                     pst = connect.prepareStatement(query);
@@ -4356,38 +4894,38 @@ public class HomePageAdmin extends javax.swing.JFrame {
                     ASeatsField.setText("");
 
                 } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(null,ex);
+                    JOptionPane.showMessageDialog(null, ex);
                 }
             }
         }
-    }//GEN-LAST:event_ACSubmitBtnMouseClicked
+    }// GEN-LAST:event_ACSubmitBtnMouseClicked
 
-    private void ACSubmitBtnKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ACSubmitBtnKeyPressed
+    private void ACSubmitBtnKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_ACSubmitBtnKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER){
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             ACSubmitBtnMouseClicked(null);
         }
-    }//GEN-LAST:event_ACSubmitBtnKeyPressed
+    }// GEN-LAST:event_ACSubmitBtnKeyPressed
 
-    private void UCourseCodeFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UCourseCodeFieldFocusGained
+    private void UCourseCodeFieldFocusGained(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UCourseCodeFieldFocusGained
         // TODO add your handling code here:
         if (UCourseCodeField.getText().trim().equals("Enter Code to Search")) {
             UCourseCodeField.setText("");
-            UCourseCodeField.setForeground(new Color(0,0,0));
+            UCourseCodeField.setForeground(new Color(0, 0, 0));
         }
-    }//GEN-LAST:event_UCourseCodeFieldFocusGained
+    }// GEN-LAST:event_UCourseCodeFieldFocusGained
 
-    private void UCourseCodeFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_UCourseCodeFieldFocusLost
+    private void UCourseCodeFieldFocusLost(java.awt.event.FocusEvent evt) {// GEN-FIRST:event_UCourseCodeFieldFocusLost
         // TODO add your handling code here:
         if (UCourseCodeField.getText().trim().equals("")) {
             UCourseCodeField.setText("Enter Code to Search");
-            UCourseCodeField.setForeground(new Color(153,153,153));
+            UCourseCodeField.setForeground(new Color(153, 153, 153));
         }
-    }//GEN-LAST:event_UCourseCodeFieldFocusLost
+    }// GEN-LAST:event_UCourseCodeFieldFocusLost
 
-    private void UCourseCodeFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_UCourseCodeFieldKeyPressed
+    private void UCourseCodeFieldKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_UCourseCodeFieldKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             String Code = UCourseCodeField.getText();
             try {
                 String query = "SELECT * FROM `course` WHERE `coursecode` = ?";
@@ -4410,7 +4948,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
                             idnotfound.dispose();
                         }
                     }, 1000);
-                    
+
                     UCourseCodeField.setText("");
                     UCourseNameField.setText("");
                     UCreditHrsField.setText("");
@@ -4420,58 +4958,61 @@ public class HomePageAdmin extends javax.swing.JFrame {
                     USeatsField.setText("");
                 }
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null,ex);
+                JOptionPane.showMessageDialog(null, ex);
             }
         }
-    }//GEN-LAST:event_UCourseCodeFieldKeyPressed
+    }// GEN-LAST:event_UCourseCodeFieldKeyPressed
 
-    private void UCSubmitBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UCSubmitBtnMouseClicked
+    private void UCSubmitBtnMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_UCSubmitBtnMouseClicked
         // TODO add your handling code here:
         String cCode = UCourseCodeField.getText();
         String courseName = UCourseNameField.getText();
         String cCreditHr = UCreditHrsField.getText();
-        String cSession = (String)USessionCombo.getSelectedItem();
+        String cSession = (String) USessionCombo.getSelectedItem();
         String cAcademicYear = UAcademicYearField.getText();
-        String cDepartment = (String)UCDepartmentCombo.getSelectedItem();
+        String cDepartment = (String) UCDepartmentCombo.getSelectedItem();
         String cSeats = USeatsField.getText();
 
-        if(cCode.isBlank()){
+        if (cCode.isBlank()) {
             UCourseCode.setForeground(Color.RED);
         } else {
             UCourseCode.setForeground(Color.BLACK);
         }
-        if(courseName.isBlank()){
+        if (courseName.isBlank()) {
             UCourseName.setForeground(Color.RED);
         } else {
             UCourseName.setForeground(Color.BLACK);
         }
-        if(cCreditHr.isBlank()){
+        if (cCreditHr.isBlank()) {
             UCreditHrs.setForeground(Color.RED);
         } else {
             UCreditHrs.setForeground(Color.BLACK);
         }
-        if(cSession.equals("Select Session")){
+        if (cSession.equals("Select Session")) {
             USession.setForeground(Color.RED);
         } else {
             USession.setForeground(Color.BLACK);
         }
-        if(cAcademicYear.isBlank()){
+        if (cAcademicYear.isBlank()) {
             UAcademicYear.setForeground(Color.RED);
         } else {
             UAcademicYear.setForeground(Color.BLACK);
         }
-        if(cDepartment.equals("Select Department")){
+        if (cDepartment.equals("Select Department")) {
             UCDepartment.setForeground(Color.RED);
         } else {
             UCDepartment.setForeground(Color.BLACK);
         }
-        if(cSeats.isBlank()){
+        if (cSeats.isBlank()) {
             USeatsField.setForeground(Color.RED);
         } else {
             USeatsField.setForeground(Color.BLACK);
         }
-        if(temp == true){
-            String query = "UPDATE `course` SET `coursecode`='"+cCode+"',`coursename`='"+courseName+"',`credithrs`='"+cCreditHr+"',`session`='"+cSession+"',`academicyear`='"+cAcademicYear+"',`department`='"+cDepartment+"',`seats`='"+cSeats+"' WHERE `coursecode`='"+cCode+"'";
+        if (temp == true) {
+            String query = "UPDATE `course` SET `coursecode`='" + cCode + "',`coursename`='" + courseName
+                    + "',`credithrs`='" + cCreditHr + "',`session`='" + cSession + "',`academicyear`='" + cAcademicYear
+                    + "',`department`='" + cDepartment + "',`seats`='" + cSeats + "' WHERE `coursecode`='" + cCode
+                    + "'";
             try {
                 pst = connect.prepareStatement(query);
                 pst.execute();
@@ -4487,7 +5028,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 show_Table("course", ViewCoursesTable);
 
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null,ex);
+                JOptionPane.showMessageDialog(null, ex);
             }
         } else {
             Failed failed = new Failed();
@@ -4499,33 +5040,33 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 }
             }, 1000);
         }
-    }//GEN-LAST:event_UCSubmitBtnMouseClicked
+    }// GEN-LAST:event_UCSubmitBtnMouseClicked
 
-    private void UCSubmitBtnKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_UCSubmitBtnKeyPressed
+    private void UCSubmitBtnKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_UCSubmitBtnKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             UCSubmitBtnMouseClicked(null);
         }
-    }//GEN-LAST:event_UCSubmitBtnKeyPressed
+    }// GEN-LAST:event_UCSubmitBtnKeyPressed
 
-    private void ViewCoursesTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ViewCoursesTableMouseClicked
+    private void ViewCoursesTableMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ViewCoursesTableMouseClicked
         // TODO add your handling code here:
         boolean confirmed = false;
         int row = ViewCoursesTable.rowAtPoint(evt.getPoint());
         int col = ViewCoursesTable.columnAtPoint(evt.getPoint());
-        if(row >= 0 && col >= 0){
+        if (row >= 0 && col >= 0) {
             Object cellValue = ViewCoursesTable.getModel().getValueAt(row, 0);
-            if(col == 6){
+            if (col == 6) {
                 String message = "Are you sure want to delete?";
                 CustomConfirmDialog customDialog = new CustomConfirmDialog(this, "Confirm Course Deletion", message);
                 customDialog.setVisible(true);
                 confirmed = customDialog.isConfirmed();
-                if(confirmed == true){
+                if (confirmed == true) {
                     String query = "DELETE FROM `course` WHERE `coursecode`=?";
                     try {
                         pst = connect.prepareStatement(query);
 
-                        pst.setString(1, (String)cellValue);
+                        pst.setString(1, (String) cellValue);
 
                         pst.execute();
                         DataDeleted datadeleted = new DataDeleted();
@@ -4539,35 +5080,35 @@ public class HomePageAdmin extends javax.swing.JFrame {
                         show_Table("course", ViewCoursesTable);
 
                     } catch (SQLException ex) {
-                        JOptionPane.showMessageDialog(null,ex);
+                        JOptionPane.showMessageDialog(null, ex);
                     }
                 }
             }
         }
-    }//GEN-LAST:event_ViewCoursesTableMouseClicked
+    }// GEN-LAST:event_ViewCoursesTableMouseClicked
 
-    private void ViewTimeTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ViewTimeTableMouseClicked
+    private void ViewTimeTableMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ViewTimeTableMouseClicked
         // TODO add your handling code here:
         int row = ViewTimeTable.rowAtPoint(evt.getPoint());
         int col = ViewTimeTable.columnAtPoint(evt.getPoint());
-        if(row >= 0 && col >= 0){
+        if (row >= 0 && col >= 0) {
             TableModel model = ViewTimeTable.getModel();
             try {
-                cName = model.getValueAt(row,0).toString();
-                instructorName = model.getValueAt(row,1).toString();
-                day = model.getValueAt(row,2).toString();
-                sTime = model.getValueAt(row,3).toString();
-                eTime = model.getValueAt(row,4).toString();
-                roomNo = model.getValueAt(row,5).toString();
-                
+                cName = model.getValueAt(row, 0).toString();
+                instructorName = model.getValueAt(row, 1).toString();
+                day = model.getValueAt(row, 2).toString();
+                sTime = model.getValueAt(row, 3).toString();
+                eTime = model.getValueAt(row, 4).toString();
+                roomNo = model.getValueAt(row, 5).toString();
+
                 String[] sparts = sTime.split(":");
                 String sHour = sparts[0];
                 String sMinutes = sparts[1];
-                
+
                 String[] eparts = eTime.split(":");
                 String eHour = eparts[0];
                 String eMinutes = eparts[1];
-                
+
                 DayCombo.setSelectedItem(day);
                 HoursCombo.setSelectedItem(sHour);
                 MinutesCombo.setSelectedItem(sMinutes);
@@ -4577,38 +5118,39 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 InstructorCombo.setSelectedItem(instructorName);
                 RoomCombo.setSelectedItem(roomNo);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null,ex);
+                JOptionPane.showMessageDialog(null, ex);
             }
         }
-    }//GEN-LAST:event_ViewTimeTableMouseClicked
+    }// GEN-LAST:event_ViewTimeTableMouseClicked
 
-    private void AddMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_AddMouseClicked
+    private void AddMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_AddMouseClicked
         // TODO add your handling code here:
         boolean overlap = true;
-        String sHour = (String)HoursCombo.getSelectedItem();
-        String sMinutes = (String)MinutesCombo.getSelectedItem();
-        String eHour = (String)HoursCombo1.getSelectedItem();
-        String eMinutes = (String)MinutesCombo1.getSelectedItem();
-        
-        day = (String)DayCombo.getSelectedItem();
+        String sHour = (String) HoursCombo.getSelectedItem();
+        String sMinutes = (String) MinutesCombo.getSelectedItem();
+        String eHour = (String) HoursCombo1.getSelectedItem();
+        String eMinutes = (String) MinutesCombo1.getSelectedItem();
+
+        day = (String) DayCombo.getSelectedItem();
         sTime = sHour + ':' + sMinutes;
         eTime = eHour + ':' + eMinutes;
-        
+
         // Get Names from UI
-        cName = (String)CourseCombo.getSelectedItem();
-        instructorName = (String)InstructorCombo.getSelectedItem();
-        roomNo = (String)RoomCombo.getSelectedItem();
-        
+        cName = (String) CourseCombo.getSelectedItem();
+        instructorName = (String) InstructorCombo.getSelectedItem();
+        roomNo = (String) RoomCombo.getSelectedItem();
+
         // Retrieve IDs from Maps
         String courseCode = courseMap.get(cName);
         String instructorID = instructorMap.get(instructorName);
-        
+
         String[] sparts = sTime.split(":");
         String[] eparts = eTime.split(":");
 
         // Validation logic
-        if(day.equals("Select Day") || sparts[0].equals("Select Hour") || eparts[0].equals("Select Hour") || 
-        cName.equals("Select Course") || instructorName.equals("Select Instructor") || roomNo.equals("Select Room")){
+        if (day.equals("Select Day") || sparts[0].equals("Select Hour") || eparts[0].equals("Select Hour") ||
+                cName.equals("Select Course") || instructorName.equals("Select Instructor")
+                || roomNo.equals("Select Room")) {
             JOptionPane.showMessageDialog(null, "Please fill all fields");
             return;
         }
@@ -4623,7 +5165,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             pst.setString(4, eTime);
             pst.setString(5, sTime);
             result = pst.executeQuery();
-            if(result.next() && result.getInt(1) > 0){
+            if (result.next() && result.getInt(1) > 0) {
                 AlreadyBooked alreadybooked = new AlreadyBooked();
                 alreadybooked.setVisible(true);
                 new Timer().schedule(new TimerTask() {
@@ -4660,7 +5202,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 }
             }, 1000);
             show_Table("timetable", ViewTimeTable);
-            
+
             DayCombo.setSelectedIndex(0);
             HoursCombo.setSelectedIndex(0);
             MinutesCombo.setSelectedIndex(0);
@@ -4680,46 +5222,47 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 }
             }, 1000);
         }
-    }//GEN-LAST:event_AddMouseClicked
+    }// GEN-LAST:event_AddMouseClicked
 
-    private void AddKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_AddKeyPressed
+    private void AddKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_AddKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             AddMouseClicked(null);
         }
-    }//GEN-LAST:event_AddKeyPressed
+    }// GEN-LAST:event_AddKeyPressed
 
-    private void UpdateMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UpdateMouseClicked
+    private void UpdateMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_UpdateMouseClicked
         // TODO add your handling code here:
-        String sHour = (String)HoursCombo.getSelectedItem();
-        String sMinutes = (String)MinutesCombo.getSelectedItem();
-        String eHour = (String)HoursCombo1.getSelectedItem();
-        String eMinutes = (String)MinutesCombo1.getSelectedItem();
-        
-        String tempDay = (String)DayCombo.getSelectedItem();
+        String sHour = (String) HoursCombo.getSelectedItem();
+        String sMinutes = (String) MinutesCombo.getSelectedItem();
+        String eHour = (String) HoursCombo1.getSelectedItem();
+        String eMinutes = (String) MinutesCombo1.getSelectedItem();
+
+        String tempDay = (String) DayCombo.getSelectedItem();
         String tempSTime = sHour + ':' + sMinutes;
         String tempETime = eHour + ':' + eMinutes;
-        String tempCName = (String)CourseCombo.getSelectedItem();
-        String tempInstructorName = (String)InstructorCombo.getSelectedItem();
-        String tempRoomNo = (String)RoomCombo.getSelectedItem();
-        
+        String tempCName = (String) CourseCombo.getSelectedItem();
+        String tempInstructorName = (String) InstructorCombo.getSelectedItem();
+        String tempRoomNo = (String) RoomCombo.getSelectedItem();
+
         String tempCourseCode = courseMap.get(tempCName);
         String tempInstructorID = instructorMap.get(tempInstructorName);
-        
-        boolean noChanges = tempDay.equals(day) && tempSTime.equals(sTime) && 
-                            tempETime.equals(eTime) && tempInstructorName.equals(instructorName) && 
-                            tempRoomNo.equals(roomNo);
 
-        if(tempDay.equals("Select Day") || sHour.equals("Select Hour") || eHour.equals("Select Hour") || 
-        tempCName.equals("Select Course") || tempInstructorName.equals("Select Instructor")) {
+        boolean noChanges = tempDay.equals(day) && tempSTime.equals(sTime) &&
+                tempETime.equals(eTime) && tempInstructorName.equals(instructorName) &&
+                tempRoomNo.equals(roomNo);
+
+        if (tempDay.equals("Select Day") || sHour.equals("Select Hour") || eHour.equals("Select Hour") ||
+                tempCName.equals("Select Course") || tempInstructorName.equals("Select Instructor")) {
             JOptionPane.showMessageDialog(null, "Please fill all required fields.");
             return;
         }
 
         // Overlap Check
-        if(!noChanges){
-            String query = "SELECT COUNT(*) FROM `timetable` WHERE `day` = ? AND (`instructorName` = ? OR `roomNo` = ?) " +
-                        "AND (`sTime` < ? AND `eTime` > ?) AND NOT (`cName` = ? AND `day` = ? AND `sTime` = ?)";
+        if (!noChanges) {
+            String query = "SELECT COUNT(*) FROM `timetable` WHERE `day` = ? AND (`instructorName` = ? OR `roomNo` = ?) "
+                    +
+                    "AND (`sTime` < ? AND `eTime` > ?) AND NOT (`cName` = ? AND `day` = ? AND `sTime` = ?)";
             try {
                 pst = connect.prepareStatement(query);
                 pst.setString(1, tempDay);
@@ -4728,12 +5271,12 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 pst.setString(4, tempETime);
                 pst.setString(5, tempSTime);
                 // Exclude current record
-                pst.setString(6, cName); 
+                pst.setString(6, cName);
                 pst.setString(7, day);
                 pst.setString(8, sTime);
-                
+
                 result = pst.executeQuery();
-                if(result.next() && result.getInt(1) > 0){
+                if (result.next() && result.getInt(1) > 0) {
                     AlreadyBooked alreadybooked = new AlreadyBooked();
                     alreadybooked.setVisible(true);
                     new Timer().schedule(new TimerTask() {
@@ -4748,11 +5291,12 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, ex);
             }
         }
-        
+
         // Update the database using the retrieved Course Code and Instructor ID
-        String updateQuery = "UPDATE `timetable` SET `day` = ?, `sTime` = ?, `eTime` = ?, `courseCode` = ?, `cName` = ?, " +
-                            "`instructorID` = ?, `instructorName` = ?, `roomNo` = ? " +
-                            "WHERE `day` = ? AND `sTime` = ? AND `cName` = ?";
+        String updateQuery = "UPDATE `timetable` SET `day` = ?, `sTime` = ?, `eTime` = ?, `courseCode` = ?, `cName` = ?, "
+                +
+                "`instructorID` = ?, `instructorName` = ?, `roomNo` = ? " +
+                "WHERE `day` = ? AND `sTime` = ? AND `cName` = ?";
         try {
             pst = connect.prepareStatement(updateQuery);
             pst.setString(1, tempDay);
@@ -4763,7 +5307,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             pst.setString(6, tempInstructorID);
             pst.setString(7, tempInstructorName);
             pst.setString(8, tempRoomNo);
-            
+
             pst.setString(9, day);
             pst.setString(10, sTime);
             pst.setString(11, cName);
@@ -4778,7 +5322,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 }
             }, 1000);
             show_Table("timetable", ViewTimeTable);
-            
+
             DayCombo.setSelectedIndex(0);
             HoursCombo.setSelectedIndex(0);
             MinutesCombo.setSelectedIndex(0);
@@ -4787,7 +5331,7 @@ public class HomePageAdmin extends javax.swing.JFrame {
             CourseCombo.setSelectedIndex(0);
             InstructorCombo.setSelectedIndex(0);
             RoomCombo.setSelectedIndex(0);
-            
+
         } catch (SQLException ex) {
             Failed failed = new Failed();
             failed.setVisible(true);
@@ -4798,70 +5342,71 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 }
             }, 1000);
         }
-    }//GEN-LAST:event_UpdateMouseClicked
+    }// GEN-LAST:event_UpdateMouseClicked
 
-    private void UpdateKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_UpdateKeyPressed
+    private void UpdateKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_UpdateKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             UpdateMouseClicked(null);
         }
-    }//GEN-LAST:event_UpdateKeyPressed
+    }// GEN-LAST:event_UpdateKeyPressed
 
-    private void DeleteMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DeleteMouseClicked
+    private void DeleteMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_DeleteMouseClicked
         // TODO add your handling code here:
-        String sHour = (String)HoursCombo.getSelectedItem();
-        String sMinutes = (String)MinutesCombo.getSelectedItem();
-        String eHour = (String)HoursCombo1.getSelectedItem();
-        String eMinutes = (String)MinutesCombo1.getSelectedItem();
-        day = (String)DayCombo.getSelectedItem();
+        String sHour = (String) HoursCombo.getSelectedItem();
+        String sMinutes = (String) MinutesCombo.getSelectedItem();
+        String eHour = (String) HoursCombo1.getSelectedItem();
+        String eMinutes = (String) MinutesCombo1.getSelectedItem();
+        day = (String) DayCombo.getSelectedItem();
         sTime = sHour + ':' + sMinutes;
         eTime = eHour + ':' + eMinutes;
-        cName = (String)CourseCombo.getSelectedItem();
-        instructorName = (String)InstructorCombo.getSelectedItem();
-        roomNo = (String)RoomCombo.getSelectedItem();
-        
+        cName = (String) CourseCombo.getSelectedItem();
+        instructorName = (String) InstructorCombo.getSelectedItem();
+        roomNo = (String) RoomCombo.getSelectedItem();
+
         String[] sparts = sTime.split(":");
         String[] eparts = eTime.split(":");
 
-        if(day.equals("Select Day")){
+        if (day.equals("Select Day")) {
             Day.setForeground(Color.RED);
             temp = false;
         } else {
             Day.setForeground(Color.BLACK);
         }
-        if(sparts[0].equals("Select Hour") || sparts[1].equals("Select Minute")){
+        if (sparts[0].equals("Select Hour") || sparts[1].equals("Select Minute")) {
             StartTime.setForeground(Color.RED);
             temp = false;
         } else {
             StartTime.setForeground(Color.BLACK);
         }
-        if(eparts[0].equals("Select Hour") || eparts[1].equals("Select Minute")){
+        if (eparts[0].equals("Select Hour") || eparts[1].equals("Select Minute")) {
             EndTime.setForeground(Color.RED);
             temp = false;
         } else {
             EndTime.setForeground(Color.BLACK);
         }
-        if(cName.equals("Select Course")){
+        if (cName.equals("Select Course")) {
             Course.setForeground(Color.RED);
             temp = false;
         } else {
             Course.setForeground(Color.BLACK);
         }
-        if(instructorName.equals("Select Instructor")){
+        if (instructorName.equals("Select Instructor")) {
             Instructor.setForeground(Color.RED);
             temp = false;
         } else {
             Instructor.setForeground(Color.BLACK);
         }
-        if(roomNo.equals("Select Room")){
+        if (roomNo.equals("Select Room")) {
             Room.setForeground(Color.RED);
             temp = false;
         } else {
             Room.setForeground(Color.BLACK);
         }
         boolean confirmed = false;
-        if (temp == true){
-            String message = "Are you sure you want to delete the time table entry for Course: " + cName + " on " + day + " from " + sTime + " to " + eTime + "?";
+        if (temp == true) {
+            String message = "Are you sure you want to delete the time table entry for Course: " + cName + " on " + day
+                    + " from " + sTime + " to " + eTime + "?";
             CustomConfirmDialog customDialog = new CustomConfirmDialog(this, "Confirm Deletion", message);
             customDialog.setVisible(true);
             confirmed = customDialog.isConfirmed();
@@ -4908,19 +5453,20 @@ public class HomePageAdmin extends javax.swing.JFrame {
                         failed.dispose();
                     }
                 }, 1000);
-                JOptionPane.showMessageDialog(null, "Database Error: " + ex.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Database Error: " + ex.getMessage(), "SQL Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
-    }//GEN-LAST:event_DeleteMouseClicked
+    }// GEN-LAST:event_DeleteMouseClicked
 
-    private void DeleteKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_DeleteKeyPressed
+    private void DeleteKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_DeleteKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             DeleteMouseClicked(null);
         }
-    }//GEN-LAST:event_DeleteKeyPressed
+    }// GEN-LAST:event_DeleteKeyPressed
 
-    private void CourseCombo1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CourseCombo1ActionPerformed
+    private void CourseCombo1ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_CourseCombo1ActionPerformed
         // TODO add your handling code here:
         String selectedCourse = (String) CourseCombo1.getSelectedItem();
         if (selectedCourse == null || selectedCourse.equals("Select Course")) {
@@ -4928,9 +5474,9 @@ public class HomePageAdmin extends javax.swing.JFrame {
             return;
         }
         showResultsToPublish(selectedCourse);
-    }//GEN-LAST:event_CourseCombo1ActionPerformed
+    }// GEN-LAST:event_CourseCombo1ActionPerformed
 
-    private void PublishMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_PublishMouseClicked
+    private void PublishMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_PublishMouseClicked
         // TODO add your handling code here:
         String selectedCourse = (String) CourseCombo1.getSelectedItem();
 
@@ -4941,8 +5487,8 @@ public class HomePageAdmin extends javax.swing.JFrame {
 
         try {
             String checkQuery = "SELECT COUNT(*) FROM results r " +
-                                "JOIN course c ON r.course_code = c.coursecode " +
-                                "WHERE c.coursename = ? AND r.is_published = 0";
+                    "JOIN course c ON r.course_code = c.coursecode " +
+                    "WHERE c.coursename = ? AND r.is_published = 0";
 
             pst = connect.prepareStatement(checkQuery);
             pst.setString(1, selectedCourse);
@@ -4953,18 +5499,20 @@ public class HomePageAdmin extends javax.swing.JFrame {
 
                 if (pendingCount == 0) {
                     String existQuery = "SELECT COUNT(*) FROM results r " +
-                                    "JOIN course c ON r.course_code = c.coursecode " +
-                                    "WHERE c.coursename = ?";
+                            "JOIN course c ON r.course_code = c.coursecode " +
+                            "WHERE c.coursename = ?";
                     pst = connect.prepareStatement(existQuery);
                     pst.setString(1, selectedCourse);
                     result = pst.executeQuery();
 
                     if (result.next() && result.getInt(1) > 0) {
                         String infoMessage = "Results for " + selectedCourse + " are already published.";
-                        new CustomMessageDialog(this, "Already Published", infoMessage, CustomMessageDialog.SUCCESS).setVisible(true);
+                        new CustomMessageDialog(this, "Already Published", infoMessage, CustomMessageDialog.SUCCESS)
+                                .setVisible(true);
                     } else {
                         String warnMessage = "No results have been uploaded by the instructor for this course yet.";
-                        new CustomMessageDialog(this, "Data Missing", warnMessage, CustomMessageDialog.ERROR).setVisible(true);
+                        new CustomMessageDialog(this, "Data Missing", warnMessage, CustomMessageDialog.ERROR)
+                                .setVisible(true);
                     }
                     return;
                 }
@@ -4978,9 +5526,9 @@ public class HomePageAdmin extends javax.swing.JFrame {
 
             if (confirmed) {
                 String updateQuery = "UPDATE results r " +
-                                    "JOIN course c ON r.course_code = c.coursecode " +
-                                    "SET r.is_published = 1 " +
-                                    "WHERE c.coursename = ? AND r.is_published = 0";
+                        "JOIN course c ON r.course_code = c.coursecode " +
+                        "SET r.is_published = 1 " +
+                        "WHERE c.coursename = ? AND r.is_published = 0";
 
                 pst = connect.prepareStatement(updateQuery);
                 pst.setString(1, selectedCourse);
@@ -4988,38 +5536,39 @@ public class HomePageAdmin extends javax.swing.JFrame {
 
                 if (updated > 0) {
                     String successMessage = "Successfully Published: " + selectedCourse;
-                    new CustomMessageDialog(this, "Success", successMessage, CustomMessageDialog.SUCCESS).setVisible(true);
+                    new CustomMessageDialog(this, "Success", successMessage, CustomMessageDialog.SUCCESS)
+                            .setVisible(true);
                     showResultsToPublish(selectedCourse);
                 }
             }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage());
         }
-    }//GEN-LAST:event_PublishMouseClicked
+    }// GEN-LAST:event_PublishMouseClicked
 
-    private void PublishKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_PublishKeyPressed
+    private void PublishKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_PublishKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             PublishMouseClicked(null);
         }
-    }//GEN-LAST:event_PublishKeyPressed
+    }// GEN-LAST:event_PublishKeyPressed
 
-    private void SendBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SendBtnMouseClicked
+    private void SendBtnMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_SendBtnMouseClicked
         // TODO add your handling code here:
         String title = TitleField.getText();
         String message = MessageTextArea.getText();
 
-        if(title.isBlank()){
+        if (title.isBlank()) {
             Title.setForeground(Color.RED);
         } else {
             Title.setForeground(Color.BLACK);
         }
-        if(message.isBlank()){
+        if (message.isBlank()) {
             Message.setForeground(Color.RED);
         } else {
             Message.setForeground(Color.BLACK);
         }
-        if(temp == true){
+        if (temp == true) {
             String query = "INSERT INTO `notification`(`title`, `message`) VALUES (?,?)";
             try {
                 pst = connect.prepareStatement(query);
@@ -5040,36 +5589,36 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 MessageTextArea.setText("");
 
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null,ex);
+                JOptionPane.showMessageDialog(null, ex);
             }
         }
-    }//GEN-LAST:event_SendBtnMouseClicked
+    }// GEN-LAST:event_SendBtnMouseClicked
 
-    private void SendBtnKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_SendBtnKeyPressed
+    private void SendBtnKeyPressed(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_SendBtnKeyPressed
         // TODO add your handling code here:
-        if(evt.getKeyCode()==KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             SendBtnMouseClicked(null);
         }
-    }//GEN-LAST:event_SendBtnKeyPressed
+    }// GEN-LAST:event_SendBtnKeyPressed
 
-    private void ViewNotificationsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ViewNotificationsTableMouseClicked
+    private void ViewNotificationsTableMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_ViewNotificationsTableMouseClicked
         // TODO add your handling code here:
         boolean confirmed = false;
         int row = ViewNotificationsTable.rowAtPoint(evt.getPoint());
         int col = ViewNotificationsTable.columnAtPoint(evt.getPoint());
-        if(row >= 0 && col >= 0){
+        if (row >= 0 && col >= 0) {
             Object cellValue = ViewNotificationsTable.getModel().getValueAt(row, 0);
-            if(col == 2){
+            if (col == 2) {
                 String message = "Are you sure want to delete?";
                 CustomConfirmDialog customDialog = new CustomConfirmDialog(this, "Confirm Student Deletion", message);
                 customDialog.setVisible(true);
                 confirmed = customDialog.isConfirmed();
-                if(confirmed == true){
+                if (confirmed == true) {
                     String query = "DELETE FROM `notification` WHERE `ID`=?";
                     try {
                         pst = connect.prepareStatement(query);
 
-                        pst.setString(1, (String)cellValue);
+                        pst.setString(1, (String) cellValue);
 
                         pst.execute();
                         DataDeleted datadeleted = new DataDeleted();
@@ -5083,21 +5632,25 @@ public class HomePageAdmin extends javax.swing.JFrame {
                         show_Table("notification", ViewNotificationsTable);
 
                     } catch (SQLException ex) {
-                        JOptionPane.showMessageDialog(null,ex);
+                        JOptionPane.showMessageDialog(null, ex);
                     }
                 }
             }
         }
-    }//GEN-LAST:event_ViewNotificationsTableMouseClicked
+    }// GEN-LAST:event_ViewNotificationsTableMouseClicked
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+        // <editor-fold defaultstate="collapsed" desc=" Look and feel setting code
+        // (optional) ">
+        /*
+         * If Nimbus (introduced in Java SE 6) is not available, stay with the default
+         * look and feel.
+         * For details see
+         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -5107,15 +5660,19 @@ public class HomePageAdmin extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(HomePageAdmin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(HomePageAdmin.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(HomePageAdmin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(HomePageAdmin.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(HomePageAdmin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(HomePageAdmin.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(HomePageAdmin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(HomePageAdmin.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
         }
-        //</editor-fold>
+        // </editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
