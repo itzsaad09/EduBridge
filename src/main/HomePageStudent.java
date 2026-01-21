@@ -307,13 +307,12 @@ public class HomePageStudent extends javax.swing.JFrame {
             }
         } else if (tableName.equals("enrollment")) {
             String enrollmentQuery = "SELECT `coursecode`, `enrollment_date` FROM `enrollment` WHERE `student_id` = ?";
-
             String courseDetailQuery = "SELECT `coursename`, `credithrs` FROM `course` WHERE `coursecode` = ?";
 
             try {
                 pst = connect.prepareStatement(enrollmentQuery);
                 pst.setString(1, this.id);
-                result = pst.executeQuery();
+                result = pst.executeQuery(); // Outer ResultSet
 
                 DTM = (DefaultTableModel) targetTable.getModel();
                 DTM.setRowCount(0);
@@ -321,28 +320,28 @@ public class HomePageStudent extends javax.swing.JFrame {
                 while (result.next()) {
                     String combinedCodes = result.getString("coursecode");
                     String enrollDate = result.getString("enrollment_date");
-
                     String[] codes = combinedCodes.split(",\\s*");
 
                     for (String code : codes) {
-                        pst = connect.prepareStatement(courseDetailQuery);
-                        pst.setString(1, code);
-                        result = pst.executeQuery();
-
-                        if (result.next()) {
-                            Vector row = new Vector();
-                            row.add(code);
-                            row.add(result.getString("coursename"));
-                            row.add(result.getString("credithrs"));
-                            row.add(enrollDate);
-                            row.add(DELETE_ICON);
-                            DTM.addRow(row);
+                        // Use a separate PreparedStatement and ResultSet for the inner query
+                        try (PreparedStatement pstDetails = connect.prepareStatement(courseDetailQuery)) {
+                            pstDetails.setString(1, code);
+                            try (ResultSet resultDetails = pstDetails.executeQuery()) { // Separate ResultSet
+                                if (resultDetails.next()) {
+                                    Vector row = new Vector();
+                                    row.add(code);
+                                    row.add(resultDetails.getString("coursename"));
+                                    row.add(resultDetails.getString("credithrs"));
+                                    row.add(enrollDate);
+                                    row.add(DELETE_ICON);
+                                    DTM.addRow(row);
+                                }
+                            }
                         }
                     }
                 }
-
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null, ex);
+                JOptionPane.showMessageDialog(null, "Error loading enrolled courses: " + ex.getMessage());
             }
         }
     }
@@ -391,7 +390,7 @@ public class HomePageStudent extends javax.swing.JFrame {
                         CustomMessageDialog.ERROR).setVisible(true);
                 return;
             }
-            
+
             try (PreparedStatement checkAllPst = connect
                     .prepareStatement("SELECT `coursecode` FROM `enrollment` WHERE `student_id` = ?")) {
                 checkAllPst.setString(1, this.id);
