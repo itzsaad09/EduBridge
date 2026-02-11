@@ -1,2 +1,11 @@
 /dist/
 *.ini
+*.sql
+*.class
+nbproject/desktop.ini
+src/desktop.ini
+src/images/desktop.ini
+src/main/desktop.ini
+src/main/resources/desktop.ini
+src/ui/desktop.ini
+test/desktop.ini

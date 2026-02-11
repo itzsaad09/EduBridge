@@ -20,6 +20,15 @@ EduBridge University is a comprehensive management system designed for education
   - Robust MySQL database integration.
   - Persistent data storage for users, courses, and academic records.
 
+
+## Screenshots
+<!--
+[![Login Screen](screenshots/login.png)](screenshots/login.png)
+[![Student Dashboard](screenshots/student_dashboard.png)](screenshots/student_dashboard.png)
+[![Admin Dashboard](screenshots/admin_dashboard.png)](screenshots/admin_dashboard.png)
+[![Instructor Dashboard](screenshots/instructor_dashboard.png)](screenshots/instructor_dashboard.png)
+-->
+
 ## Project Structure
 The project is organized into the following packages:
 - `src.main`: Contains core business logic, database connection (`Database.java`), authentication (`LogIn.java`), and dashboard controllers.
