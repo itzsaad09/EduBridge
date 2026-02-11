@@ -22,12 +22,10 @@ EduBridge University is a comprehensive management system designed for education
 
 
 ## Screenshots
-<!--
 [![Login Screen](screenshots/login.png)](screenshots/login.png)
 [![Student Dashboard](screenshots/student_dashboard.png)](screenshots/student_dashboard.png)
 [![Admin Dashboard](screenshots/admin_dashboard.png)](screenshots/admin_dashboard.png)
 [![Instructor Dashboard](screenshots/instructor_dashboard.png)](screenshots/instructor_dashboard.png)
--->
 
 ## Project Structure
 The project is organized into the following packages:
@@ -44,7 +42,7 @@ The project is organized into the following packages:
 ## Setup & Installation
 1.  **Clone the Repository**:
     ```bash
-    git clone <repository_url>
+    git clone https://github.com/itzsaad09/EduBridge.git
     ```
 2.  **Database Setup**:
     - Open your MySQL management tool (e.g., PHPMyAdmin, MySQL Workbench).
